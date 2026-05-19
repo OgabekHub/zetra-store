@@ -45,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <Image 
               src={zetraLogo} 
               alt="Zetra Logo" 
-              className="h-64 w-64 object-contain -my-24"
+              className="h-48 w-48 object-contain -my-18"
               priority
             />
           </div>

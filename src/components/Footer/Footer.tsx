@@ -24,7 +24,7 @@ const Footer: React.FC = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center cursor-pointer">
-              <Image src={zetraLogo} alt="Zetra Logo" className="h-10 w-auto object-contain brightness-100" priority={false} />
+              <Image src={zetraLogo} alt="Zetra Logo" className="h-48 w-48 object-contain -my-18 brightness-100" priority={false} />
             </div>
             <p className="text-slate-400 text-sm max-w-sm leading-relaxed">
               Zetra Store — premium dizayn shablonlari, e-kitoblar, dasturlash kodlari va litsenziya kalitlarini sotib olish hamda sotish uchun O'zbekistondagi eng ilg'or raqamli mahsulotlar bozori.

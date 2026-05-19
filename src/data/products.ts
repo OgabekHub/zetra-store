@@ -1,0 +1,185 @@
+export interface Product {
+  id: number;
+  title: string;
+  category: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  image: string;
+  author: string;
+  description: string;
+  fileSize: string;
+  fileType: string;
+  features: string[];
+}
+
+export const products: Product[] = [
+  {
+    id: 1,
+    title: 'Zamonaviy E-commerce UI Kit',
+    category: 'Dizayn Shablonlari',
+    price: 29.99,
+    rating: 4.8,
+    reviews: 124,
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+    author: 'DesignPro',
+    description: 'Figma platformasida tayyorlangan, mutlaqo zamonaviy va foydalanishga juda oson bo\'lgan elektron tijorat UI/UX to\'plami. 50 dan ortiq tayyor sahifalar, komponentlar tizimi va to\'liq moslashuvchan dizayn.',
+    fileSize: '45.2 MB',
+    fileType: 'Figma File (.fig)',
+    features: ['Dark & Light rejimlar', '50+ sahifalar', 'Avtomatik tartib (Auto Layout 4.0)', 'Bepul yangilanishlar']
+  },
+  {
+    id: 2,
+    title: 'React.js To\'liq Qo\'llanma 2024',
+    category: 'E-Kitoblar',
+    price: 19.00,
+    rating: 4.9,
+    reviews: 342,
+    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+    author: 'CodeMaster',
+    description: 'React.js kutubxonasini noldan professional darajagacha o\'rganish uchun yozilgan eng mukammal elektron kitob. Hooks, Redux Toolkit, Context API va Next.js 14 bo\'limlarini o\'z ichiga oladi.',
+    fileSize: '18.5 MB',
+    fileType: 'PDF & EPUB',
+    features: ['To\'liq o\'zbek tilida', '350 dan ortiq sahifalar', 'Amaliy kod namunalari', 'Telegram qo\'llab-quvvatlash guruhi']
+  },
+  {
+    id: 3,
+    title: 'Telegram Bot Python Script (AI)',
+    category: 'Dastur Kodelari',
+    price: 49.50,
+    rating: 5.0,
+    reviews: 89,
+    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop',
+    author: 'DevNinja',
+    description: 'OpenAI GPT-4 va DALL-E 3 API bilan integratsiya qilingan, to\'liq tayyor Telegram bot kodi. Python aiogram kutubxonasida yozilgan, PostgreSQL bazasiga va to\'lov tizimlariga ega.',
+    fileSize: '2.4 MB',
+    fileType: 'ZIP Archive',
+    features: ['GPT-4 & DALL-E integratsiya', 'Payme/Click to\'lov tizimlari', 'Admin panel va statistika', 'Docker qo\'llab-quvvatlashi']
+  },
+  {
+    id: 4,
+    title: 'Windows 11 Pro Litsenziya Kaliti',
+    category: 'Litsenziya & Kalitlar',
+    price: 15.00,
+    rating: 4.7,
+    reviews: 512,
+    image: 'https://images.unsplash.com/photo-1618410320928-25228d811631?q=80&w=2070&auto=format&fit=crop',
+    author: 'TechKeys',
+    description: 'Windows 11 Pro operatsion tizimi uchun 100% rasmiy va umrbod ishlaydigan litsenziya kaliti. Faqat bitta kompyuter uchun mo\'ljallangan. Onlayn aktivatsiya qilinadi.',
+    fileSize: '1 KB',
+    fileType: 'Activation Key (Text)',
+    features: ['Umrbod faol litsenziya', 'Barcha tillarni qo\'llab-quvvatlaydi', 'Rasmiy Microsoft yangilanishlari', '24/7 texnik yordam']
+  },
+  {
+    id: 5,
+    title: 'SaaS Dashboard Admin Template',
+    category: 'Dizayn Shablonlari',
+    price: 39.00,
+    rating: 4.6,
+    reviews: 75,
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+    author: 'DesignPro',
+    description: 'SaaS va murakkab veb-ilovalar uchun mukammal ishlab chiqilgan dashboard shabloni. Figma komponentlar kutubxonasi, grafikalar, jadvallar va turli xil widgetlarni o\'z ichiga oladi.',
+    fileSize: '32.1 MB',
+    fileType: 'Figma File (.fig)',
+    features: ['100+ UI elementlar', 'Analitika sahifalari', 'Responsive dizayn gridlari', 'Interaktiv prototip']
+  },
+  {
+    id: 6,
+    title: 'NodeJS & Microservices Mukammal Kitob',
+    category: 'E-Kitoblar',
+    price: 25.00,
+    rating: 4.8,
+    reviews: 110,
+    image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=2070&auto=format&fit=crop',
+    author: 'CodeMaster',
+    description: 'Node.js va microservice arxitekturasini chuqurroq o\'rganishni xohlovchilar uchun ajoyib manba. Express, NestJS, gRPC, RabbitMQ va Redis kabi texnologiyalar amaliy misollar bilan ko\'rsatilgan.',
+    fileSize: '24.8 MB',
+    fileType: 'PDF & EPUB',
+    features: ['Microservices asoslari', 'Security & Docker', 'Real loyihalar misolida', 'Manba kodlari bilan birga']
+  },
+  {
+    id: 7,
+    title: 'Next.js 14 Full-Stack Blog Starter',
+    category: 'Dastur Kodelari',
+    price: 35.00,
+    rating: 4.9,
+    reviews: 95,
+    image: 'https://images.unsplash.com/photo-1618401471353-b98aedd07871?q=80&w=2070&auto=format&fit=crop',
+    author: 'DevNinja',
+    description: 'Next.js 14 App Router, TailwindCSS, Prisma va PostgreSQL yordamida yozilgan tezkor va SEO-optimallashgan blog shabloni. Markdown fayllarni va admin panelni qo\'llab-quvvatlaydi.',
+    fileSize: '5.8 MB',
+    fileType: 'ZIP Archive',
+    features: ['SEO-optimallashgan', 'Prisma ORM & Auth.js', 'MDX qo\'llab-quvvatlash', 'Vercel-ga oson yuklash']
+  },
+  {
+    id: 8,
+    title: '3D Abstract Shapes Pack',
+    category: 'Grafika & Media',
+    price: 12.00,
+    rating: 4.7,
+    reviews: 43,
+    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2070&auto=format&fit=crop',
+    author: 'Studio3D',
+    description: 'Sizning dizaynlaringiz, veb-saytlaringiz va taqdimotlaringiz uchun 50 ta yuqori aniqlikdagi 3D mavhum shakllar to\'plami. Barcha fayllar shaffof PNG va Blender formatida taqdim etiladi.',
+    fileSize: '142.0 MB',
+    fileType: 'PNG & Blender File (.blend)',
+    features: ['50 ta noyob 3D shakl', 'Shaffof fon (PNG)', '4K gacha bo\'lgan ruxsat', 'Blender fayllari bilan birga']
+  },
+  {
+    id: 9,
+    title: 'Minimalist Instagram Post Templates',
+    category: 'Grafika & Media',
+    price: 8.00,
+    rating: 4.5,
+    reviews: 62,
+    image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=2070&auto=format&fit=crop',
+    author: 'Studio3D',
+    description: 'Instagram sahifangizni professional va minimalist uslubda yuritish uchun 30 ta tayyor Canva va Figma shablonlari. Brend ranglarini oson o\'zgartirish imkoniyati.',
+    fileSize: '12.4 MB',
+    fileType: 'Canva Link & Figma File',
+    features: ['30 ta post shablonlari', 'Canva-da oson tahrirlash', 'Minimalist va estetik dizayn', 'Shriftlar kiritilgan']
+  },
+  {
+    id: 10,
+    title: 'Unity RPG Starter Project Template',
+    category: 'O\'yin va Hisoblar',
+    price: 59.00,
+    rating: 4.8,
+    reviews: 28,
+    image: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop',
+    author: 'GameDevs',
+    description: 'Unity motorida RPG o\'yinlar yaratish uchun to\'liq boshlang\'ich loyiha kodi. Qahramon harakatlari, dushman AI tizimi, inventar, topshiriqlar (quests) va jang tizimi tayyor shaklda.',
+    fileSize: '320.5 MB',
+    fileType: 'Unity Package (.unitypackage)',
+    features: ['Unity 2022.3 mosligi', 'Inventar va Quests tizimi', 'Tayyor 3D modellar', 'C# toza kod va darsliklar']
+  },
+  {
+    id: 11,
+    title: 'Steam $20 USD Gift Card',
+    category: 'O\'yin va Hisoblar',
+    price: 21.50,
+    rating: 4.9,
+    reviews: 180,
+    image: 'https://images.unsplash.com/photo-1560253023-3ec5d502959f?q=80&w=2070&auto=format&fit=crop',
+    author: 'GameDevs',
+    description: 'Steam do\'konidagi o\'yinlarni sotib olish uchun $20 dollarlik rasmiy sovg\'a kartasi kaliti. Kalitni Steam hamyoningizga kiritishingiz bilan hisobingiz to\'ldiriladi.',
+    fileSize: '1 KB',
+    fileType: 'Redeem Code (Text)',
+    features: ['Raqamli yetkazib berish', 'Tezkor aktivatsiya', 'Xavfsiz va rasmiy', 'Global ishlaydi']
+  },
+  {
+    id: 12,
+    title: 'Kaspersky Total Security 1 Year',
+    category: 'Litsenziya & Kalitlar',
+    price: 18.00,
+    rating: 4.8,
+    reviews: 230,
+    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2070&auto=format&fit=crop',
+    author: 'TechKeys',
+    description: '1 ta qurilma uchun 1 yillik rasmiy Kaspersky Total Security antivirus litsenziya kaliti. Kompyuter yoki telefoningizni barcha virus va xakerlik hujumlaridan himoya qiladi.',
+    fileSize: '1 KB',
+    fileType: 'Activation Key (Text)',
+    features: ['1 yil to\'liq himoya', '1 ta qurilma uchun', 'Rasmiy Kaspersky saytidan yuklash', 'Avtomatik yangilanishlar']
+  }
+];

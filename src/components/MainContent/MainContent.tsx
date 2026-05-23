@@ -4,29 +4,24 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
 import { products, Product } from '@/data/products';
-import ProductModal from '@/components/MainContent/ProductModal';
-
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
   searchQuery: string;
   selectedCategory: string | null;
   onClearFilters: () => void;
+  onOpenProductModal: (product: Product) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
   onAddToCart, 
   searchQuery, 
   selectedCategory, 
-  onClearFilters 
+  onClearFilters,
+  onOpenProductModal
 }) => {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
 
-  const openProductModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
+  const openProductModal = onOpenProductModal;
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory ? product.category === selectedCategory : true;
@@ -175,13 +170,6 @@ const MainContent: React.FC<MainContentProps> = ({
         )}
       </div>
 
-      {/* Product Detail Modal */}
-      <ProductModal 
-        product={selectedProduct}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddToCart={onAddToCart}
-      />
     </div>
   );
 };

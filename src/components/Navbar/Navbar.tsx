@@ -69,6 +69,7 @@ const Navbar: React.FC<NavbarProps> = ({
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Click outside handler
   useEffect(() => {
@@ -453,8 +454,15 @@ const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-5 space-y-4">
+      <div
+        ref={mobileMenuRef}
+        className="md:hidden bg-slate-900 border-b border-slate-800 overflow-hidden transition-all duration-300 ease-in-out"
+        style={{
+          maxHeight: isMobileMenuOpen ? (mobileMenuRef.current?.scrollHeight ?? 1000) + 'px' : '0px',
+          opacity: isMobileMenuOpen ? 1 : 0,
+        }}
+      >
+        <div className="px-4 pt-2 pb-5 space-y-4">
           
           {/* Mobile Search */}
           <div ref={mobileSearchRef} className="relative w-full">
@@ -710,7 +718,7 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

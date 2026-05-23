@@ -4,12 +4,17 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
 import { products, Product } from '@/data/products';
+import { formatPrice } from '@/utils/price';
+
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
   searchQuery: string;
   selectedCategory: string | null;
   onClearFilters: () => void;
   onOpenProductModal: (product: Product) => void;
+  currency: 'USD' | 'UZS';
+  exchangeRate: number;
+  isLoading: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
@@ -17,7 +22,10 @@ const MainContent: React.FC<MainContentProps> = ({
   searchQuery, 
   selectedCategory, 
   onClearFilters,
-  onOpenProductModal
+  onOpenProductModal,
+  currency,
+  exchangeRate,
+  isLoading
 }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
 
@@ -39,6 +47,45 @@ const MainContent: React.FC<MainContentProps> = ({
     }
     return b.id - a.id;
   });
+
+  // Render skeletons when category changes are loading
+  if (isLoading) {
+    return (
+      <div id="products-section" className="bg-slate-900 py-16 pb-24 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-6 mb-10">
+            <div className="w-full max-w-sm space-y-3">
+              <div className="h-8 bg-slate-800/80 rounded-2xl w-2/3 animate-pulse" />
+              <div className="h-4 bg-slate-800/80 rounded-xl w-1/2 animate-pulse" />
+            </div>
+            <div className="flex gap-2">
+              <div className="h-10 bg-slate-800/80 rounded-xl w-28 animate-pulse" />
+              <div className="h-10 bg-slate-800/80 rounded-xl w-28 animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
+              <div key={index} className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700/50 flex flex-col justify-between h-[390px] p-5 space-y-4">
+                <div className="h-40 bg-slate-700/30 rounded-xl animate-pulse" />
+                <div className="space-y-3 flex-1">
+                  <div className="h-4 bg-slate-700/30 rounded w-1/3 animate-pulse" />
+                  <div className="h-5 bg-slate-700/30 rounded w-5/6 animate-pulse" />
+                  <div className="h-3 bg-slate-700/30 rounded w-1/2 animate-pulse" />
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <div className="space-y-2">
+                    <div className="h-3 bg-slate-700/30 rounded w-10 animate-pulse" />
+                    <div className="h-6 bg-slate-700/30 rounded w-20 animate-pulse" />
+                  </div>
+                  <div className="h-8 bg-slate-700/30 rounded-lg w-12 animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div id="products-section" className="bg-slate-900 py-16 pb-24 border-t border-slate-800">
@@ -143,8 +190,12 @@ const MainContent: React.FC<MainContentProps> = ({
 
                   <div className="flex items-end justify-between mt-auto">
                     <div className="flex flex-col">
-                      <span className="text-xs text-slate-500 line-through">${(product.price * 1.2).toFixed(2)}</span>
-                      <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
+                      <span className="text-xs text-slate-550 line-through">
+                        {formatPrice(product.price * 1.2, currency, exchangeRate)}
+                      </span>
+                      <span className="text-xl font-bold text-white">
+                        {formatPrice(product.price, currency, exchangeRate)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1 bg-slate-900/50 px-2 py-1 rounded-lg border border-slate-700/50">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
@@ -162,14 +213,13 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="mt-12 flex justify-center">
             <button 
               onClick={onClearFilters}
-              className="px-8 py-3 bg-slate-800 hover:bg-indigo-600 hover:border-indigo-600 hover:text-white text-slate-300 border border-slate-700 rounded-xl font-medium transition-all"
+              className="px-8 py-3 bg-slate-800 hover:bg-indigo-600 hover:border-indigo-600 hover:text-white text-slate-300 border border-slate-700 rounded-xl font-medium transition-all cursor-pointer"
             >
               Barcha mahsulotlarni ko'rish
             </button>
           </div>
         )}
       </div>
-
     </div>
   );
 };

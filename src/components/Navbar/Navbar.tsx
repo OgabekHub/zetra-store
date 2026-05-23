@@ -6,6 +6,7 @@ import Image from 'next/image';
 import zetraLogo from '../../assets/images/zetra-logo2-backup.png';
 import { CartItem } from '@/types';
 import { Product, products } from '@/data/products';
+import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 
 interface UserProfile {
@@ -25,6 +26,9 @@ interface NavbarProps {
   onLogout: () => void;
   onOpenAuth: () => void;
   onOpenProductModal: (product: Product) => void;
+  currency: 'USD' | 'UZS';
+  setCurrency: (currency: 'USD' | 'UZS') => void;
+  exchangeRate: number;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
@@ -38,7 +42,10 @@ const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   onLogout,
   onOpenAuth,
-  onOpenProductModal
+  onOpenProductModal,
+  currency,
+  setCurrency,
+  exchangeRate
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -192,7 +199,7 @@ const Navbar: React.FC<NavbarProps> = ({
                             </p>
                           </div>
                           <div className="text-sm font-bold text-white flex-shrink-0">
-                            ${product.price.toFixed(2)}
+                            {formatPrice(product.price, currency, exchangeRate)}
                           </div>
                         </div>
                       ))}
@@ -228,6 +235,36 @@ const Navbar: React.FC<NavbarProps> = ({
             >
               Kategoriyalar
             </button>
+
+            {/* Currency Switcher */}
+            <div className="flex bg-slate-800/80 p-0.5 rounded-xl border border-slate-700/50 items-center">
+              <button 
+                onClick={() => {
+                  setCurrency('USD');
+                  toast('Valyuta: AQSH Dollari', { icon: '💵' });
+                }}
+                className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                  currency === 'USD' 
+                    ? 'bg-indigo-600 text-white shadow-md' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                USD
+              </button>
+              <button 
+                onClick={() => {
+                  setCurrency('UZS');
+                  toast(`Valyuta: O'zbek So'mi (Jonli kurs: 1$ = ${exchangeRate.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm)`, { icon: '🇺🇿', duration: 3000 });
+                }}
+                className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
+                  currency === 'UZS' 
+                    ? 'bg-indigo-600 text-white shadow-md' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                UZS
+              </button>
+            </div>
             
             {/* Cart Icon */}
             <button 
@@ -378,8 +415,8 @@ const Navbar: React.FC<NavbarProps> = ({
                               {product.category}
                             </p>
                           </div>
-                          <div className="text-xs font-bold text-white">
-                            ${product.price.toFixed(2)}
+                          <div className="text-xs font-bold text-white flex-shrink-0">
+                            {formatPrice(product.price, currency, exchangeRate)}
                           </div>
                         </div>
                       ))}
@@ -415,13 +452,46 @@ const Navbar: React.FC<NavbarProps> = ({
             >
               Kategoriyalar
             </button>
+
+            {/* Mobile Currency Switcher */}
+            <div className="flex items-center justify-between px-2 py-2 border-t border-slate-800/60 mt-1">
+              <span className="text-sm text-slate-400 font-medium">Valyuta</span>
+              <div className="flex bg-slate-800/85 p-0.5 rounded-lg border border-slate-700/55">
+                <button 
+                  onClick={() => {
+                    setCurrency('USD');
+                    toast('Valyuta: AQSH Dollari', { icon: '💵' });
+                  }}
+                  className={`px-3 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                    currency === 'USD' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  USD
+                </button>
+                <button 
+                  onClick={() => {
+                    setCurrency('UZS');
+                    toast(`Valyuta: O'zbek So'mi (Jonli kurs: 1$ = ${exchangeRate.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm)`, { icon: '🇺🇿', duration: 3000 });
+                  }}
+                  className={`px-3 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                    currency === 'UZS' 
+                      ? 'bg-indigo-600 text-white' 
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  UZS
+                </button>
+              </div>
+            </div>
             
             {currentUser ? (
               <div className="border-t border-slate-800 pt-2 mt-1 space-y-2">
                 <div className="px-2 py-1.5">
                   <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Hisob</p>
                   <p className="text-sm font-bold text-white truncate mt-0.5">{currentUser.name}</p>
-                  <p className="text-xs text-slate-450 truncate mt-0.5">{currentUser.email}</p>
+                  <p className="text-xs text-slate-455 truncate mt-0.5">{currentUser.email}</p>
                 </div>
                 <button 
                   onClick={() => {

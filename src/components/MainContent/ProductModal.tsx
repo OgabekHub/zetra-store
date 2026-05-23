@@ -4,15 +4,25 @@ import React, { useEffect } from 'react';
 import { X, Star, ShoppingCart, CheckCircle2, HardDrive, FileType } from 'lucide-react';
 import Image from 'next/image';
 import { Product } from '@/data/products';
+import { formatPrice } from '@/utils/price';
 
 interface ProductModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (product: Product) => void;
+  currency: 'USD' | 'UZS';
+  exchangeRate: number;
 }
 
-const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, onAddToCart }) => {
+const ProductModal: React.FC<ProductModalProps> = ({ 
+  product, 
+  isOpen, 
+  onClose, 
+  onAddToCart,
+  currency,
+  exchangeRate
+}) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -30,7 +40,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
   if (!isOpen || !product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
@@ -43,7 +53,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl bg-slate-950/40 hover:bg-slate-800 transition-colors z-20"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl bg-slate-950/40 hover:bg-slate-800 transition-colors z-20 cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -58,54 +68,61 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
-            <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-semibold text-white">
-              {product.category}
-            </div>
           </div>
         </div>
 
         {/* Column 2: Details */}
-        <div className="w-full md:w-1/2 p-6 md:p-8 md:pl-0 flex flex-col justify-between">
-          <div className="space-y-5">
+        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between">
+          
+          <div className="space-y-6">
+            {/* Header info */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-2 pr-8">{product.title}</h2>
-              <p className="text-slate-400 text-sm">
-                Sotuvchi: <span className="text-slate-300 font-medium hover:text-white cursor-pointer">{product.author}</span>
+              <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 text-xs font-semibold rounded-lg border border-indigo-550/20">
+                {product.category}
+              </span>
+              <h2 className="text-xl md:text-2xl font-bold text-white mt-3 leading-tight">{product.title}</h2>
+              <p className="text-slate-400 text-xs mt-2">
+                Muallif: <span className="text-slate-200 hover:text-white cursor-pointer transition-colors font-medium">{product.author}</span>
               </p>
             </div>
 
-            {/* Ratings */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/50">
-                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-semibold">{product.rating}</span>
+            {/* Ratings & reviews */}
+            <div className="flex items-center gap-4 bg-slate-800/40 p-3 rounded-2xl border border-slate-800/80">
+              <div className="flex items-center gap-1.5 border-r border-slate-800 pr-4">
+                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                <span className="text-base font-bold text-white">{product.rating}</span>
               </div>
-              <span className="text-xs text-slate-500">({product.reviews} ta fikrlar)</span>
+              <div className="text-slate-400 text-xs">
+                <span className="text-slate-205 font-semibold text-white">{product.reviews} ta</span> baho berilgan
+              </div>
             </div>
 
             {/* Description */}
-            <p className="text-slate-300 text-sm leading-relaxed">
-              {product.description}
-            </p>
+            <div className="space-y-1.5">
+              <p className="text-xs text-slate-500 uppercase font-semibold">Tavsif:</p>
+              <p className="text-slate-300 text-sm leading-relaxed max-h-[120px] overflow-y-auto pr-1">
+                {product.description}
+              </p>
+            </div>
 
-            {/* Files info */}
-            <div className="grid grid-cols-2 gap-4 border-t border-b border-slate-800 py-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-indigo-400">
-                  <HardDrive className="w-4.5 h-4.5" />
+            {/* Technical details */}
+            <div className="grid grid-cols-2 gap-4 border-y border-slate-800 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-800/50 rounded-xl flex items-center justify-center border border-slate-700/30">
+                  <HardDrive className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-semibold">Fayl Hajmi</p>
-                  <p className="text-xs font-bold text-white">{product.fileSize || 'Noma\'lum'}</p>
+                  <p className="text-[10px] text-slate-500 font-semibold uppercase">Fayl hajmi</p>
+                  <p className="text-xs font-bold text-slate-200">{product.fileSize}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-indigo-400">
-                  <FileType className="w-4.5 h-4.5" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-800/50 rounded-xl flex items-center justify-center border border-slate-700/30">
+                  <FileType className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase font-semibold">Fayl Turi</p>
-                  <p className="text-xs font-bold text-white">{product.fileType || 'Noma\'lum'}</p>
+                  <p className="text-[10px] text-slate-500 font-semibold uppercase">Format</p>
+                  <p className="text-xs font-bold text-slate-200 truncate max-w-[120px]">{product.fileType}</p>
                 </div>
               </div>
             </div>
@@ -129,15 +146,19 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
           {/* Pricing & Add to Cart */}
           <div className="mt-8 border-t border-slate-800 pt-6 flex items-center justify-between gap-6">
             <div className="flex flex-col">
-              <span className="text-xs text-slate-500 line-through">${(product.price * 1.2).toFixed(2)}</span>
-              <span className="text-2xl md:text-3xl font-extrabold text-white">${product.price.toFixed(2)}</span>
+              <span className="text-xs text-slate-500 line-through">
+                {formatPrice(product.price * 1.2, currency, exchangeRate)}
+              </span>
+              <span className="text-2xl md:text-3xl font-extrabold text-white">
+                {formatPrice(product.price, currency, exchangeRate)}
+              </span>
             </div>
             <button 
               onClick={() => {
                 onAddToCart(product);
                 onClose();
               }}
-              className="flex-1 max-w-[220px] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-xl shadow-indigo-600/20 active:scale-[0.98]"
+              className="flex-1 max-w-[220px] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-xl shadow-indigo-600/20 active:scale-[0.98] cursor-pointer"
             >
               <ShoppingCart className="w-5 h-5" />
               Savatga qo'shish

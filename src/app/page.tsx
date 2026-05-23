@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
 import Navbar from '@/components/Navbar/Navbar';
 import Header from '@/components/Header/Header';
 import Carousel from '@/components/Carousel/Carousel';
@@ -33,8 +34,19 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
-  // Safely initialize state on client-side mount
+  // Currency state
+  const [currency, setCurrency] = useState<'USD' | 'UZS'>('USD');
+  const [exchangeRate, setExchangeRate] = useState<number>(12800); // Default fallback rate
+
+  // Loading state (for category changes)
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Back to Top button visibility
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Safely initialize state on client-side mount & fetch exchange rate
   useEffect(() => {
+    // Load cart
     const savedCart = localStorage.getItem('zetra-cart');
     if (savedCart) {
       try {
@@ -44,6 +56,7 @@ export default function Home() {
       }
     }
 
+    // Load user
     const savedUser = localStorage.getItem('zetra-user');
     if (savedUser) {
       try {
@@ -52,7 +65,23 @@ export default function Home() {
         console.error("User yuklashda xatolik:", e);
       }
     }
-    
+
+    // Fetch live currency exchange rate
+    const fetchExchangeRate = async () => {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!res.ok) throw new Error('Api call failed');
+        const data = await res.json();
+        if (data && data.rates && data.rates.UZS) {
+          setExchangeRate(data.rates.UZS);
+          console.log(`ZETRA: Real vaqtdagi USD/UZS kursi muvaffaqiyatli yuklandi: 1 USD = ${data.rates.UZS} UZS`);
+        }
+      } catch (err) {
+        console.warn("ZETRA: Jonli valyuta kursini olishda xatolik (fallback ishlatiladi):", err);
+      }
+    };
+
+    fetchExchangeRate();
     setIsInitialized(true);
   }, []);
 
@@ -73,6 +102,19 @@ export default function Home() {
       }
     }
   }, [currentUser, isInitialized]);
+
+  // Scroll event listener for Back to Top button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
@@ -117,8 +159,21 @@ export default function Home() {
     toast.success("Tizimdan muvaffaqiyatli chiqdingiz!", { icon: '👋' });
   };
 
+  // Simulating loading skeletons when category is changed
+  const handleSelectCategory = (category: string | null) => {
+    setIsLoading(true);
+    setSelectedCategory(category);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-slate-900 selection:bg-indigo-500/30 relative">
       <Navbar 
         cartItems={cart}
         isCartOpen={isCartOpen}
@@ -131,11 +186,14 @@ export default function Home() {
         onLogout={handleLogout}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenProductModal={handleOpenProductModal}
+        currency={currency}
+        setCurrency={setCurrency}
+        exchangeRate={exchangeRate}
       />
       <Header />
       <Carousel 
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
+        onSelectCategory={handleSelectCategory}
       />
       <MainContent 
         onAddToCart={addToCart} 
@@ -143,6 +201,9 @@ export default function Home() {
         selectedCategory={selectedCategory}
         onClearFilters={clearFilters}
         onOpenProductModal={handleOpenProductModal}
+        currency={currency}
+        exchangeRate={exchangeRate}
+        isLoading={isLoading}
       />
       <Footer />
       
@@ -152,6 +213,8 @@ export default function Home() {
         cartItems={cart}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeFromCart}
+        currency={currency}
+        exchangeRate={exchangeRate}
       />
 
       <AuthModal 
@@ -165,8 +228,20 @@ export default function Home() {
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onAddToCart={addToCart}
+        currency={currency}
+        exchangeRate={exchangeRate}
       />
+
+      {/* Floating Back to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-8 right-8 z-40 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl transition-all duration-300 border border-indigo-500/20 active:scale-95 cursor-pointer flex items-center justify-center ${
+          showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+        aria-label="Yuqoriga qaytish"
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import { CartItem } from '@/types';
+import { formatPrice } from '@/utils/price';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface CartDrawerProps {
   cartItems: CartItem[];
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemoveItem: (id: number) => void;
+  currency: 'USD' | 'UZS';
+  exchangeRate: number;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ 
@@ -18,7 +21,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onClose, 
   cartItems, 
   onUpdateQuantity, 
-  onRemoveItem 
+  onRemoveItem,
+  currency,
+  exchangeRate
 }) => {
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -36,19 +41,30 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
     }
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true" aria-label="Savatcha">
+    <div 
+      className={`fixed inset-0 z-50 overflow-hidden transition-all duration-300 ${
+        isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
+      }`} 
+      role="dialog" 
+      aria-modal="true" 
+      aria-label="Savatcha"
+    >
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
 
       <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
         {/* Drawer Panel */}
-        <div className="w-screen max-w-md bg-slate-950/95 border-l border-slate-800 text-white shadow-2xl flex flex-col h-full transform transition-all duration-300 backdrop-blur-md">
+        <div 
+          className={`w-screen max-w-md bg-slate-950/95 border-l border-slate-800 text-white shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out backdrop-blur-md ${
+            isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
           
           {/* Header */}
           <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
@@ -58,7 +74,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
             </h2>
             <button 
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -77,7 +93,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <button 
                   onClick={onClose}
-                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-semibold transition-colors"
+                  className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 >
                   Xaridni boshlash
                 </button>
@@ -97,35 +113,35 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h4 className="font-semibold text-sm line-clamp-1 leading-snug">{item.title}</h4>
-                      <p className="text-slate-500 text-xs mt-0.5">{item.category}</p>
+                      <p className="text-slate-550 text-[10px] mt-0.5">{item.category}</p>
                     </div>
                     
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-2 border border-slate-700 rounded-lg p-1 bg-slate-900/50">
                         <button 
                           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                          className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors"
+                          className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <span className="text-xs font-semibold w-5 text-center">{item.quantity}</span>
                         <button 
                           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                          className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors"
+                          className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
                       
                       <span className="text-sm font-bold text-indigo-400">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity, currency, exchangeRate)}
                       </span>
                     </div>
                   </div>
                   
                   <button 
                     onClick={() => onRemoveItem(item.id)}
-                    className="p-1.5 self-start text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-all"
+                    className="p-1.5 self-start text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-all cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -139,12 +155,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
             <div className="p-6 border-t border-slate-800 bg-slate-950/50 backdrop-blur-md space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-400">Jami summa:</span>
-                <span className="text-xl font-bold text-white">${subtotal.toFixed(2)}</span>
+                <span className="text-xl font-bold text-white">
+                  {formatPrice(subtotal, currency, exchangeRate)}
+                </span>
               </div>
               <button 
                 // TODO: Checkout sahifasi
                 onClick={() => {}}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-indigo-600/20 active:scale-[0.98] cursor-pointer"
               >
                 Buyurtmani rasmiylashtirish
               </button>

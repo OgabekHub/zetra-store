@@ -174,7 +174,27 @@ export const translations: Record<Language, Record<string, string>> = {
     "pay_items_purchased": "Sotib olingan mahsulotlar",
     "pay_total_paid": "Jami to'langan summa:",
     "pay_invoice_secure": "🔒 Mahsulotlar xavfsiz yuklab olish uchun shifrlash tizimiga ulandi.",
-    "pay_go_purchases": "Mening xaridlarimga o'tish"
+    "pay_go_purchases": "Mening xaridlarimga o'tish",
+
+    // Footer
+    "footer_description": "Zetra Store — premium dizayn shablonlari, e-kitoblar, dasturlash kodlari va litsenziya kalitlarini sotib olish hamda sotish uchun O'zbekistondagi eng ilg'or raqamli mahsulotlar bozori.",
+    "footer_catalog": "Katalog",
+    "footer_designs": "Dizayn shablonlari",
+    "footer_ebooks": "E-kitoblar",
+    "footer_code": "Dastur kodlari",
+    "footer_licenses": "Litsenziyalar",
+    "footer_info": "Ma'lumot",
+    "footer_about": "Platforma haqida",
+    "footer_terms": "Foydalanish shartlari",
+    "footer_privacy": "Maxfiylik siyosati",
+    "footer_faq": "Yordam / FAQ",
+    "footer_newsletter": "Xabarnoma",
+    "footer_newsletter_desc": "Yangi mahsulotlar va chegirmalardan birinchilardan bo'lib xabardor bo'ling. Obuna bo'ling!",
+    "footer_email_placeholder": "Elektron pochtangiz...",
+    "footer_copyright": "Barcha huquqlar himoyalangan.",
+    "footer_support": "Qo'llab-quvvatlash",
+    "footer_payment": "To'lov usullari",
+    "footer_warranty": "Kafolatlar"
   },
   ru: {
     // Common / General
@@ -349,7 +369,27 @@ export const translations: Record<Language, Record<string, string>> = {
     "pay_items_purchased": "Приобретенные товары",
     "pay_total_paid": "Всего оплачено:",
     "pay_invoice_secure": "🔒 Товары подключены к системе шифрования для безопасного скачивания.",
-    "pay_go_purchases": "Перейти к моим покупкам"
+    "pay_go_purchases": "Перейти к моим покупкам",
+
+    // Footer
+    "footer_description": "Zetra Store — рынок цифровых продуктов для покупки и продажи дизайн-шаблонов, электронных книг, кодов и лицензионных ключей.",
+    "footer_catalog": "Каталог",
+    "footer_designs": "Дизайн шаблоны",
+    "footer_ebooks": "Электронные книги",
+    "footer_code": "Код программ",
+    "footer_licenses": "Лицензии",
+    "footer_info": "Информация",
+    "footer_about": "О платформе",
+    "footer_terms": "Условия использования",
+    "footer_privacy": "Политика конфиденциальности",
+    "footer_faq": "Помощь / FAQ",
+    "footer_newsletter": "Новости",
+    "footer_newsletter_desc": "Первыми узнавайте о новых продуктах и скидках. Подпишитесь!",
+    "footer_email_placeholder": "Ваша электронная почта...",
+    "footer_copyright": "Все права защищены.",
+    "footer_support": "Поддержка",
+    "footer_payment": "Способы оплаты",
+    "footer_warranty": "Гарантии"
   },
   en: {
     // Common / General
@@ -524,6 +564,26 @@ export const translations: Record<Language, Record<string, string>> = {
     "pay_items_purchased": "Items Purchased",
     "pay_total_paid": "Total Paid:",
     "pay_invoice_secure": "🔒 Files have been linked to secure encryption vaults for download.",
-    "pay_go_purchases": "Go to My Purchases"
+    "pay_go_purchases": "Go to My Purchases",
+
+    // Footer
+    "footer_description": "Zetra Store — a digital product marketplace for buying and selling design templates, e-books, code, and license keys in Uzbekistan.",
+    "footer_catalog": "Catalog",
+    "footer_designs": "Design Templates",
+    "footer_ebooks": "E-Books",
+    "footer_code": "Code Projects",
+    "footer_licenses": "Licenses",
+    "footer_info": "Information",
+    "footer_about": "About Platform",
+    "footer_terms": "Terms of Use",
+    "footer_privacy": "Privacy Policy",
+    "footer_faq": "Help / FAQ",
+    "footer_newsletter": "Newsletter",
+    "footer_newsletter_desc": "Be the first to know about new products and discounts. Subscribe!",
+    "footer_email_placeholder": "Your email address...",
+    "footer_copyright": "All rights reserved.",
+    "footer_support": "Support",
+    "footer_payment": "Payment Methods",
+    "footer_warranty": "Warranty"
   }
 };

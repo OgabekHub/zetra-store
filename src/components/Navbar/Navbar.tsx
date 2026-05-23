@@ -250,7 +250,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   element.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              className="text-slate-300 hover:text-white light:text-slate-660 light:hover:text-slate-900 p-2 rounded-lg transition-colors hidden md:block cursor-pointer text-xs font-semibold"
+              className="text-slate-300 hover:text-white light:text-slate-700 light:hover:text-slate-900 p-2 rounded-lg transition-colors hidden md:block cursor-pointer text-xs font-semibold"
             >
               {t('nav_categories')}
             </button>
@@ -328,13 +328,13 @@ const Navbar: React.FC<NavbarProps> = ({
                     onClick={() => {
                       setLanguage('en');
                       setIsLangOpen(false);
-                      toast("Language updated: English", { icon: '🇬🇧' });
+                      toast("Language updated: English", { icon: '🇺🇸' });
                     }}
                     className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs font-semibold hover:bg-slate-800/60 light:hover:bg-slate-50 transition-colors text-left cursor-pointer ${
                       language === 'en' ? 'text-indigo-400 bg-slate-800/40 light:text-indigo-650 light:bg-indigo-50/60' : 'text-slate-350 hover:text-slate-202 light:text-slate-600 light:hover:text-slate-800'
                     }`}
                   >
-                    <span>🇬🇧</span> EN
+                    <span>🇺🇸</span> EN
                   </button>
                 </div>
               )}
@@ -357,11 +357,11 @@ const Navbar: React.FC<NavbarProps> = ({
             <button 
               onClick={() => setIsCartOpen(true)}
               aria-label={t('nav_cart')}
-              className="text-slate-300 hover:text-white p-2 rounded-lg transition-colors relative cursor-pointer"
+              className="text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 rounded-lg transition-colors relative cursor-pointer"
             >
               <ShoppingCart className="w-6 h-6" />
               {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 shadow">
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 light:border-white shadow">
                   {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
                 </span>
               )}
@@ -611,7 +611,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={() => {
                     setLanguage('en');
-                    toast("Language updated: English", { icon: '🇬🇧' });
+                    toast("Language updated: English", { icon: '🇺🇸' });
                   }}
                   className={`px-2.5 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                     language === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'

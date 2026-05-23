@@ -2,14 +2,17 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Mail, Send, MessageCircle, HelpCircle } from 'lucide-react';
+import { Send, MessageCircle, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import zetraLogo from '@/assets/images/zetra-logo2-backup.png';
+import { useLanguage } from '@/context/LanguageContext';
 
 const Footer: React.FC = () => {
+  const { t } = useLanguage();
+
   const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success('Xabarnomaga muvaffaqiyatli obuna bo\'ldingiz!');
+    toast.success(t('footer_newsletter_desc').split('.')[0] + '!');
   };
 
   return (
@@ -28,7 +31,7 @@ const Footer: React.FC = () => {
               <Image src={zetraLogo} alt="Zetra Logo" className="h-48 w-48 object-contain -my-18 brightness-100" priority={false} />
             </div>
             <p className="text-slate-400 light:text-slate-600 text-sm max-w-sm leading-relaxed transition-colors">
-              Zetra Store — premium dizayn shablonlari, e-kitoblar, dasturlash kodlari va litsenziya kalitlarini sotib olish hamda sotish uchun O'zbekistondagi eng ilg'or raqamli mahsulotlar bozori.
+              {t('footer_description')}
             </p>
             <div className="flex gap-4">
               <a href="#" aria-label="Telegram" className="w-10 h-10 bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 hover:border-indigo-500 text-slate-400 light:text-slate-500 hover:text-white light:hover:text-slate-800 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm">
@@ -56,38 +59,38 @@ const Footer: React.FC = () => {
 
           {/* Links Column 1 */}
           <div>
-            <h3 className="text-white light:text-slate-900 font-semibold mb-4 text-sm uppercase tracking-wider transition-colors">Katalog</h3>
+            <h3 className="text-white light:text-slate-900 font-semibold mb-4 text-sm uppercase tracking-wider transition-colors">{t('footer_catalog')}</h3>
             <ul className="space-y-3 text-slate-400 light:text-slate-600 text-sm transition-colors">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Dizayn shablonlari sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Dizayn shablonlari</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('E-kitoblar sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">E-kitoblar</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Dastur kodlari sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Dastur kodlari</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Litsenziyalar sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Litsenziyalar</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_designs') + ' — coming soon!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_designs')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_ebooks') + ' — coming soon!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_ebooks')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_code') + ' — coming soon!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_code')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_licenses') + ' — coming soon!', { icon: '📦' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_licenses')}</a></li>
             </ul>
           </div>
 
           {/* Links Column 2 */}
           <div>
-            <h3 className="text-white light:text-slate-900 font-semibold mb-4 text-sm uppercase tracking-wider transition-colors">Ma'lumot</h3>
+            <h3 className="text-white light:text-slate-900 font-semibold mb-4 text-sm uppercase tracking-wider transition-colors">{t('footer_info')}</h3>
             <ul className="space-y-3 text-slate-400 light:text-slate-600 text-sm transition-colors">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Platforma haqida sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Platforma haqida</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Foydalanish shartlari sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Foydalanish shartlari</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Maxfiylik siyosati sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Maxfiylik siyosati</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Yordam sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">Yordam / FAQ</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_about') + ' — coming soon!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_about')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_terms') + ' — coming soon!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_terms')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_privacy') + ' — coming soon!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_privacy')}</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast(t('footer_faq') + ' — coming soon!', { icon: 'ℹ️' }); }} className="hover:text-white light:hover:text-slate-950 transition-colors">{t('footer_faq')}</a></li>
             </ul>
           </div>
 
           {/* Newsletter Column */}
           <div className="space-y-4">
-            <h3 className="text-white light:text-slate-900 font-semibold text-sm uppercase tracking-wider transition-colors">Xabarnoma</h3>
+            <h3 className="text-white light:text-slate-900 font-semibold text-sm uppercase tracking-wider transition-colors">{t('footer_newsletter')}</h3>
             <p className="text-slate-400 light:text-slate-600 text-sm leading-relaxed transition-colors">
-              Yangi mahsulotlar va chegirmalardan birinchilardan bo'lib xabardor bo'ling. Obuna bo'ling!
+              {t('footer_newsletter_desc')}
             </p>
             <form onSubmit={handleNewsletterSubmit} className="relative mt-2">
               <input
                 type="email"
                 required
                 className="w-full pl-3 pr-12 py-3 border border-slate-800 light:border-slate-250 rounded-xl bg-slate-900 light:bg-white text-slate-200 light:text-slate-800 placeholder-slate-500 light:placeholder-slate-455 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                placeholder="Elektron pochtangiz..."
+                placeholder={t('footer_email_placeholder')}
               />
               <button
                 type="submit"
@@ -102,14 +105,14 @@ const Footer: React.FC = () => {
 
         {/* Bottom copyright line */}
         <div className="border-t border-slate-900 light:border-slate-200 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 light:text-slate-600 transition-colors">
-          <p>&copy; {new Date().getFullYear()} Zetra.uz. Barcha huquqlar himoyalangan.</p>
+          <p>&copy; {new Date().getFullYear()} Zetra.uz. {t('footer_copyright')}</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="hover:text-slate-300 light:hover:text-slate-850 transition-colors flex items-center gap-1">
               <HelpCircle className="w-3.5 h-3.5" />
-              Qo'llab-quvvatlash
+              {t('footer_support')}
             </a>
-            <a href="#" className="hover:text-slate-300 light:hover:text-slate-850 transition-colors">To'lov usullari</a>
-            <a href="#" className="hover:text-slate-300 light:hover:text-slate-850 transition-colors">Kafolatlar</a>
+            <a href="#" className="hover:text-slate-300 light:hover:text-slate-850 transition-colors">{t('footer_payment')}</a>
+            <a href="#" className="hover:text-slate-300 light:hover:text-slate-850 transition-colors">{t('footer_warranty')}</a>
           </div>
         </div>
       </div>

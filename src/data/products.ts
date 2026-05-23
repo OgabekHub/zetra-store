@@ -181,5 +181,47 @@ export const products: Product[] = [
     fileSize: '1 KB',
     fileType: 'Activation Key (Text)',
     features: ['1 yil to\'liq himoya', '1 ta qurilma uchun', 'Rasmiy Kaspersky saytidan yuklash', 'Avtomatik yangilanishlar']
+  },
+  {
+    id: 13,
+    title: 'Low-Poly Zamonaviy Shahar Paketi',
+    category: '3D Modellar',
+    price: 24.99,
+    rating: 4.9,
+    reviews: 67,
+    image: 'https://images.unsplash.com/photo-1608156639585-b3a032ef9689?q=80&w=2070&auto=format&fit=crop',
+    author: 'PolyCraft',
+    description: 'Unity, Unreal Engine va Blender uchun to\'liq optimallashtirilgan low-poly uslubidagi shahar 3D modellari to\'plami. 150 dan ortiq noyob modellar (binolar, avtomobillar, daraxtlar, yo\'llar).',
+    fileSize: '88.4 MB',
+    fileType: 'FBX & OBJ (.zip)',
+    features: ['150+ noyob modellar', 'Oson import (FBX)', 'Optimallashtirilgan meshlar', 'Blender fayllari bilan birga']
+  },
+  {
+    id: 14,
+    title: 'Zamonaviy Mehmonxona Ichki Dizayni (ArchViz)',
+    category: '3D Modellar',
+    price: 39.00,
+    rating: 4.8,
+    reviews: 34,
+    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2070&auto=format&fit=crop',
+    author: 'ArchStudio',
+    description: 'Yuqori aniqlikdagi teksturalar va fotorealistik yoritish tizimiga ega bo\'lgan zamonaviy mehmonxona xonasi ichki dizayni 3D modeli. Blender (Cycles) va 3ds Max (V-Ray) formatlarida.',
+    fileSize: '245.0 MB',
+    fileType: 'Blend & Max (.zip)',
+    features: ['Fotorealistik sifat', 'PBR materiallar va teksturalar', 'Tayyor yoritish sozlamalari', 'Yuqori poligonli mesh']
+  },
+  {
+    id: 15,
+    title: 'Cinematic Ambient Soundscapes',
+    category: 'Audio & Musiqa',
+    price: 14.50,
+    rating: 4.7,
+    reviews: 58,
+    image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop',
+    author: 'SoundWave',
+    description: 'Videolar, o\'yinlar va podkastlar uchun 15 ta premium darajadagi fon musiqasi va ambient tovushlar to\'plami. Barcha treklar mualliflik huquqisiz (royalty-free) foydalanish uchun litsenziyalangan.',
+    fileSize: '312.0 MB',
+    fileType: 'WAV & MP3 (.zip)',
+    features: ['15 ta to\'liq trek', '24-bit WAV formati', 'Royalty-Free litsenziya', 'Turli xil kayfiyatlar']
   }
 ];

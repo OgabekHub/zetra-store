@@ -391,10 +391,13 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                       className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
                     >
                       <option value="Dizayn Shablonlari">Dizayn Shablonlari</option>
+                      <option value="3D Modellar">3D Modellar</option>
                       <option value="E-Kitoblar">E-Kitoblar</option>
                       <option value="Dastur Kodelari">Dastur Kodelari</option>
-                      <option value="Litsenziya & Kalitlar">Litsenziya & Kalitlar</option>
                       <option value="Grafika & Media">Grafika & Media</option>
+                      <option value="O'yin va Hisoblar">O'yin va Hisoblar</option>
+                      <option value="Litsenziya & Kalitlar">Litsenziya & Kalitlar</option>
+                      <option value="Audio & Musiqa">Audio & Musiqa</option>
                     </select>
                   </div>
                 </div>

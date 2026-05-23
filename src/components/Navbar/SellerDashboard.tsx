@@ -5,6 +5,7 @@ import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users,
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SellerDashboardProps {
   isOpen: boolean;
@@ -17,13 +18,16 @@ interface SellerDashboardProps {
   currentUser: { name: string; email: string } | null;
 }
 
-// Preset Unsplash cover templates to make product creation super easy & beautiful
-const IMAGE_TEMPLATES = [
-  { name: 'UI Kit / Dizayn', url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop' },
-  { name: 'Koding / Skript', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop' },
-  { name: 'E-Kitob / Qo\'llanma', url: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=600&auto=format&fit=crop' },
-  { name: 'Grafika / Blender', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop' }
-];
+const categoryTranslations: Record<string, string> = {
+  'Dizayn Shablonlari': 'cat_design',
+  '3D Modellar': 'cat_3d',
+  'E-Kitoblar': 'cat_ebooks',
+  'Dastur Kodelari': 'cat_code',
+  'Grafika & Media': 'cat_graphics',
+  'O\'yin va Hisoblar': 'cat_games',
+  'Litsenziya & Kalitlar': 'cat_keys',
+  'Audio & Musiqa': 'cat_audio'
+};
 
 const SellerDashboard: React.FC<SellerDashboardProps> = ({
   isOpen,
@@ -36,7 +40,16 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
   currentUser
 }) => {
   const [activeSection, setActiveSection] = useState<'stats' | 'add' | 'my-products'>('stats');
+  const { language, t } = useLanguage();
   
+  // Preset Unsplash cover templates to make product creation super easy & beautiful
+  const IMAGE_TEMPLATES = [
+    { name: language === 'uz' ? 'UI Kit / Dizayn' : language === 'ru' ? 'UI Kit / Дизайн' : 'UI Kit / UI Design', url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop' },
+    { name: language === 'uz' ? 'Koding / Skript' : language === 'ru' ? 'Код / Скрипты' : 'Code / Scripts', url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop' },
+    { name: language === 'uz' ? 'E-Kitob / Qo\'llanma' : language === 'ru' ? 'Эл. книга / Пособие' : 'E-Book / Guide', url: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=600&auto=format&fit=crop' },
+    { name: language === 'uz' ? 'Grafika / Blender' : language === 'ru' ? 'Графика / Blender' : 'Graphics / Blender', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop' }
+  ];
+
   // Form states
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Dizayn Shablonlari');
@@ -89,6 +102,11 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
     (product) => product.author === (currentUser?.name || 'Sotuvchi')
   );
 
+  const getCategoryDisplayName = (catName: string) => {
+    const key = categoryTranslations[catName];
+    return key ? t(key) : catName;
+  };
+
   const handleAddFeature = (e: React.MouseEvent) => {
     e.preventDefault();
     if (featureInput.trim()) {
@@ -105,13 +123,13 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
     e.preventDefault();
     
     if (!title || !price || !description || !fileSize || !fileType) {
-      toast.error('Barcha maydonlarni to\'ldiring!');
+      toast.error(language === 'uz' ? "Barcha maydonlarni to'ldiring!" : language === 'ru' ? "Заполните все поля!" : "Please fill out all fields!");
       return;
     }
 
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum <= 0) {
-      toast.error('Narx xato kiritildi (musbat son bo\'lishi kerak)!');
+      toast.error(language === 'uz' ? "Narx xato kiritildi (musbat son bo'lishi kerak)!" : language === 'ru' ? "Неверная цена (должна быть положительным числом)!" : "Invalid price (must be a positive number)!");
       return;
     }
 
@@ -133,7 +151,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
     };
 
     onAddProduct(newProduct);
-    toast.success('Mahsulot muvaffaqiyatli sotuvga qo\'shildi!', { icon: '📦' });
+    toast.success(language === 'uz' ? "Mahsulot muvaffaqiyatli sotuvga qo'shildi!" : language === 'ru' ? "Продукт успешно добавлен на продажу!" : "Product successfully published for sale!", { icon: '📦' });
     
     // Reset Form
     setTitle('');
@@ -150,63 +168,63 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
 
   const handleDeleteProductClick = (id: number) => {
     onDeleteProduct(id);
-    toast.success('Mahsulot sotuvdan olib tashlandi!');
+    toast.success(language === 'uz' ? "Mahsulot sotuvdan olib tashlandi!" : language === 'ru' ? "Продукт удален с продажи!" : "Product removed from listing!");
   };
 
   return (
     <div 
-      className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[90] flex items-center justify-center p-0 sm:p-4 bg-slate-950/85 backdrop-blur-sm animate-fade-in"
       onClick={handleOutsideClick}
     >
       <div 
         ref={modalRef}
-        className="relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[90vh] md:flex-row"
+        className="relative w-full h-full sm:h-[90vh] max-w-5xl bg-slate-900 light:bg-slate-50 border border-slate-800 light:border-slate-200 rounded-none sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
       >
         {/* Sidebar Menu */}
-        <div className="w-full md:w-64 bg-slate-950/40 border-r border-slate-800 p-6 flex flex-col justify-between">
-          <div className="space-y-8">
+        <div className="w-full md:w-64 bg-slate-950/40 light:bg-slate-100/50 border-b md:border-b-0 md:border-r border-slate-800 light:border-slate-200 p-4 sm:p-6 flex flex-row md:flex-col justify-between items-center md:items-stretch gap-4">
+          <div className="space-y-0 md:space-y-8 flex md:flex-col items-center md:items-stretch justify-between w-full">
             <div className="flex items-center gap-2">
               <Package className="w-6 h-6 text-indigo-400" />
-              <span className="text-white font-bold text-lg">Sotuvchi Paneli</span>
+              <span className="text-white light:text-slate-900 font-bold text-base sm:text-lg">{t('seller_title')}</span>
             </div>
             
-            <div className="space-y-2">
+            <div className="flex md:flex-col gap-1 sm:gap-2">
               <button
                 onClick={() => setActiveSection('stats')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeSection === 'stats' 
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800 hover:bg-slate-800/40 hover:light:bg-slate-200/50'
                 }`}
               >
-                <LayoutDashboard className="w-4.5 h-4.5" />
-                Statistika & Tahlillar
+                <LayoutDashboard className="w-4 sm:w-4.5 h-4 sm:h-4.5" />
+                <span className="hidden xs:inline">{t('seller_stats')}</span>
               </button>
               <button
                 onClick={() => setActiveSection('add')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeSection === 'add' 
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800 hover:bg-slate-800/40 hover:light:bg-slate-200/50'
                 }`}
               >
-                <PlusCircle className="w-4.5 h-4.5" />
-                Mahsulot qo'shish
+                <PlusCircle className="w-4 sm:w-4.5 h-4 sm:h-4.5" />
+                <span className="hidden xs:inline">{t('seller_add_product')}</span>
               </button>
               <button
                 onClick={() => setActiveSection('my-products')}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center justify-between gap-1.5 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeSection === 'my-products' 
                     ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800 hover:bg-slate-800/40 hover:light:bg-slate-200/50'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Package className="w-4.5 h-4.5" />
-                  Mening mahsulotlarim
+                <div className="flex items-center gap-1.5 sm:gap-3">
+                  <Package className="w-4 sm:w-4.5 h-4 sm:h-4.5" />
+                  <span className="hidden xs:inline">{t('seller_my_products')}</span>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  activeSection === 'my-products' ? 'bg-white text-indigo-600' : 'bg-slate-800 text-slate-400'
+                <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${
+                  activeSection === 'my-products' ? 'bg-white text-indigo-600' : 'bg-slate-800 light:bg-slate-200 text-slate-400 light:text-slate-600'
                 }`}>
                   {myUploadedProducts.length}
                 </span>
@@ -214,14 +232,14 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
             </div>
           </div>
 
-          <div className="mt-8 pt-4 border-t border-slate-800/80">
+          <div className="hidden md:block mt-8 pt-4 border-t border-slate-800/80 light:border-slate-200">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white uppercase">
                 {currentUser?.name?.charAt(0) || 'S'}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-white truncate">{currentUser?.name || 'Sotuvchi'}</p>
-                <p className="text-[10px] text-slate-500 truncate">{currentUser?.email || 'seller@zetra.uz'}</p>
+                <p className="text-xs font-bold text-white light:text-slate-900 truncate">{currentUser?.name || 'Sotuvchi'}</p>
+                <p className="text-[10px] text-slate-550 light:text-slate-500 truncate">{currentUser?.email || 'seller@zetra.uz'}</p>
               </div>
             </div>
           </div>
@@ -230,87 +248,91 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
         {/* Content Area */}
         <div className="flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
-          <div className="px-8 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/60 sticky top-0 backdrop-blur z-10">
-            <h2 className="text-xl font-bold text-white">
-              {activeSection === 'stats' && 'Sotuvlar Ko\'rsatkichlari'}
-              {activeSection === 'add' && 'Yangi Mahsulot Yuklash'}
-              {activeSection === 'my-products' && 'Yuklangan Mahsulotlar'}
+          <div className="px-6 sm:px-8 py-4 sm:py-5 border-b border-slate-800 light:border-slate-200 flex justify-between items-center bg-slate-900/60 light:bg-slate-50/80 sticky top-0 backdrop-blur z-10">
+            <h2 className="text-lg sm:text-xl font-bold text-white light:text-slate-900">
+              {activeSection === 'stats' && t('seller_stats')}
+              {activeSection === 'add' && t('seller_add_product')}
+              {activeSection === 'my-products' && t('seller_my_products')}
             </h2>
             <button 
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-white light:text-slate-500 hover:light:text-slate-850 rounded-xl hover:bg-slate-800 hover:light:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Form / Stats Body */}
-          <div className="p-8 flex-1">
+          <div className="p-4 sm:p-8 flex-1 bg-slate-900 light:bg-slate-50">
             
             {/* 1. STATS SECTION */}
             {activeSection === 'stats' && (
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-6 sm:space-y-8 animate-fade-in">
                 {/* Stats Cards Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="bg-slate-800/40 border border-slate-800 rounded-3xl p-6 flex items-center justify-between">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  <div className="bg-slate-800/40 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm">
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Jami daromad</p>
-                      <h3 className="text-2xl font-extrabold text-white mt-2">
+                      <p className="text-[10px] sm:text-xs font-bold text-slate-550 light:text-slate-450 uppercase tracking-wider">{t('seller_total_income')}</p>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white light:text-slate-900 mt-2">
                         {formatPrice(314.50, currency, exchangeRate)}
                       </h3>
                       <p className="text-[10px] text-emerald-450 mt-1 flex items-center gap-0.5">
                         <ArrowUpRight className="w-3.5 h-3.5" />
-                        +14.8% bu oy
+                        {language === 'uz' ? '+14.8% bu oy' : language === 'ru' ? '+14.8% в этом месяце' : '+14.8% this month'}
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400">
+                    <div className="w-12 h-12 bg-indigo-500/10 light:bg-indigo-50 border border-indigo-500/20 light:border-indigo-100 rounded-2xl flex items-center justify-center text-indigo-400 light:text-indigo-600">
                       <DollarSign className="w-6 h-6" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/40 border border-slate-800 rounded-3xl p-6 flex items-center justify-between">
+                  <div className="bg-slate-800/40 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm">
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sotilgan mahsulotlar</p>
-                      <h3 className="text-2xl font-extrabold text-white mt-2">12 ta</h3>
+                      <p className="text-[10px] sm:text-xs font-bold text-slate-550 light:text-slate-450 uppercase tracking-wider">{t('seller_sold_count')}</p>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white light:text-slate-900 mt-2">
+                        {language === 'uz' ? '12 ta' : language === 'ru' ? '12 шт' : '12 units'}
+                      </h3>
                       <p className="text-[10px] text-emerald-455 mt-1 flex items-center gap-0.5">
                         <ArrowUpRight className="w-3.5 h-3.5" />
-                        +8% bu oy
+                        {language === 'uz' ? '+8% bu oy' : language === 'ru' ? '+8% в этом месяце' : '+8% this month'}
                       </p>
                     </div>
-                    <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-450">
+                    <div className="w-12 h-12 bg-emerald-500/10 light:bg-emerald-50 border border-emerald-500/20 light:border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-450 light:text-emerald-600">
                       <TrendingUp className="w-6 h-6" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/40 border border-slate-800 rounded-3xl p-6 flex items-center justify-between">
+                  <div className="bg-slate-800/40 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl p-6 flex items-center justify-between shadow-sm">
                     <div>
-                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Ko'rishlar jami</p>
-                      <h3 className="text-2xl font-extrabold text-white mt-2">1 420 ta</h3>
-                      <p className="text-[10px] text-slate-500 mt-1">Noyob kirishlar soni</p>
+                      <p className="text-[10px] sm:text-xs font-bold text-slate-555 light:text-slate-455 uppercase tracking-wider">{t('seller_views_count')}</p>
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-white light:text-slate-900 mt-2">
+                        {language === 'uz' ? '1 420 ta' : language === 'ru' ? '1 420' : '1,420'}
+                      </h3>
+                      <p className="text-[10px] text-slate-500 light:text-slate-400 mt-1">{t('seller_views_sub')}</p>
                     </div>
-                    <div className="w-12 h-12 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center text-purple-405">
+                    <div className="w-12 h-12 bg-purple-500/10 light:bg-purple-50 border border-purple-500/20 light:border-purple-100 rounded-2xl flex items-center justify-center text-purple-405 light:text-purple-600">
                       <Eye className="w-6 h-6" />
                     </div>
                   </div>
                 </div>
 
                 {/* SVG Live Graphic Chart */}
-                <div className="bg-slate-800/20 border border-slate-800 rounded-3xl p-6 space-y-6">
+                <div className="bg-slate-800/20 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl p-4 sm:p-6 space-y-6 shadow-sm">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h4 className="text-base font-bold text-white">Daromad Grafigi (Oxirgi 7 kun)</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">Haqiqiy sotuvlar mantiqi bo'yicha</p>
+                      <h4 className="text-sm sm:text-base font-bold text-white light:text-slate-900">{t('seller_income_graph')}</h4>
+                      <p className="text-xs text-slate-500 light:text-slate-400 mt-0.5">{t('seller_graph_sub')}</p>
                     </div>
-                    <div className="text-xs bg-slate-800/80 px-3 py-1 rounded-xl text-slate-350 border border-slate-700/50">
-                      Haftalik
+                    <div className="text-xs bg-slate-800/80 light:bg-slate-100 text-slate-350 light:text-slate-650 px-3 py-1 rounded-xl border border-slate-700/50 light:border-slate-200">
+                      {t('seller_weekly')}
                     </div>
                   </div>
                   
                   {/* SVG Chart */}
-                  <div className="relative h-60 w-full bg-slate-950/20 border border-slate-800/60 rounded-2xl flex flex-col justify-end p-6 overflow-hidden">
+                  <div className="relative h-60 w-full bg-slate-950/20 light:bg-slate-50/50 border border-slate-800/60 light:border-slate-200 rounded-2xl flex flex-col justify-end p-6 overflow-hidden">
                     <div className="absolute inset-0 grid grid-rows-4 pointer-events-none">
                       {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="border-b border-slate-800/30 w-full h-full" />
+                        <div key={i} className="border-b border-slate-800/30 light:border-slate-250/30 w-full h-full" />
                       ))}
                     </div>
                     {/* SVG Line Chart path */}
@@ -326,35 +348,59 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                     </svg>
 
                     {/* Chart Labels */}
-                    <div className="w-full flex justify-between text-[10px] font-semibold text-slate-550 mt-auto relative z-10 pt-4 border-t border-slate-800/30">
-                      <span>Dush</span>
-                      <span>Sesh</span>
-                      <span>Chor</span>
-                      <span>Pay</span>
-                      <span>Jum</span>
-                      <span>Shan</span>
-                      <span>Yak</span>
+                    <div className="w-full flex justify-between text-[10px] font-semibold text-slate-550 light:text-slate-400 mt-auto relative z-10 pt-4 border-t border-slate-800/30 light:border-slate-200">
+                      {language === 'uz' ? (
+                        <>
+                          <span>Dush</span>
+                          <span>Sesh</span>
+                          <span>Chor</span>
+                          <span>Pay</span>
+                          <span>Jum</span>
+                          <span>Shan</span>
+                          <span>Yak</span>
+                        </>
+                      ) : language === 'ru' ? (
+                        <>
+                          <span>Пн</span>
+                          <span>Вт</span>
+                          <span>Ср</span>
+                          <span>Чт</span>
+                          <span>Пт</span>
+                          <span>Сб</span>
+                          <span>Вс</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Mon</span>
+                          <span>Tue</span>
+                          <span>Wed</span>
+                          <span>Thu</span>
+                          <span>Fri</span>
+                          <span>Sat</span>
+                          <span>Sun</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Sales History Log (Mock Log) */}
                 <div className="space-y-4">
-                  <h4 className="text-base font-bold text-white">Sotuvlar Tarixi</h4>
+                  <h4 className="text-sm sm:text-base font-bold text-white light:text-slate-900">{t('seller_sales_history')}</h4>
                   <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                     {[
-                      { item: 'Zamonaviy E-commerce UI Kit', buyer: 'Maftuna S.', date: 'Bugun, 09:12', earn: 29.99 },
-                      { item: 'Telegram Bot Python Script (AI)', buyer: 'Shoxrux T.', date: 'Kecha, 18:40', earn: 49.50 },
-                      { item: 'React.js To\'liq Qo\'llanma 2024', buyer: 'Asadbek O.', date: '21-may, 14:10', earn: 19.00 }
+                      { item: 'Zamonaviy E-commerce UI Kit', buyer: 'Maftuna S.', date: language === 'uz' ? "Bugun, 09:12" : language === 'ru' ? "Сегодня, 09:12" : "Today, 09:12", earn: 29.99 },
+                      { item: 'Telegram Bot Python Script (AI)', buyer: 'Shoxrux T.', date: language === 'uz' ? "Kecha, 18:40" : language === 'ru' ? "Вчера, 18:40" : "Yesterday, 18:40", earn: 49.50 },
+                      { item: 'React.js To\'liq Qo\'llanma 2024', buyer: 'Asadbek O.', date: language === 'uz' ? "21-may, 14:10" : language === 'ru' ? "21 мая, 14:10" : "May 21, 14:10", earn: 19.00 }
                     ].map((log, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-4 bg-slate-850/30 border border-slate-800/60 rounded-2xl text-xs">
+                      <div key={idx} className="flex justify-between items-center p-4 bg-slate-850/30 light:bg-white border border-slate-800/60 light:border-slate-200 rounded-2xl text-xs shadow-sm">
                         <div className="space-y-1">
-                          <p className="font-bold text-slate-200">{log.item}</p>
-                          <p className="text-[10px] text-slate-500">
-                            Xaridor: <span className="text-slate-400">{log.buyer}</span> • {log.date}
+                          <p className="font-bold text-slate-200 light:text-slate-800">{log.item}</p>
+                          <p className="text-[10px] text-slate-500 light:text-slate-400">
+                            {t('seller_buyer')}: <span className="text-slate-400 light:text-slate-605">{log.buyer}</span> • {log.date}
                           </p>
                         </div>
-                        <div className="text-right font-bold text-indigo-400">
+                        <div className="text-right font-bold text-indigo-400 light:text-indigo-600">
                           +{formatPrice(log.earn, currency, exchangeRate)}
                         </div>
                       </div>
@@ -369,126 +415,126 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
               <form onSubmit={handleProductSubmit} className="space-y-6 max-w-3xl animate-fade-in">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Mahsulot nomi
+                    <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                      {t('seller_prod_name')}
                     </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
                       placeholder="Masalan: Telegram Bot Python Script (AI)"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Kategoriya
+                    <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                      {t('seller_prod_cat')}
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all cursor-pointer"
                     >
-                      <option value="Dizayn Shablonlari">Dizayn Shablonlari</option>
-                      <option value="3D Modellar">3D Modellar</option>
-                      <option value="E-Kitoblar">E-Kitoblar</option>
-                      <option value="Dastur Kodelari">Dastur Kodelari</option>
-                      <option value="Grafika & Media">Grafika & Media</option>
-                      <option value="O'yin va Hisoblar">O'yin va Hisoblar</option>
-                      <option value="Litsenziya & Kalitlar">Litsenziya & Kalitlar</option>
-                      <option value="Audio & Musiqa">Audio & Musiqa</option>
+                      <option value="Dizayn Shablonlari">{t('cat_design')}</option>
+                      <option value="3D Modellar">{t('cat_3d')}</option>
+                      <option value="E-Kitoblar">{t('cat_ebooks')}</option>
+                      <option value="Dastur Kodelari">{t('cat_code')}</option>
+                      <option value="Grafika & Media">{t('cat_graphics')}</option>
+                      <option value="O'yin va Hisoblar">{t('cat_games')}</option>
+                      <option value="Litsenziya & Kalitlar">{t('cat_keys')}</option>
+                      <option value="Audio & Musiqa">{t('cat_audio')}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Narxi (USD da)
+                    <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                      {t('seller_price')}
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
                       placeholder="19.99"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Fayl hajmi
+                    <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                      {t('seller_file_size')}
                     </label>
                     <input
                       type="text"
                       value={fileSize}
                       onChange={(e) => setFileSize(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
-                      placeholder="Masalan: 45.2 MB"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                      placeholder={t('seller_file_size_placeholder')}
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                      Fayl formati
+                    <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                      {t('seller_file_format')}
                     </label>
                     <input
                       type="text"
                       value={fileType}
                       onChange={(e) => setFileType(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
-                      placeholder="Masalan: ZIP Archive"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-455 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                      placeholder={t('seller_file_format_placeholder')}
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Mahsulot tavsifi
+                  <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
+                    {t('seller_description')}
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={4}
-                    className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
-                    placeholder="Mahsulot haqida to'liqroq ma'lumot bering..."
+                    className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-550 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all"
+                    placeholder={t('seller_desc_placeholder')}
                     required
                   />
                 </div>
 
                 {/* Features input list */}
                 <div className="space-y-3">
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Asosiy afzalliklari (Features)
+                  <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+                    {t('seller_features')}
                   </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={featureInput}
                       onChange={(e) => setFeatureInput(e.target.value)}
-                      className="block flex-1 px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm"
-                      placeholder="Masalan: Umrbod yangilanishlar"
+                      className="block flex-1 px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm"
+                      placeholder={t('seller_features_placeholder')}
                     />
                     <button
                       onClick={handleAddFeature}
-                      className="px-5 bg-slate-850 hover:bg-slate-800 text-slate-250 border border-slate-700/50 rounded-2xl font-semibold transition-colors cursor-pointer text-xs"
+                      className="px-5 bg-slate-850 light:bg-slate-105 hover:bg-slate-800 hover:light:bg-slate-200 text-slate-250 light:text-slate-800 border border-slate-700/50 light:border-slate-200 rounded-2xl font-semibold transition-colors cursor-pointer text-xs"
                     >
-                      Qo'shish
+                      {t('seller_features_add')}
                     </button>
                   </div>
                   {features.length > 0 && (
                     <div className="flex flex-wrap gap-2 pt-1">
                       {features.map((feat, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-slate-950/50 border border-slate-800 px-3 py-1.5 rounded-xl text-xs text-slate-300">
+                        <div key={idx} className="flex items-center gap-2 bg-slate-950/50 light:bg-white border border-slate-800 light:border-slate-200 px-3 py-1.5 rounded-xl text-xs text-slate-300 light:text-slate-700">
                           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                           <span>{feat}</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveFeature(idx)}
-                            className="text-slate-500 hover:text-red-400 ml-1"
+                            className="text-slate-550 hover:text-red-400 ml-1 cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -500,8 +546,8 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
 
                 {/* Cover Image Template Select */}
                 <div className="space-y-4">
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Mahsulot muqova rasmi
+                  <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+                    {t('seller_cover_image')}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {IMAGE_TEMPLATES.map((img) => (
@@ -514,7 +560,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                         className={`relative h-24 rounded-2xl overflow-hidden cursor-pointer border-2 transition-all ${
                           selectedImageUrl === img.url && !customImageUrl
                             ? 'border-indigo-500 scale-98 shadow-lg shadow-indigo-650/10'
-                            : 'border-slate-800 hover:border-slate-700'
+                            : 'border-slate-800 light:border-slate-200 hover:border-slate-700 hover:light:border-slate-300'
                         }`}
                       >
                         <img 
@@ -537,8 +583,8 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                         setCustomImageUrl(e.target.value);
                         setSelectedImageUrl('');
                       }}
-                      className="block w-full px-4 py-3 border border-slate-800 rounded-2xl bg-slate-950/40 text-slate-200 placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm"
-                      placeholder="Yoki o'zingizning rasm havolangizni (URL) kiriting"
+                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-550 light:placeholder-slate-450 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm"
+                      placeholder={t('seller_custom_image')}
                     />
                   </div>
                 </div>
@@ -547,7 +593,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                   type="submit"
                   className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] text-sm cursor-pointer"
                 >
-                  Mahsulotni yuklash
+                  {t('seller_submit')}
                 </button>
               </form>
             )}
@@ -557,53 +603,53 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
               <div className="space-y-4 animate-fade-in">
                 {myUploadedProducts.length === 0 ? (
                   <div className="py-20 text-center space-y-4 max-w-sm mx-auto">
-                    <div className="w-16 h-16 bg-slate-800/40 rounded-2xl flex items-center justify-center border border-slate-800 text-slate-500 mx-auto">
+                    <div className="w-16 h-16 bg-slate-800/40 light:bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-800 light:border-slate-200 text-slate-500 mx-auto">
                       <Package className="w-8 h-8" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-lg text-white">Mahsulotlaringiz yo'q</h4>
-                      <p className="text-slate-500 text-sm mt-1">Siz hali hech qanday raqamli mahsulotni sotuvga qo'ymadingiz.</p>
+                      <h4 className="font-semibold text-lg text-white light:text-slate-900">{t('seller_no_products')}</h4>
+                      <p className="text-slate-500 text-sm mt-1">{t('seller_no_products_sub')}</p>
                     </div>
                     <button
                       onClick={() => setActiveSection('add')}
                       className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs cursor-pointer"
                     >
-                      Birinchi mahsulotni qo'shish
+                      {t('seller_add_first_prod')}
                     </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-4">
                     {myUploadedProducts.map((product) => (
-                      <div key={product.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-slate-850/30 border border-slate-800 rounded-2xl gap-4 hover:border-slate-700/60 transition-colors">
+                      <div key={product.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-slate-850/30 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl gap-4 hover:border-slate-700/60 hover:light:border-slate-350 transition-colors shadow-sm">
                         <div className="flex items-center gap-4">
                           <img 
                             src={product.image} 
                             alt={product.title}
-                            className="w-12 h-12 rounded-xl object-cover border border-slate-700/50"
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-700/50 light:border-slate-200"
                           />
                           <div className="space-y-0.5">
-                            <h4 className="font-bold text-slate-200 text-sm line-clamp-1 max-w-xs sm:max-w-md">{product.title}</h4>
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500">
-                              <span className="text-slate-400 font-semibold">{product.category}</span>
+                            <h4 className="font-bold text-slate-200 light:text-slate-800 text-sm line-clamp-1 max-w-xs sm:max-w-md">{product.title}</h4>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-550 light:text-slate-450">
+                              <span className="text-slate-400 light:text-slate-600 font-semibold">{getCategoryDisplayName(product.category)}</span>
                               <span>•</span>
-                              <span>Hajmi: {product.fileSize}</span>
+                              <span>{language === 'uz' ? 'Hajmi' : language === 'ru' ? 'Размер' : 'Size'}: {product.fileSize}</span>
                               <span>•</span>
-                              <span>Format: {product.fileType}</span>
+                              <span>{language === 'uz' ? 'Format' : language === 'ru' ? 'Формат' : 'Format'}: {product.fileType}</span>
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
                           <div className="text-right">
-                            <p className="text-sm font-bold text-white">
+                            <p className="text-sm font-bold text-white light:text-slate-900">
                               {formatPrice(product.price, currency, exchangeRate)}
                             </p>
-                            <p className="text-[10px] text-slate-550 mt-0.5">Baholash: ⭐ {product.rating} ({product.reviews})</p>
+                            <p className="text-[10px] text-slate-550 light:text-slate-500 mt-0.5">{t('seller_rating_rev')}: ⭐ {product.rating} ({product.reviews})</p>
                           </div>
                           
                           <button
                             onClick={() => handleDeleteProductClick(product.id)}
-                            className="p-2.5 text-slate-550 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
+                            className="p-2.5 text-slate-550 light:text-slate-450 hover:text-red-400 hover:light:text-red-655 hover:bg-red-500/10 hover:light:bg-red-50 rounded-xl transition-all cursor-pointer"
                             aria-label="O'chirish"
                           >
                             <Trash2 className="w-4.5 h-4.5" />

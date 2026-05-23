@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
@@ -18,6 +19,17 @@ interface MainContentProps {
   products: Product[];
 }
 
+const categoryTranslations: Record<string, string> = {
+  'Dizayn Shablonlari': 'cat_design',
+  '3D Modellar': 'cat_3d',
+  'E-Kitoblar': 'cat_ebooks',
+  'Dastur Kodelari': 'cat_code',
+  'Grafika & Media': 'cat_graphics',
+  'O\'yin va Hisoblar': 'cat_games',
+  'Litsenziya & Kalitlar': 'cat_keys',
+  'Audio & Musiqa': 'cat_audio'
+};
+
 const MainContent: React.FC<MainContentProps> = ({ 
   onAddToCart, 
   searchQuery, 
@@ -30,6 +42,7 @@ const MainContent: React.FC<MainContentProps> = ({
   products
 }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
+  const { language, t } = useLanguage();
 
   const openProductModal = onOpenProductModal;
 
@@ -50,36 +63,41 @@ const MainContent: React.FC<MainContentProps> = ({
     return b.id - a.id;
   });
 
+  const getCategoryDisplayName = (catName: string) => {
+    const key = categoryTranslations[catName];
+    return key ? t(key) : catName;
+  };
+
   // Render skeletons when category changes are loading
   if (isLoading) {
     return (
-      <div id="products-section" className="bg-slate-900 py-16 pb-24 border-t border-slate-800">
+      <div id="products-section" className="bg-slate-900 light:bg-slate-50 py-16 pb-24 border-t border-slate-800 light:border-slate-200 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-6 mb-10">
             <div className="w-full max-w-sm space-y-3">
-              <div className="h-8 bg-slate-800/80 rounded-2xl w-2/3 animate-pulse" />
-              <div className="h-4 bg-slate-800/80 rounded-xl w-1/2 animate-pulse" />
+              <div className="h-8 bg-slate-800/80 light:bg-slate-200 rounded-2xl w-2/3 animate-pulse" />
+              <div className="h-4 bg-slate-800/80 light:bg-slate-200 rounded-xl w-1/2 animate-pulse" />
             </div>
             <div className="flex gap-2">
-              <div className="h-10 bg-slate-800/80 rounded-xl w-28 animate-pulse" />
-              <div className="h-10 bg-slate-800/80 rounded-xl w-28 animate-pulse" />
+              <div className="h-10 bg-slate-800/80 light:bg-slate-200 rounded-xl w-28 animate-pulse" />
+              <div className="h-10 bg-slate-800/80 light:bg-slate-200 rounded-xl w-28 animate-pulse" />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
-              <div key={index} className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700/50 flex flex-col justify-between h-[390px] p-5 space-y-4">
-                <div className="h-40 bg-slate-700/30 rounded-xl animate-pulse" />
+              <div key={index} className="bg-slate-800 light:bg-white rounded-2xl overflow-hidden border border-slate-700/50 light:border-slate-200 flex flex-col justify-between h-[390px] p-5 space-y-4 shadow-sm">
+                <div className="h-40 bg-slate-700/30 light:bg-slate-100 rounded-xl animate-pulse" />
                 <div className="space-y-3 flex-1">
-                  <div className="h-4 bg-slate-700/30 rounded w-1/3 animate-pulse" />
-                  <div className="h-5 bg-slate-700/30 rounded w-5/6 animate-pulse" />
-                  <div className="h-3 bg-slate-700/30 rounded w-1/2 animate-pulse" />
+                  <div className="h-4 bg-slate-700/30 light:bg-slate-100 rounded w-1/3 animate-pulse" />
+                  <div className="h-5 bg-slate-700/30 light:bg-slate-100 rounded w-5/6 animate-pulse" />
+                  <div className="h-3 bg-slate-700/30 light:bg-slate-100 rounded w-1/2 animate-pulse" />
                 </div>
                 <div className="flex justify-between items-center pt-2">
                   <div className="space-y-2">
-                    <div className="h-3 bg-slate-700/30 rounded w-10 animate-pulse" />
-                    <div className="h-6 bg-slate-700/30 rounded w-20 animate-pulse" />
+                    <div className="h-3 bg-slate-700/30 light:bg-slate-100 rounded w-10 animate-pulse" />
+                    <div className="h-6 bg-slate-700/30 light:bg-slate-100 rounded w-20 animate-pulse" />
                   </div>
-                  <div className="h-8 bg-slate-700/30 rounded-lg w-12 animate-pulse" />
+                  <div className="h-8 bg-slate-700/30 light:bg-slate-100 rounded-lg w-12 animate-pulse" />
                 </div>
               </div>
             ))}
@@ -90,55 +108,61 @@ const MainContent: React.FC<MainContentProps> = ({
   }
 
   return (
-    <div id="products-section" className="bg-slate-900 py-16 pb-24 border-t border-slate-800">
+    <div id="products-section" className="bg-slate-900 light:bg-slate-50 py-16 pb-24 border-t border-slate-800 light:border-slate-200 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-6 mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">
-              {selectedCategory ? `${selectedCategory}` : 'Yangi va Ommabop'}
+            <h2 className="text-3xl font-bold text-white light:text-slate-900 mb-2 transition-colors">
+              {selectedCategory ? getCategoryDisplayName(selectedCategory) : t('main_new_popular_title')}
             </h2>
-            <p className="text-slate-400">
-              {searchQuery ? `"${searchQuery}" bo'yicha qidiruv natijalari` : "Eng ko'p sotilayotgan raqamli mahsulotlar"}
+            <p className="text-slate-400 light:text-slate-600 transition-colors">
+              {searchQuery 
+                ? (language === 'uz' 
+                    ? `"${searchQuery}" bo'yicha qidiruv natijalari` 
+                    : language === 'ru' 
+                      ? `Результаты поиска по запросу "${searchQuery}"` 
+                      : `Search results for "${searchQuery}"`) 
+                : t('main_sub_title')}
             </p>
           </div>
           <div className="flex gap-2">
             <button 
               onClick={() => setSortBy('newest')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border cursor-pointer ${
                 sortBy === 'newest'
                   ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
+                  : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white light:bg-white light:text-slate-600 light:border-slate-200 light:hover:bg-slate-50 light:hover:text-slate-950'
               }`}
             >
-              Eng yangilari
+              {t('main_newest')}
             </button>
             <button 
               onClick={() => setSortBy('popular')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border cursor-pointer ${
                 sortBy === 'popular'
                   ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
+                  : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white light:bg-white light:text-slate-600 light:border-slate-200 light:hover:bg-slate-50 light:hover:text-slate-950'
               }`}
             >
-              Ko'p sotilgan
+              {t('main_popular')}
             </button>
           </div>
         </div>
 
         {sortedProducts.length === 0 ? (
-          <div className="text-center py-20 bg-slate-800/10 border border-slate-800/80 rounded-3xl p-8 max-w-md mx-auto">
-            <p className="text-slate-400 mb-6">Ushbu filtrga mos keladigan mahsulot topilmadi.</p>
+          <div className="text-center py-20 bg-slate-800/10 light:bg-white border border-slate-800/80 light:border-slate-200 rounded-3xl p-8 max-w-md mx-auto shadow-sm transition-colors">
+            <p className="text-slate-400 light:text-slate-655 mb-6">{t('main_no_products')}</p>
             <button 
               onClick={onClearFilters}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-600/25 active:scale-95 text-sm"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-600/25 active:scale-95 text-sm cursor-pointer"
             >
-              Filtrlarni tozalash
+              {t('clear_filter')}
             </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {sortedProducts.map((product) => (
-              <div key={product.id} className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700/50 hover:border-indigo-500/50 transition-all duration-300 group hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col justify-between h-full">
+              <div key={product.id} className="bg-slate-800 light:bg-white rounded-2xl overflow-hidden border border-slate-700/50 light:border-slate-200 hover:border-indigo-500/50 light:hover:border-indigo-500/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-indigo-500/10 light:hover:shadow-slate-250/80 flex flex-col justify-between h-full">
                 {/* Product Image */}
                 <div 
                   className="relative h-48 overflow-hidden cursor-pointer flex-shrink-0"
@@ -172,7 +196,7 @@ const MainContent: React.FC<MainContentProps> = ({
                     </button>
                   </div>
                   <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white">
-                    {product.category}
+                    {getCategoryDisplayName(product.category)}
                   </div>
                 </div>
 
@@ -181,28 +205,28 @@ const MainContent: React.FC<MainContentProps> = ({
                   <div>
                     <h3 
                       onClick={() => openProductModal(product)}
-                      className="text-lg font-semibold text-white line-clamp-2 leading-tight group-hover:text-indigo-400 transition-colors cursor-pointer mb-2"
+                      className="text-lg font-semibold text-white light:text-slate-900 line-clamp-2 leading-tight group-hover:text-indigo-400 light:group-hover:text-indigo-650 transition-colors cursor-pointer mb-2"
                     >
                       {product.title}
                     </h3>
-                    <p className="text-slate-400 text-xs mb-4">
-                      Sotuvchi: <span className="text-slate-300 hover:text-white cursor-pointer">{product.author}</span>
+                    <p className="text-slate-400 light:text-slate-550 text-xs mb-4">
+                      {t('main_seller')}: <span className="text-slate-300 light:text-slate-600 hover:text-white light:hover:text-indigo-655 cursor-pointer">{product.author}</span>
                     </p>
                   </div>
 
                   <div className="flex items-end justify-between mt-auto">
                     <div className="flex flex-col">
-                      <span className="text-xs text-slate-550 line-through">
+                      <span className="text-xs text-slate-550 light:text-slate-400 line-through">
                         {formatPrice(product.price * 1.2, currency, exchangeRate)}
                       </span>
-                      <span className="text-xl font-bold text-white">
+                      <span className="text-xl font-bold text-white light:text-slate-900 transition-colors">
                         {formatPrice(product.price, currency, exchangeRate)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 bg-slate-900/50 px-2 py-1 rounded-lg border border-slate-700/50">
+                    <div className="flex items-center gap-1 bg-slate-900/50 light:bg-slate-50 px-2 py-1 rounded-lg border border-slate-700/50 light:border-slate-200">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-medium text-white">{product.rating}</span>
-                      <span className="text-xs text-slate-500">({product.reviews})</span>
+                      <span className="text-sm font-medium text-white light:text-slate-800 transition-colors">{product.rating}</span>
+                      <span className="text-xs text-slate-500 light:text-slate-400">({product.reviews})</span>
                     </div>
                   </div>
                 </div>
@@ -215,9 +239,9 @@ const MainContent: React.FC<MainContentProps> = ({
           <div className="mt-12 flex justify-center">
             <button 
               onClick={onClearFilters}
-              className="px-8 py-3 bg-slate-800 hover:bg-indigo-600 hover:border-indigo-600 hover:text-white text-slate-300 border border-slate-700 rounded-xl font-medium transition-all cursor-pointer"
+              className="px-8 py-3 bg-slate-800 hover:bg-indigo-600 hover:border-indigo-600 hover:text-white light:bg-white light:text-slate-700 light:border-slate-200 light:hover:bg-indigo-600 light:hover:text-white text-slate-300 border border-slate-700 rounded-xl font-medium transition-all cursor-pointer shadow-md light:shadow-slate-200/50"
             >
-              Barcha mahsulotlarni ko'rish
+              {t('main_all_products_btn')}
             </button>
           </div>
         )}

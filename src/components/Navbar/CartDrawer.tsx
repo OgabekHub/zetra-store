@@ -132,7 +132,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <h4 className="font-semibold text-sm line-clamp-1 leading-snug text-white light:text-slate-850 transition-colors">{item.title}</h4>
+                      <h4 className="font-semibold text-sm line-clamp-1 leading-snug text-white light:text-slate-900 transition-colors">{item.title}</h4>
                       <p className="text-slate-550 light:text-slate-500 text-[10px] mt-0.5 transition-colors">{getCategoryDisplayName(item.category)}</p>
                     </div>
                     

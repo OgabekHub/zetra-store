@@ -372,29 +372,29 @@ const Navbar: React.FC<NavbarProps> = ({
               <div className="relative hidden md:block" ref={userDropdownRef}>
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center gap-2 bg-slate-850 hover:bg-slate-800 text-white px-4 py-2 rounded-xl transition-all duration-300 border border-slate-700/50 cursor-pointer"
+                  className="flex items-center gap-2 bg-slate-850 hover:bg-slate-800 light:bg-white light:hover:bg-slate-50 text-white light:text-slate-800 px-4 py-2 rounded-xl transition-all duration-300 border border-slate-700/50 light:border-slate-200 cursor-pointer"
                 >
                   <div className="w-6 h-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white uppercase">
                     {currentUser.name.charAt(0)}
                   </div>
-                  <span className="max-w-[100px] truncate text-sm font-semibold text-slate-200">
+                  <span className="max-w-[100px] truncate text-sm font-semibold text-slate-200 light:text-slate-700">
                     {currentUser.name}
                   </span>
                 </button>
                 
                 {isUserDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-fade-in">
-                    <div className="px-4 py-2 border-b border-slate-800">
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('auth_welcome_back').split(' ')[0]}</p>
-                      <p className="text-sm font-bold text-white truncate mt-0.5">{currentUser.name}</p>
-                      <p className="text-xs text-slate-455 truncate mt-0.5">{currentUser.email}</p>
+                  <div className="absolute right-0 mt-2 w-56 bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl shadow-2xl light:shadow-slate-200/80 py-2 z-50 animate-fade-in">
+                    <div className="px-4 py-2 border-b border-slate-800 light:border-slate-100">
+                      <p className="text-[10px] text-slate-500 light:text-slate-400 font-bold uppercase tracking-wider">{t('auth_welcome_back').split(' ')[0]}</p>
+                      <p className="text-sm font-bold text-white light:text-slate-900 truncate mt-0.5">{currentUser.name}</p>
+                      <p className="text-xs text-slate-455 light:text-slate-500 truncate mt-0.5">{currentUser.email}</p>
                     </div>
                     <button
                       onClick={() => {
                         setIsUserDropdownOpen(false);
                         onOpenProfileSettings();
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
+                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800/40 light:hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       {t('nav_profile_settings')}
                     </button>
@@ -403,7 +403,7 @@ const Navbar: React.FC<NavbarProps> = ({
                         setIsUserDropdownOpen(false);
                         onOpenMyPurchases();
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
+                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800/40 light:hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       {t('nav_my_purchases')}
                     </button>
@@ -412,11 +412,11 @@ const Navbar: React.FC<NavbarProps> = ({
                         setIsUserDropdownOpen(false);
                         onOpenSeller();
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
+                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 light:text-slate-600 hover:text-white light:hover:text-slate-900 hover:bg-slate-800/40 light:hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       {t('nav_seller_panel')}
                     </button>
-                    <div className="border-t border-slate-800/80 my-1"></div>
+                    <div className="border-t border-slate-800/80 light:border-slate-100 my-1"></div>
                     <button
                       onClick={() => {
                         setIsUserDropdownOpen(false);

@@ -10,7 +10,8 @@ import Footer from '@/components/Footer/Footer';
 import CartDrawer from '@/components/Navbar/CartDrawer';
 import AuthModal from '@/components/Navbar/AuthModal';
 import ProductModal from '@/components/MainContent/ProductModal';
-import { Product } from '@/data/products';
+import SellerDashboard from '@/components/Navbar/SellerDashboard';
+import { Product, products } from '@/data/products';
 import { CartItem } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -44,6 +45,12 @@ export default function Home() {
   // Back to Top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // Dynamic products list state
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+
+  // Seller dashboard state
+  const [isSellerOpen, setIsSellerOpen] = useState(false);
+
   // Safely initialize state on client-side mount & fetch exchange rate
   useEffect(() => {
     // Load cart
@@ -64,6 +71,19 @@ export default function Home() {
       } catch (e) {
         console.error("User yuklashda xatolik:", e);
       }
+    }
+
+    // Load dynamic products list
+    const savedProducts = localStorage.getItem('zetra-products');
+    if (savedProducts) {
+      try {
+        setAllProducts(JSON.parse(savedProducts));
+      } catch (e) {
+        console.error("Mahsulotlarni yuklashda xatolik:", e);
+        setAllProducts(products);
+      }
+    } else {
+      setAllProducts(products);
     }
 
     // Fetch live currency exchange rate
@@ -102,6 +122,13 @@ export default function Home() {
       }
     }
   }, [currentUser, isInitialized]);
+
+  // Save products changes to localStorage once client-side is initialized
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem('zetra-products', JSON.stringify(allProducts));
+    }
+  }, [allProducts, isInitialized]);
 
   // Scroll event listener for Back to Top button
   useEffect(() => {
@@ -156,6 +183,7 @@ export default function Home() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setIsSellerOpen(false); // Close dashboard on logout
     toast.success("Tizimdan muvaffaqiyatli chiqdingiz!", { icon: '👋' });
   };
 
@@ -170,6 +198,23 @@ export default function Home() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBecomeSeller = () => {
+    if (!currentUser) {
+      setIsAuthOpen(true);
+      toast.error("Sotuvchi bo'limiga kirish uchun avval tizimga kiring!");
+    } else {
+      setIsSellerOpen(true);
+    }
+  };
+
+  const handleAddProduct = (newProduct: Product) => {
+    setAllProducts((prev) => [newProduct, ...prev]);
+  };
+
+  const handleDeleteProduct = (id: number) => {
+    setAllProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
   return (
@@ -189,8 +234,10 @@ export default function Home() {
         currency={currency}
         setCurrency={setCurrency}
         exchangeRate={exchangeRate}
+        products={allProducts}
+        onOpenSeller={handleBecomeSeller}
       />
-      <Header />
+      <Header onBecomeSeller={handleBecomeSeller} />
       <Carousel 
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
@@ -204,6 +251,7 @@ export default function Home() {
         currency={currency}
         exchangeRate={exchangeRate}
         isLoading={isLoading}
+        products={allProducts}
       />
       <Footer />
       
@@ -230,6 +278,17 @@ export default function Home() {
         onAddToCart={addToCart}
         currency={currency}
         exchangeRate={exchangeRate}
+      />
+
+      <SellerDashboard 
+        isOpen={isSellerOpen}
+        onClose={() => setIsSellerOpen(false)}
+        products={allProducts}
+        onAddProduct={handleAddProduct}
+        onDeleteProduct={handleDeleteProduct}
+        currency={currency}
+        exchangeRate={exchangeRate}
+        currentUser={currentUser}
       />
 
       {/* Floating Back to Top Button */}

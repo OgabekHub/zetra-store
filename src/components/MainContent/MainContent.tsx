@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
-import { products, Product } from '@/data/products';
+import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 
 interface MainContentProps {
@@ -15,6 +15,7 @@ interface MainContentProps {
   currency: 'USD' | 'UZS';
   exchangeRate: number;
   isLoading: boolean;
+  products: Product[];
 }
 
 const MainContent: React.FC<MainContentProps> = ({ 
@@ -25,7 +26,8 @@ const MainContent: React.FC<MainContentProps> = ({
   onOpenProductModal,
   currency,
   exchangeRate,
-  isLoading
+  isLoading,
+  products
 }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
 

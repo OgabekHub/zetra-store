@@ -6,9 +6,10 @@ import toast from 'react-hot-toast';
 
 interface HeaderProps {
   onExploreClick?: () => void;
+  onBecomeSeller?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onExploreClick }) => {
+const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
   const handleExplore = () => {
     if (onExploreClick) {
       onExploreClick();
@@ -53,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onExploreClick }) => {
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
           <button 
-            onClick={() => toast('Ro\'yxatdan o\'tish sahifasi tez orada ishga tushadi!', { icon: '🚀' })}
+            onClick={onBecomeSeller}
             className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-2xl font-semibold text-lg transition-all duration-300 cursor-pointer"
           >
             Sotuvchi bo'lish

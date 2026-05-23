@@ -5,7 +5,7 @@ import { ShoppingCart, Search, Menu, User, X, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import zetraLogo from '../../assets/images/zetra-logo2-backup.png';
 import { CartItem } from '@/types';
-import { Product, products } from '@/data/products';
+import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 
@@ -29,6 +29,8 @@ interface NavbarProps {
   currency: 'USD' | 'UZS';
   setCurrency: (currency: 'USD' | 'UZS') => void;
   exchangeRate: number;
+  products: Product[];
+  onOpenSeller: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
@@ -45,7 +47,9 @@ const Navbar: React.FC<NavbarProps> = ({
   onOpenProductModal,
   currency,
   setCurrency,
-  exchangeRate
+  exchangeRate,
+  products = [],
+  onOpenSeller
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -320,6 +324,15 @@ const Navbar: React.FC<NavbarProps> = ({
                     >
                       Mening xaridlarim
                     </button>
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        onOpenSeller();
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
+                    >
+                      Sotuvchi paneli
+                    </button>
                     <div className="border-t border-slate-800/80 my-1"></div>
                     <button
                       onClick={() => {
@@ -510,6 +523,15 @@ const Navbar: React.FC<NavbarProps> = ({
                   className="w-full text-left text-slate-350 hover:text-white px-2 py-2 rounded-lg text-sm"
                 >
                   Mening xaridlarim
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenSeller();
+                  }}
+                  className="w-full text-left text-slate-350 hover:text-white px-2 py-2 rounded-lg text-sm"
+                >
+                  Sotuvchi paneli
                 </button>
                 <button 
                   onClick={() => {

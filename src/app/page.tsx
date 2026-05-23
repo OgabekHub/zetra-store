@@ -12,6 +12,7 @@ import AuthModal from '@/components/Navbar/AuthModal';
 import ProductModal from '@/components/MainContent/ProductModal';
 import SellerDashboard from '@/components/Navbar/SellerDashboard';
 import UserProfileModal from '@/components/Navbar/UserProfileModal';
+import PaymentModal from '@/components/Navbar/PaymentModal';
 import { Product, products } from '@/data/products';
 import { CartItem } from '@/types';
 import toast from 'react-hot-toast';
@@ -56,6 +57,7 @@ export default function Home() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileActiveTab, setProfileActiveTab] = useState<'purchases' | 'settings'>('purchases');
   const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   // Safely initialize state on client-side mount & fetch exchange rate
   useEffect(() => {
@@ -269,6 +271,11 @@ export default function Home() {
       return;
     }
 
+    setIsCartOpen(false); // Close cart drawer
+    setIsPaymentOpen(true); // Open the Uzum/Payme/Click payment simulator modal
+  };
+
+  const handlePaymentSuccess = () => {
     // Convert CartItems to Products (strip quantity)
     const newPurchases = cart.map(item => {
       const { quantity, ...product } = item;
@@ -277,8 +284,7 @@ export default function Home() {
 
     setPurchasedProducts((prev) => [...newPurchases, ...prev]);
     setCart([]); // Clear cart
-    setIsCartOpen(false); // Close cart drawer
-    toast.success("To'lov muvaffaqiyatli o'tdi! Rahmat!", { icon: '🎉', duration: 4000 });
+    setIsPaymentOpen(false); // Close payment modal
 
     // Open My Purchases modal after a brief delay
     setTimeout(() => {
@@ -373,6 +379,15 @@ export default function Home() {
         purchases={purchasedProducts}
         currency={currency}
         exchangeRate={exchangeRate}
+      />
+
+      <PaymentModal
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        cartItems={cart}
+        currency={currency}
+        exchangeRate={exchangeRate}
+        onPaymentSuccess={handlePaymentSuccess}
       />
 
       {/* Floating Back to Top Button */}

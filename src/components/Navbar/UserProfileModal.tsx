@@ -35,7 +35,32 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Download simulation states
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadStatus, setDownloadStatus] = useState('');
+  const [secKeys, setSecKeys] = useState<{ [productId: number]: { license: string; decrypt: string } }>({});
+
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Sync security keys from localStorage on mount
+  useEffect(() => {
+    const savedKeys = localStorage.getItem('zetra-security-keys');
+    if (savedKeys) {
+      try {
+        setSecKeys(JSON.parse(savedKeys));
+      } catch (e) {
+        console.error("Kompilyatsiya va shifrlash kalitlarini yuklashda xatolik:", e);
+      }
+    }
+  }, []);
+
+  // Save security keys to localStorage
+  useEffect(() => {
+    if (Object.keys(secKeys).length > 0) {
+      localStorage.setItem('zetra-security-keys', JSON.stringify(secKeys));
+    }
+  }, [secKeys]);
 
   // Sync state with currentUser when modal opens or user changes
   useEffect(() => {
@@ -105,9 +130,46 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   const handleDownload = (product: Product) => {
-    // Generate simple filename from title
-    const filename = product.title.toLowerCase().replace(/[^a-z0-5]/g, '_') + (product.fileType.includes('Figma') ? '.fig' : '.zip');
-    toast.success(`Yuklab olish boshlandi: ${filename}`, { icon: '📥', duration: 4000 });
+    if (downloadingId !== null) return;
+
+    setDownloadingId(product.id);
+    setDownloadProgress(0);
+
+    const steps = [
+      { p: 15, msg: "Xarid va litsenziya tekshirilmoqda..." },
+      { p: 40, msg: `Visual suv belgisi joylanmoqda: ${currentUser?.email || 'ogabek@zetra.uz'}` },
+      { p: 70, msg: "Fayl shaxsiy kalit bilan AES-255 shifrlanmoqda..." },
+      { p: 90, msg: "Cloudflare R2 vaqtinchalik xavfsiz tokeni olinmoqda..." },
+      { p: 100, msg: "Shifrlangan fayl yuklanmoqda..." }
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setDownloadProgress(steps[currentStep].p);
+        setDownloadStatus(steps[currentStep].msg);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+
+        // Generate and save unique keys
+        const licenseKey = `ZTR-LIC-${Math.floor(100000 + Math.random() * 900000)}-${product.id}`;
+        const decryptKey = `ZTR-KEY-${Math.floor(10000 + Math.random() * 90000)}`;
+
+        setSecKeys(prev => ({
+          ...prev,
+          [product.id]: { license: licenseKey, decrypt: decryptKey }
+        }));
+
+        toast.success("Fayl shifrlangan shaklda yuklab olindi!", { icon: '🔒' });
+        toast.success(`Nusxalashga qarshi ochish paroli: ${decryptKey}`, { icon: '🔑', duration: 6000 });
+
+        // Reset downloading states
+        setDownloadingId(null);
+        setDownloadProgress(0);
+        setDownloadStatus('');
+      }
+    }, 850);
   };
 
   return (
@@ -212,19 +274,43 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                       </div>
 
                       <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                        <div className="text-left sm:text-right">
-                          <p className="text-xs text-slate-500">To'landi:</p>
-                          <p className="text-sm font-extrabold text-white mt-0.5">
-                            {formatPrice(product.price, currency, exchangeRate)}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDownload(product)}
-                          className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                        >
-                          <Download className="w-4 h-4" />
-                          Yuklab olish
-                        </button>
+                        {downloadingId === product.id ? (
+                          <div className="w-full sm:w-60 space-y-2">
+                            <div className="flex justify-between text-[10px] font-semibold">
+                              <span className="text-slate-400 truncate max-w-[150px] animate-pulse">{downloadStatus}</span>
+                              <span className="text-indigo-400 font-extrabold">{downloadProgress}%</span>
+                            </div>
+                            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-700/50">
+                              <div 
+                                className="bg-gradient-to-r from-indigo-500 to-purple-505 bg-indigo-550 h-full rounded-full transition-all duration-300"
+                                style={{ width: `${downloadProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                            {secKeys[product.id] && (
+                              <div className="text-left bg-indigo-500/5 border border-indigo-500/10 rounded-xl p-2 space-y-0.5 text-[9px] max-w-[170px]">
+                                <p className="text-indigo-400 font-bold">🔒 SHIFRLANGAN FAOL</p>
+                                <p className="text-slate-400 truncate">Litsenziya: <span className="text-slate-350 font-semibold">{secKeys[product.id].license}</span></p>
+                                <p className="text-slate-400">Parol: <span className="text-emerald-450 font-bold bg-slate-950/40 px-1.5 py-0.5 rounded">{secKeys[product.id].decrypt}</span></p>
+                              </div>
+                            )}
+                            <div className="text-left sm:text-right hidden xs:block">
+                              <p className="text-xs text-slate-500">To'landi:</p>
+                              <p className="text-sm font-extrabold text-white mt-0.5">
+                                {formatPrice(product.price, currency, exchangeRate)}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDownload(product)}
+                              className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                            >
+                              <Download className="w-4 h-4" />
+                              {secKeys[product.id] ? "Qayta yuklash" : "Yuklab olish"}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

@@ -78,10 +78,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
         onClick={onClose}
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="absolute inset-y-0 right-0 w-full sm:max-w-md flex">
         {/* Drawer Panel */}
         <div 
-          className={`w-screen max-w-md bg-slate-950/95 light:bg-white border-l border-slate-800 light:border-slate-200 text-white light:text-slate-800 shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out backdrop-blur-md ${
+          className={`w-full bg-slate-950/95 light:bg-white border-l border-slate-800 light:border-slate-200 text-white light:text-slate-800 shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out backdrop-blur-md ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

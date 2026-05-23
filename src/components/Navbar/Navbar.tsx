@@ -31,6 +31,8 @@ interface NavbarProps {
   exchangeRate: number;
   products: Product[];
   onOpenSeller: () => void;
+  onOpenProfileSettings: () => void;
+  onOpenMyPurchases: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
@@ -49,7 +51,9 @@ const Navbar: React.FC<NavbarProps> = ({
   setCurrency,
   exchangeRate,
   products = [],
-  onOpenSeller
+  onOpenSeller,
+  onOpenProfileSettings,
+  onOpenMyPurchases
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -309,7 +313,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <button
                       onClick={() => {
                         setIsUserDropdownOpen(false);
-                        toast('Profil sozlamalari bo\'limi tez orada!', { icon: '⚙️' });
+                        onOpenProfileSettings();
                       }}
                       className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
                     >
@@ -318,7 +322,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     <button
                       onClick={() => {
                         setIsUserDropdownOpen(false);
-                        toast('Mening xaridlarim sahifasi tez orada!', { icon: '📦' });
+                        onOpenMyPurchases();
                       }}
                       className="w-full text-left px-4 py-2.5 text-sm text-slate-350 hover:text-white hover:bg-slate-800/40 transition-colors cursor-pointer"
                     >
@@ -509,7 +513,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    toast('Profil sozlamalari tez orada!', { icon: '⚙️' });
+                    onOpenProfileSettings();
                   }}
                   className="w-full text-left text-slate-350 hover:text-white px-2 py-2 rounded-lg text-sm"
                 >
@@ -518,7 +522,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    toast('Mening xaridlarim tez orada!', { icon: '📦' });
+                    onOpenMyPurchases();
                   }}
                   className="w-full text-left text-slate-350 hover:text-white px-2 py-2 rounded-lg text-sm"
                 >

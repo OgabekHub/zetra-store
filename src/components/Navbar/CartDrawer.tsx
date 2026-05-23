@@ -14,6 +14,7 @@ interface CartDrawerProps {
   onRemoveItem: (id: number) => void;
   currency: 'USD' | 'UZS';
   exchangeRate: number;
+  onCheckout: () => void;
 }
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ 
@@ -23,7 +24,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateQuantity, 
   onRemoveItem,
   currency,
-  exchangeRate
+  exchangeRate,
+  onCheckout
 }) => {
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -160,8 +162,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                 </span>
               </div>
               <button 
-                // TODO: Checkout sahifasi
-                onClick={() => {}}
+                onClick={onCheckout}
                 className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-indigo-600/20 active:scale-[0.98] cursor-pointer"
               >
                 Buyurtmani rasmiylashtirish

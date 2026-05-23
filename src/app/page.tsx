@@ -11,6 +11,7 @@ import CartDrawer from '@/components/Navbar/CartDrawer';
 import AuthModal from '@/components/Navbar/AuthModal';
 import ProductModal from '@/components/MainContent/ProductModal';
 import SellerDashboard from '@/components/Navbar/SellerDashboard';
+import UserProfileModal from '@/components/Navbar/UserProfileModal';
 import { Product, products } from '@/data/products';
 import { CartItem } from '@/types';
 import toast from 'react-hot-toast';
@@ -51,6 +52,11 @@ export default function Home() {
   // Seller dashboard state
   const [isSellerOpen, setIsSellerOpen] = useState(false);
 
+  // User Profile settings & Purchases state
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileActiveTab, setProfileActiveTab] = useState<'purchases' | 'settings'>('purchases');
+  const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
+
   // Safely initialize state on client-side mount & fetch exchange rate
   useEffect(() => {
     // Load cart
@@ -84,6 +90,16 @@ export default function Home() {
       }
     } else {
       setAllProducts(products);
+    }
+
+    // Load purchased products
+    const savedPurchases = localStorage.getItem('zetra-purchases');
+    if (savedPurchases) {
+      try {
+        setPurchasedProducts(JSON.parse(savedPurchases));
+      } catch (e) {
+        console.error("Purchases yuklashda xatolik:", e);
+      }
     }
 
     // Fetch live currency exchange rate
@@ -129,6 +145,13 @@ export default function Home() {
       localStorage.setItem('zetra-products', JSON.stringify(allProducts));
     }
   }, [allProducts, isInitialized]);
+
+  // Save purchases changes to localStorage
+  useEffect(() => {
+    if (isInitialized) {
+      localStorage.setItem('zetra-purchases', JSON.stringify(purchasedProducts));
+    }
+  }, [purchasedProducts, isInitialized]);
 
   // Scroll event listener for Back to Top button
   useEffect(() => {
@@ -184,6 +207,9 @@ export default function Home() {
   const handleLogout = () => {
     setCurrentUser(null);
     setIsSellerOpen(false); // Close dashboard on logout
+    setIsProfileOpen(false); // Close profile on logout
+    setPurchasedProducts([]); // Clear purchases on logout
+    localStorage.removeItem('zetra-purchases');
     toast.success("Tizimdan muvaffaqiyatli chiqdingiz!", { icon: '👋' });
   };
 
@@ -217,6 +243,49 @@ export default function Home() {
     setAllProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
+  const handleOpenProfileSettings = () => {
+    setProfileActiveTab('settings');
+    setIsProfileOpen(true);
+  };
+
+  const handleOpenMyPurchases = () => {
+    setProfileActiveTab('purchases');
+    setIsProfileOpen(true);
+  };
+
+  const handleUpdateProfile = (name: string, email: string) => {
+    setCurrentUser((prev) => prev ? { ...prev, name, email } : { name, email });
+  };
+
+  const handleCheckout = () => {
+    if (!currentUser) {
+      setIsCartOpen(false);
+      setIsAuthOpen(true);
+      toast.error("Xarid qilish uchun avval tizimga kiring!");
+      return;
+    }
+    if (cart.length === 0) {
+      toast.error("Savatchangiz bo'sh!");
+      return;
+    }
+
+    // Convert CartItems to Products (strip quantity)
+    const newPurchases = cart.map(item => {
+      const { quantity, ...product } = item;
+      return product as Product;
+    });
+
+    setPurchasedProducts((prev) => [...newPurchases, ...prev]);
+    setCart([]); // Clear cart
+    setIsCartOpen(false); // Close cart drawer
+    toast.success("To'lov muvaffaqiyatli o'tdi! Rahmat!", { icon: '🎉', duration: 4000 });
+
+    // Open My Purchases modal after a brief delay
+    setTimeout(() => {
+      handleOpenMyPurchases();
+    }, 600);
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 selection:bg-indigo-500/30 relative">
       <Navbar 
@@ -236,6 +305,8 @@ export default function Home() {
         exchangeRate={exchangeRate}
         products={allProducts}
         onOpenSeller={handleBecomeSeller}
+        onOpenProfileSettings={handleOpenProfileSettings}
+        onOpenMyPurchases={handleOpenMyPurchases}
       />
       <Header onBecomeSeller={handleBecomeSeller} />
       <Carousel 
@@ -263,6 +334,7 @@ export default function Home() {
         onRemoveItem={removeFromCart}
         currency={currency}
         exchangeRate={exchangeRate}
+        onCheckout={handleCheckout}
       />
 
       <AuthModal 
@@ -289,6 +361,18 @@ export default function Home() {
         currency={currency}
         exchangeRate={exchangeRate}
         currentUser={currentUser}
+      />
+
+      <UserProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        activeTab={profileActiveTab}
+        setActiveTab={setProfileActiveTab}
+        currentUser={currentUser}
+        onUpdateProfile={handleUpdateProfile}
+        purchases={purchasedProducts}
+        currency={currency}
+        exchangeRate={exchangeRate}
       />
 
       {/* Floating Back to Top Button */}

@@ -256,7 +256,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Currency Switcher */}
-            <div className="flex bg-slate-800/80 light:bg-slate-150 p-0.5 rounded-xl border border-slate-700/50 light:border-slate-250 items-center">
+            <div className="hidden md:flex bg-slate-800/80 light:bg-slate-150 p-0.5 rounded-xl border border-slate-700/50 light:border-slate-250 items-center">
               <button 
                 onClick={() => {
                   setCurrency('USD');
@@ -286,7 +286,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Language Switcher */}
-            <div className="relative" ref={langDropdownRef}>
+            <div className="relative hidden md:block" ref={langDropdownRef}>
               <button
                 onClick={() => setIsLangOpen(!isLangOpen)}
                 className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-150 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-700 light:hover:text-slate-900 transition-all text-[10px] font-bold cursor-pointer active:scale-95 shadow-md"
@@ -343,7 +343,7 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Theme Switcher */}
             <button
               onClick={toggleTheme}
-              className="p-2 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-150 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-650 light:hover:text-slate-900 transition-all cursor-pointer active:scale-95 shadow-md flex items-center justify-center"
+              className="hidden md:flex p-2 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-150 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-650 light:hover:text-slate-900 transition-all cursor-pointer active:scale-95 shadow-md items-center justify-center"
               aria-label="Mavzuni o'zgartirish"
             >
               {theme === 'dark' ? (

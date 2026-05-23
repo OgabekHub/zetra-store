@@ -8,10 +8,8 @@ import MainContent from '@/components/MainContent/MainContent';
 import Footer from '@/components/Footer/Footer';
 import CartDrawer from '@/components/Navbar/CartDrawer';
 import { Product } from '@/data/products';
-
-interface CartItem extends Product {
-  quantity: number;
-}
+import { CartItem } from '@/types';
+import toast from 'react-hot-toast';
 
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);

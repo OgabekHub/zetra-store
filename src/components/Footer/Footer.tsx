@@ -3,12 +3,13 @@
 import React from 'react';
 import Image from 'next/image';
 import { Mail, Send, MessageCircle, HelpCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import zetraLogo from '@/assets/images/zetra-logo2-backup.png';
 
 const Footer: React.FC = () => {
   const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Xabarnomaga obuna bo'ldingiz! Rahmat.");
+    toast.success('Xabarnomaga muvaffaqiyatli obuna bo\'ldingiz!');
   };
 
   return (
@@ -30,7 +31,7 @@ const Footer: React.FC = () => {
               Zetra Store — premium dizayn shablonlari, e-kitoblar, dasturlash kodlari va litsenziya kalitlarini sotib olish hamda sotish uchun O'zbekistondagi eng ilg'or raqamli mahsulotlar bozori.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-slate-900 border border-slate-800 hover:border-indigo-500 text-slate-400 hover:text-white rounded-xl flex items-center justify-center transition-all duration-300">
+              <a href="#" aria-label="Telegram" className="w-10 h-10 bg-slate-900 border border-slate-800 hover:border-indigo-500 text-slate-400 hover:text-white rounded-xl flex items-center justify-center transition-all duration-300">
                 <MessageCircle className="w-5 h-5" />
               </a>
               <a href="#" aria-label="Instagram" className="w-10 h-10 bg-slate-900 border border-slate-800 hover:border-indigo-500 text-slate-400 hover:text-white rounded-xl flex items-center justify-center transition-all duration-300">
@@ -57,10 +58,10 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Katalog</h3>
             <ul className="space-y-3 text-slate-400 text-sm">
-              <li><a href="#" onClick={() => alert("Dizayn shablonlari")} className="hover:text-white transition-colors">Dizayn shablonlari</a></li>
-              <li><a href="#" onClick={() => alert("E-kitoblar")} className="hover:text-white transition-colors">E-kitoblar</a></li>
-              <li><a href="#" onClick={() => alert("Dastur kodlari")} className="hover:text-white transition-colors">Dastur kodlari</a></li>
-              <li><a href="#" onClick={() => alert("Litsenziyalar")} className="hover:text-white transition-colors">Litsenziyalar</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Dizayn shablonlari sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white transition-colors">Dizayn shablonlari</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('E-kitoblar sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white transition-colors">E-kitoblar</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Dastur kodlari sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white transition-colors">Dastur kodlari</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Litsenziyalar sahifasi tez orada!', { icon: '📦' }); }} className="hover:text-white transition-colors">Litsenziyalar</a></li>
             </ul>
           </div>
 
@@ -68,10 +69,10 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Ma'lumot</h3>
             <ul className="space-y-3 text-slate-400 text-sm">
-              <li><a href="#" onClick={() => alert("Platforma haqida")} className="hover:text-white transition-colors">Platforma haqida</a></li>
-              <li><a href="#" onClick={() => alert("Foydalanish shartlari")} className="hover:text-white transition-colors">Foydalanish shartlari</a></li>
-              <li><a href="#" onClick={() => alert("Maxfiylik siyosati")} className="hover:text-white transition-colors">Maxfiylik siyosati</a></li>
-              <li><a href="#" onClick={() => alert("Yordam va FAQ")} className="hover:text-white transition-colors">Yordam / FAQ</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Platforma haqida sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white transition-colors">Platforma haqida</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Foydalanish shartlari sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white transition-colors">Foydalanish shartlari</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Maxfiylik siyosati sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white transition-colors">Maxfiylik siyosati</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); toast('Yordam sahifasi tez orada!', { icon: 'ℹ️' }); }} className="hover:text-white transition-colors">Yordam / FAQ</a></li>
             </ul>
           </div>
 

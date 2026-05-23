@@ -1,8 +1,9 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Star, ShoppingCart, CheckCircle2, HardDrive, FileType } from 'lucide-react';
-import { Product } from '../../data/products';
+import Image from 'next/image';
+import { Product } from '@/data/products';
 
 interface ProductModalProps {
   product: Product | null;
@@ -12,10 +13,24 @@ interface ProductModalProps {
 }
 
 const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, onAddToCart }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
+      document.addEventListener('keydown', handleEsc);
+      return () => {
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleEsc);
+      };
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen || !product) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
@@ -23,12 +38,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
       />
 
       {/* Modal Container */}
-      <div className="relative bg-slate-900 border border-slate-800 text-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col md:flex-row transform transition-all duration-300 relative z-10">
+      <div className="relative bg-slate-900 border border-slate-800 text-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col md:flex-row transform transition-all duration-300 z-10">
         
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl bg-slate-950/40 hover:bg-slate-850 transition-colors z-20"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl bg-slate-950/40 hover:bg-slate-800 transition-colors z-20"
         >
           <X className="w-5 h-5" />
         </button>
@@ -36,10 +51,12 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
         {/* Column 1: Image & Category tag */}
         <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
           <div className="relative aspect-video md:aspect-square w-full rounded-2xl overflow-hidden border border-slate-800">
-            <img 
+            <Image 
               src={product.image} 
               alt={product.title} 
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
             />
             <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-semibold text-white">
               {product.category}
@@ -53,7 +70,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
             <div>
               <h2 className="text-2xl md:text-3xl font-bold leading-tight mb-2 pr-8">{product.title}</h2>
               <p className="text-slate-400 text-sm">
-                Sotuvchi: <span className="text-slate-350 font-medium hover:text-white cursor-pointer">{product.author}</span>
+                Sotuvchi: <span className="text-slate-300 font-medium hover:text-white cursor-pointer">{product.author}</span>
               </p>
             </div>
 
@@ -67,14 +84,14 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
             </div>
 
             {/* Description */}
-            <p className="text-slate-350 text-sm leading-relaxed">
+            <p className="text-slate-300 text-sm leading-relaxed">
               {product.description}
             </p>
 
             {/* Files info */}
             <div className="grid grid-cols-2 gap-4 border-t border-b border-slate-800 py-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-slate-850 rounded-xl flex items-center justify-center text-indigo-400">
+                <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-indigo-400">
                   <HardDrive className="w-4.5 h-4.5" />
                 </div>
                 <div>
@@ -83,7 +100,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-slate-850 rounded-xl flex items-center justify-center text-indigo-400">
+                <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center text-indigo-400">
                   <FileType className="w-4.5 h-4.5" />
                 </div>
                 <div>
@@ -99,7 +116,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
                 <p className="text-xs text-slate-500 uppercase font-semibold">Asosiy afzalliklari:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {product.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-slate-350 text-xs leading-normal">
+                    <div key={idx} className="flex items-start gap-2 text-slate-300 text-xs leading-normal">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                       <span>{feat}</span>
                     </div>
@@ -120,7 +137,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose, o
                 onAddToCart(product);
                 onClose();
               }}
-              className="flex-1 max-w-[220px] py-4 bg-indigo-650 hover:bg-indigo-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-xl shadow-indigo-650/20 active:scale-[0.98]"
+              className="flex-1 max-w-[220px] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 shadow-xl shadow-indigo-600/20 active:scale-[0.98]"
             >
               <ShoppingCart className="w-5 h-5" />
               Savatga qo'shish

@@ -4,15 +4,7 @@ import React, { useState } from 'react';
 import { ShoppingCart, Search, Menu, User, X } from 'lucide-react';
 import Image from 'next/image';
 import zetraLogo from '../../assets/images/zetra-logo2-backup.png';
-
-interface CartItem {
-  id: number;
-  title: string;
-  price: number;
-  quantity: number;
-  category: string;
-  image: string;
-}
+import { CartItem } from '@/types';
 
 interface NavbarProps {
   cartItems: CartItem[];
@@ -69,13 +61,15 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Right Navigation */}
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => alert("Kategoriyalar ochilmoqda...")}
+              // TODO: Kategoriyalar sahifasi
+              onClick={() => {}}
               className="text-slate-300 hover:text-white p-2 rounded-lg transition-colors hidden md:block"
             >
               Kategoriyalar
             </button>
             <button 
               onClick={() => setIsCartOpen(true)}
+              aria-label="Savatcha"
               className="text-slate-300 hover:text-white p-2 rounded-lg transition-colors relative"
             >
               <ShoppingCart className="w-6 h-6" />
@@ -86,7 +80,8 @@ const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
             <button 
-              onClick={() => alert("Kirish oynasi...")}
+              // TODO: Auth sahifasi
+              onClick={() => {}}
               className="hidden md:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-all duration-300 shadow-lg shadow-indigo-600/20 font-medium"
             >
               <User className="w-5 h-5" />
@@ -94,6 +89,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Menyu"
               className="md:hidden text-slate-300 hover:text-white p-2"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -118,10 +114,10 @@ const Navbar: React.FC<NavbarProps> = ({
             />
           </form>
           <div className="flex flex-col gap-2">
-            <button onClick={() => alert("Kategoriyalar")} className="text-left text-slate-300 hover:text-white px-2 py-2 rounded-lg">
+            <button onClick={() => {}} className="text-left text-slate-300 hover:text-white px-2 py-2 rounded-lg">
               Kategoriyalar
             </button>
-            <button onClick={() => alert("Kirish")} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl">
+            <button onClick={() => {}} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl">
               <User className="w-5 h-5" />
               Kirish
             </button>

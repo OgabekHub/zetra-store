@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Star, ShoppingCart, Eye } from 'lucide-react';
-import { products, Product } from '../../data/products';
-import ProductModal from './ProductModal';
+import { products, Product } from '@/data/products';
+import ProductModal from '@/components/MainContent/ProductModal';
 
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
@@ -99,10 +100,12 @@ const MainContent: React.FC<MainContentProps> = ({
                   className="relative h-48 overflow-hidden cursor-pointer flex-shrink-0"
                   onClick={() => openProductModal(product)}
                 >
-                  <img 
+                  <Image 
                     src={product.image} 
                     alt={product.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
                     <button 
@@ -149,7 +152,7 @@ const MainContent: React.FC<MainContentProps> = ({
                       <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
                     </div>
                     <div className="flex items-center gap-1 bg-slate-900/50 px-2 py-1 rounded-lg border border-slate-700/50">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 animate-pulse" />
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                       <span className="text-sm font-medium text-white">{product.rating}</span>
                       <span className="text-xs text-slate-500">({product.reviews})</span>
                     </div>

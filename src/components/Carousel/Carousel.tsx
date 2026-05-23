@@ -31,7 +31,7 @@ interface ArrowProps {
 const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button 
     onClick={onClick}
-    className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-slate-800/80 hover:bg-indigo-650 hover:text-white border border-slate-700 text-slate-400 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95"
+    className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-400 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95"
   >
     <ChevronRight className="w-5 h-5" />
   </button>
@@ -40,7 +40,7 @@ const NextArrow: React.FC<ArrowProps> = ({ onClick }) => (
 const PrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
   <button 
     onClick={onClick}
-    className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-slate-800/80 hover:bg-indigo-650 hover:text-white border border-slate-700 text-slate-400 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95"
+    className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-slate-800/80 hover:bg-indigo-600 hover:text-white border border-slate-700 text-slate-400 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95"
   >
     <ChevronLeft className="w-5 h-5" />
   </button>
@@ -118,7 +118,7 @@ const Carousel: React.FC<CarouselProps> = ({ onSelectCategory, selectedCategory 
                     className={`bg-slate-800/50 hover:bg-slate-800 border rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 group ${
                       isSelected 
                         ? 'border-indigo-500 shadow-lg shadow-indigo-600/10 bg-slate-800' 
-                        : 'border-slate-700/50 hover:border-slate-650'
+                        : 'border-slate-700/50 hover:border-slate-600'
                     }`}
                   >
                     <div className={`w-14 h-14 rounded-2xl ${cat.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${

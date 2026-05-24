@@ -55,7 +55,7 @@ export default function Home() {
 
   // User Profile settings & Purchases state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [profileActiveTab, setProfileActiveTab] = useState<'purchases' | 'settings'>('purchases');
+  const [profileActiveTab, setProfileActiveTab] = useState<'purchases' | 'settings' | 'security'>('purchases');
   const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 

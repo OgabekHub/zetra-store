@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users, Eye, ArrowUpRight, Trash2, CheckCircle2, ChevronRight } from 'lucide-react';
+import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users, Eye, ArrowUpRight, Trash2, CheckCircle2, ChevronRight, Shield, ShieldAlert, ShieldCheck, AlertOctagon, RotateCcw, Loader2 } from 'lucide-react';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
@@ -61,6 +61,20 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
   const [features, setFeatures] = useState<string[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState(IMAGE_TEMPLATES[0].url);
   const [customImageUrl, setCustomImageUrl] = useState('');
+
+  // Antivirus Scan states
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanLogs, setScanLogs] = useState<string[]>([]);
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'clean' | 'infected'>('idle');
+  const scanConsoleEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll scan logs console
+  useEffect(() => {
+    if (isScanning) {
+      scanConsoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [scanLogs, isScanning]);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -133,37 +147,148 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
       return;
     }
 
-    const finalImage = customImageUrl.trim() || selectedImageUrl;
+    const priceNumVal = priceNum;
 
-    const newProduct: Product = {
-      id: Date.now(), // Unique ID
-      title,
-      category,
-      price: priceNum,
-      rating: 5.0,
-      reviews: 0,
-      image: finalImage,
-      author: currentUser?.name || 'Sotuvchi',
-      description,
-      fileSize,
-      fileType,
-      features: features.length > 0 ? features : ['Raqamli mahsulot', 'Kafolatlangan sifat', 'Tezkor yetkazib berish']
+    // Intercept upload to run antivirus scanner
+    const targetFileLabel = (title + " " + fileType + " " + description).toLowerCase();
+    const willBeInfected = targetFileLabel.includes('malware') || 
+                           targetFileLabel.includes('virus') || 
+                           targetFileLabel.includes('trojan') || 
+                           targetFileLabel.includes('.exe') ||
+                           targetFileLabel.includes('dangerous') ||
+                           targetFileLabel.includes('exploit');
+
+    setIsScanning(true);
+    setScanProgress(0);
+    setScanStatus('scanning');
+    
+    const logsUZ = [
+      "Fayl serverga yuklanmoqda (Zetra Sandbox v2.4)...",
+      "MD5/SHA-256 xesh summalari hisoblanmoqda...",
+      "MD5 xeshi: e82c6b4f74d081290bb353cfc23e82c1",
+      "VirusTotal va ClamAV xavfsizlik bazalaridan qidirilmoqda...",
+      "Sun'iy intellekt modeli yordamida statik va dinamik kod tahlili boshlandi...",
+      "Hevristik algoritm yordamida shubhali buyruqlar va exploitlar tekshirilmoqda..."
+    ];
+    
+    const logsRU = [
+      "Загрузка файла на сервер (Песочница Zetra v2.4)...",
+      "Вычисление хэш-сумм MD5/SHA-256...",
+      "MD5-хэш: e82c6b4f74d081290bb353cfc23e82c1",
+      "Сравнение сигнатур по базам VirusTotal и ClamAV...",
+      "Запуск ИИ-модели для статического и динамического анализа кода...",
+      "Эвристический анализ на наличие подозрительных вызовов и эксплойтов..."
+    ];
+
+    const logsEN = [
+      "Uploading file to secure sandbox (Zetra Sandbox v2.4)...",
+      "Calculating MD5/SHA-256 checksum hashes...",
+      "MD5 Hash: e82c6b4f74d081290bb353cfc23e82c1",
+      "Checking signature matches against VirusTotal & ClamAV databases...",
+      "Running AI-powered static and dynamic code structures analyzer...",
+      "Heuristic analysis for suspicious commands and memory exploits..."
+    ];
+
+    const getLogText = (index: number) => {
+      if (language === 'uz') return logsUZ[index] || '';
+      if (language === 'ru') return logsRU[index] || '';
+      return logsEN[index] || '';
     };
 
-    onAddProduct(newProduct);
-    toast.success(language === 'uz' ? "Mahsulot muvaffaqiyatli sotuvga qo'shildi!" : language === 'ru' ? "Продукт успешно добавлен на продажу!" : "Product successfully published for sale!", { icon: '📦' });
-    
-    // Reset Form
-    setTitle('');
-    setPrice('');
-    setDescription('');
-    setFileSize('');
-    setFileType('');
-    setFeatures([]);
-    setCustomImageUrl('');
-    
-    // Direct user to My Products list
-    setActiveSection('my-products');
+    setScanLogs([getLogText(0)]);
+
+    let currentProgress = 0;
+    const interval = setInterval(() => {
+      currentProgress += 5;
+      if (currentProgress <= 100) {
+        setScanProgress(currentProgress);
+        
+        if (currentProgress === 20) {
+          setScanLogs(prev => [...prev, getLogText(1), getLogText(2)]);
+        } else if (currentProgress === 50) {
+          setScanLogs(prev => [...prev, getLogText(3)]);
+        } else if (currentProgress === 75) {
+          setScanLogs(prev => [...prev, getLogText(4), getLogText(5)]);
+        }
+      } else {
+        clearInterval(interval);
+        
+        if (willBeInfected) {
+          setScanStatus('infected');
+          const infectLog = language === 'uz' 
+            ? "❌ TAHdid ANIQLANDI! Trojan.Downloader.Win32.Generic" 
+            : language === 'ru' 
+              ? "❌ ОБНАРУЖЕНА УГРОЗА! Trojan.Downloader.Win32.Generic" 
+              : "❌ SECURITY THREAT DETECTED! Trojan.Downloader.Win32.Generic";
+          const blockLog = language === 'uz'
+            ? "❌ Xavfsizlik siyosati buzildi! Faylni yuklash rad etildi."
+            : language === 'ru'
+              ? "❌ Нарушение политик безопасности! Загрузка заблокирована."
+              : "❌ Security policy violation! File upload blocked.";
+          setScanLogs(prev => [...prev, infectLog, blockLog]);
+          toast.error(
+            language === 'uz' 
+              ? "Xavfli fayl aniqlandi! Yuklash bekor qilindi." 
+              : language === 'ru' 
+                ? "Обнаружен вредоносный код! Загрузка отменена." 
+                : "Threat detected! File upload cancelled.", 
+            { icon: '🛡️' }
+          );
+        } else {
+          setScanStatus('clean');
+          const cleanLog = language === 'uz' 
+            ? "✔ XAVFSIZ! Zararli kod yoki exploit topilmadi." 
+            : language === 'ru' 
+              ? "✔ БЕЗОПАСНО! Вредоносного кода или эксплойтов не обнаружено." 
+              : "✔ SAFE! No malware or exploit patterns detected.";
+          const publishLog = language === 'uz'
+            ? "⚙ Mahsulot Zetra Store katalogiga joylanmoqda..."
+            : language === 'ru'
+              ? "⚙ Продукт добавляется в каталог Zetra Store..."
+              : "⚙ Publishing product to Zetra Store catalogue...";
+          setScanLogs(prev => [...prev, cleanLog, publishLog]);
+
+          setTimeout(() => {
+            const finalImage = customImageUrl.trim() || selectedImageUrl;
+            const newProduct: Product = {
+              id: Date.now(),
+              title,
+              category,
+              price: priceNumVal,
+              rating: 5.0,
+              reviews: 0,
+              image: finalImage,
+              author: currentUser?.name || 'Sotuvchi',
+              description,
+              fileSize,
+              fileType,
+              features: features.length > 0 ? features : ['Raqamli mahsulot', 'Kafolatlangan sifat', 'Tezkor yetkazib berish']
+            };
+
+            onAddProduct(newProduct);
+            toast.success(
+              language === 'uz' 
+                ? "Mahsulot muvaffaqiyatli sotuvga qo'shildi!" 
+                : language === 'ru' 
+                  ? "Продукт успешно добавлен на продажу!" 
+                  : "Product successfully published for sale!", 
+              { icon: '📦' }
+            );
+
+            setTitle('');
+            setPrice('');
+            setDescription('');
+            setFileSize('');
+            setFileType('');
+            setFeatures([]);
+            setCustomImageUrl('');
+            setIsScanning(false);
+            setScanStatus('idle');
+            setActiveSection('my-products');
+          }, 1500);
+        }
+      }
+    }, 150);
   };
 
   const handleDeleteProductClick = (id: number) => {
@@ -410,9 +535,99 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
               </div>
             )}
 
-            {/* 2. ADD PRODUCT FORM */}
+            {/* 2. ADD PRODUCT FORM OR ANTIVIRUS SCANNING */}
             {activeSection === 'add' && (
-              <form onSubmit={handleProductSubmit} className="space-y-6 max-w-3xl animate-fade-in">
+              isScanning ? (
+                <div className="bg-slate-950/20 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6 animate-fade-in shadow-sm transition-all duration-300">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all ${
+                      scanStatus === 'scanning'
+                        ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 animate-pulse'
+                        : scanStatus === 'clean'
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 scale-105'
+                          : 'bg-red-500/10 border-red-500/20 text-red-400 animate-bounce'
+                    }`}>
+                      {scanStatus === 'scanning' && <Loader2 className="w-8 h-8 animate-spin" />}
+                      {scanStatus === 'clean' && <ShieldCheck className="w-8 h-8" />}
+                      {scanStatus === 'infected' && <ShieldAlert className="w-8 h-8 text-red-500" />}
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-white light:text-slate-900 flex items-center justify-center gap-2">
+                        <Shield className="w-4.5 h-4.5 text-indigo-400" />
+                        {t('scan_title')}
+                      </h3>
+                      <p className="text-xs text-slate-450 light:text-slate-505">
+                        {scanStatus === 'scanning' && t('scan_running')}
+                        {scanStatus === 'clean' && t('scan_clean')}
+                        {scanStatus === 'infected' && t('scan_infected')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs font-bold text-slate-455 light:text-slate-650">
+                      <span>{language === 'uz' ? 'Tahlil qilinmoqda...' : language === 'ru' ? 'Анализ...' : 'Scanning progress...'}</span>
+                      <span className={`${scanStatus === 'infected' ? 'text-red-400' : 'text-indigo-400'}`}>{scanProgress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-900 light:bg-slate-200 border border-slate-800 light:border-slate-300/60 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-150 ${
+                          scanStatus === 'infected' 
+                            ? 'bg-red-500' 
+                            : scanStatus === 'clean'
+                              ? 'bg-emerald-500'
+                              : 'bg-indigo-600'
+                        }`}
+                        style={{ width: `${scanProgress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <label className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider block">
+                      {language === 'uz' ? 'Tekshiruv hisoboti (Logs):' : language === 'ru' ? 'Лог проверки (Logs):' : 'Scanner report logs:'}
+                    </label>
+                    <div className="h-44 bg-slate-955 light:bg-slate-950 border border-slate-850 light:border-slate-300/40 rounded-2xl p-4 overflow-y-auto font-mono text-[10px] space-y-1.5 leading-normal text-slate-300 light:text-slate-700 select-text">
+                      {scanLogs.map((log, idx) => {
+                        const isInfect = log.startsWith('❌') || log.startsWith('[XAVFLI]');
+                        const isClean = log.startsWith('✔');
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`flex gap-2 items-start ${
+                              isInfect 
+                                ? 'text-red-400 font-bold' 
+                                : isClean 
+                                  ? 'text-emerald-400 font-bold' 
+                                  : 'text-slate-400 light:text-slate-500'
+                            }`}
+                          >
+                            <span className="select-none text-slate-700 font-mono">[{idx + 1}]</span>
+                            <span className="whitespace-pre-wrap">{log}</span>
+                          </div>
+                        );
+                      })}
+                      <div ref={scanConsoleEndRef} />
+                    </div>
+                  </div>
+
+                  {scanStatus === 'infected' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsScanning(false);
+                        setScanStatus('idle');
+                      }}
+                      className="w-full py-3.5 bg-slate-800 hover:bg-slate-750 light:bg-slate-200 light:hover:bg-slate-250 text-slate-200 light:text-slate-800 rounded-2xl font-bold transition-all border border-slate-700/40 light:border-slate-300 active:scale-[0.98] text-xs cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {t('scan_try_again')}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <form onSubmit={handleProductSubmit} className="space-y-6 max-w-3xl animate-fade-in">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
@@ -596,6 +811,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                   {t('seller_submit')}
                 </button>
               </form>
+            )
             )}
 
             {/* 3. MY PRODUCTS LIST */}

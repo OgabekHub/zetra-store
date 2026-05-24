@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, User, ShoppingBag, Lock, Mail, Download, Settings, Calendar, ShieldCheck } from 'lucide-react';
@@ -10,8 +10,8 @@ import { useLanguage } from '@/context/LanguageContext';
 interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activeTab: 'purchases' | 'settings';
-  setActiveTab: (tab: 'purchases' | 'settings') => void;
+  activeTab: 'purchases' | 'settings' | 'security';
+  setActiveTab: (tab: 'purchases' | 'settings' | 'security') => void;
   currentUser: { name: string; email: string } | null;
   onUpdateProfile: (name: string, email: string) => void;
   purchases: Product[];
@@ -52,7 +52,125 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState('');
   const [secKeys, setSecKeys] = useState<{ [productId: number]: { license: string; decrypt: string } }>({});
+  const [downloadLimits, setDownloadLimits] = useState<Record<string, number>>({});
   const { language, t } = useLanguage();
+
+  // Security tab states
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [securityLogs, setSecurityLogs] = useState<any[]>([]);
+
+  // Load sessions and security logs from localStorage on mount & when currentUser changes
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      // Sessions
+      const savedSessions = localStorage.getItem('zetra-sessions');
+      let parsedSessions = savedSessions ? JSON.parse(savedSessions) : [];
+      
+      // Filter sessions for current user email
+      parsedSessions = parsedSessions.filter((s: any) => s.email === currentUser.email);
+      
+      // If no sessions exist for this user, create one for current device
+      if (parsedSessions.length === 0) {
+        const mockIP = () => {
+          const uzbekIPs = ['213.230.76.', '94.158.52.', '81.95.230.', '37.110.212.'];
+          const prefix = uzbekIPs[Math.floor(Math.random() * uzbekIPs.length)];
+          const suffix = Math.floor(Math.random() * 254) + 1;
+          return prefix + suffix;
+        };
+
+        const mockDevice = () => {
+          const ua = window.navigator.userAgent;
+          let os = 'Windows 11';
+          if (ua.indexOf('Macintosh') !== -1) os = 'macOS Sonoma';
+          if (ua.indexOf('Linux') !== -1) os = 'Linux OS';
+          if (ua.indexOf('iPhone') !== -1) os = 'iPhone 15';
+          if (ua.indexOf('Android') !== -1) os = 'Android 14';
+
+          let browser = 'Chrome';
+          if (ua.indexOf('Firefox') !== -1) browser = 'Firefox';
+          if (ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1) browser = 'Safari';
+          if (ua.indexOf('Edge') !== -1) browser = 'Edge';
+
+          return `${browser} (${os})`;
+        };
+
+        const currentSession = {
+          id: `SES-${Math.floor(100000 + Math.random() * 900000)}`,
+          email: currentUser.email,
+          device: mockDevice(),
+          ip: mockIP(),
+          lastActive: new Date().toISOString(),
+          isCurrent: true
+        };
+        parsedSessions = [currentSession];
+        
+        // Also save to all sessions in localStorage
+        const allSessions = savedSessions ? JSON.parse(savedSessions) : [];
+        localStorage.setItem('zetra-sessions', JSON.stringify([currentSession, ...allSessions]));
+      }
+      
+      setSessions(parsedSessions);
+
+      // Security Logs
+      const savedLogs = localStorage.getItem('zetra-security-logs');
+      let parsedLogs = savedLogs ? JSON.parse(savedLogs) : [];
+      parsedLogs = parsedLogs.filter((l: any) => l.email === currentUser.email);
+      
+      // If no logs, create first one
+      if (parsedLogs.length === 0) {
+        const firstLog = {
+          id: `LOG-${Math.floor(100000 + Math.random() * 900000)}`,
+          email: currentUser.email,
+          event: "Profil birinchi marta yaratildi",
+          ip: parsedSessions[0]?.ip || '127.0.0.1',
+          device: parsedSessions[0]?.device || 'Unknown Device',
+          date: new Date().toISOString(),
+          status: 'success'
+        };
+        parsedLogs = [firstLog];
+        
+        const allLogs = savedLogs ? JSON.parse(savedLogs) : [];
+        localStorage.setItem('zetra-security-logs', JSON.stringify([firstLog, ...allLogs]));
+      }
+
+      setSecurityLogs(parsedLogs);
+    }
+  }, [isOpen, currentUser]);
+
+  const handleRevokeOtherSessions = () => {
+    if (!currentUser) return;
+    
+    const savedSessions = localStorage.getItem('zetra-sessions');
+    const allSessions = savedSessions ? JSON.parse(savedSessions) : [];
+    
+    // Keep current session of this user, and keep sessions of OTHER users
+    const updatedSessions = allSessions.filter((s: any) => {
+      if (s.email !== currentUser.email) return true;
+      return s.isCurrent === true;
+    });
+    
+    localStorage.setItem('zetra-sessions', JSON.stringify(updatedSessions));
+    
+    // Update local state
+    setSessions(sessions.filter((s: any) => s.isCurrent === true));
+    
+    // Log security event
+    const savedLogs = localStorage.getItem('zetra-security-logs');
+    const allLogs = savedLogs ? JSON.parse(savedLogs) : [];
+    const newLog = {
+      id: `LOG-${Math.floor(100000 + Math.random() * 900000)}`,
+      email: currentUser.email,
+      event: "Boshqa faol seanslar tugatildi (Revoked)",
+      ip: sessions.find((s: any) => s.isCurrent)?.ip || '127.0.0.1',
+      device: sessions.find((s: any) => s.isCurrent)?.device || 'Unknown Device',
+      date: new Date().toISOString(),
+      status: 'warning'
+    };
+    localStorage.setItem('zetra-security-logs', JSON.stringify([newLog, ...allLogs]));
+    setSecurityLogs([newLog, ...securityLogs]);
+
+    toast.success(language === 'uz' ? "Boshqa qurilmalar tizimdan chiqarildi!" : language === 'ru' ? "Выход на других устройствах выполнен!" : "Successfully logged out other devices!", { icon: '🛡️' });
+  };
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +192,28 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       localStorage.setItem('zetra-security-keys', JSON.stringify(secKeys));
     }
   }, [secKeys]);
+
+  // Load and initialize download limits on mount/purchase change
+  useEffect(() => {
+    if (isOpen && currentUser && purchases.length > 0) {
+      const savedLimits = localStorage.getItem('zetra-download-limits');
+      let parsedLimits = savedLimits ? JSON.parse(savedLimits) : {};
+      
+      let updated = false;
+      purchases.forEach((product) => {
+        const key = `${currentUser.email}:${product.id}`;
+        if (parsedLimits[key] === undefined) {
+          parsedLimits[key] = 5;
+          updated = true;
+        }
+      });
+      
+      if (updated) {
+        localStorage.setItem('zetra-download-limits', JSON.stringify(parsedLimits));
+      }
+      setDownloadLimits(parsedLimits);
+    }
+  }, [isOpen, currentUser, purchases]);
 
   // Sync state with currentUser when modal opens or user changes
   useEffect(() => {
@@ -135,12 +275,31 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }
       if (newPassword !== confirmPassword) {
         toast.error(language === 'uz' ? "Yangi parollar bir-biriga mos kelmadi!" : language === 'ru' ? "ÐÐ¾Ð²Ñ‹Ðµ Ð¿Ð°Ñ€Ð¾Ð»Ð¸ Ð½Ðµ ÑÐ¾Ð²Ð¿Ð°Ð´Ð°ÑŽÑ‚!" : "New passwords do not match!");
+        toast.error(language === 'uz' ? "Yangi parollar bir-biriga mos kelmadi!" : language === 'ru' ? "Новые пароли не совпадают!" : "New passwords do not match!");
         return;
       }
     }
 
     onUpdateProfile(name, email);
-    toast.success(language === 'uz' ? "Profil ma'lumotlari muvaffaqiyatli yangilandi!" : language === 'ru' ? "Ð˜Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð°!" : "Profile settings successfully updated!", { icon: 'âš™ï¸' });
+    
+    // Log event in Security Logs
+    if (currentUser) {
+      const savedLogs = localStorage.getItem('zetra-security-logs');
+      const allLogs = savedLogs ? JSON.parse(savedLogs) : [];
+      const newLog = {
+        id: `LOG-${Math.floor(100000 + Math.random() * 900000)}`,
+        email: email,
+        event: newPassword ? "Profil va parol yangilandi" : "Profil ma'lumotlari yangilandi",
+        ip: sessions[0]?.ip || '127.0.0.1',
+        device: sessions[0]?.device || 'Unknown Device',
+        date: new Date().toISOString(),
+        status: 'success'
+      };
+      localStorage.setItem('zetra-security-logs', JSON.stringify([newLog, ...allLogs]));
+      setSecurityLogs([newLog, ...securityLogs]);
+    }
+
+    toast.success(language === 'uz' ? "Profil ma'lumotlari muvaffaqiyatli yangilandi!" : language === 'ru' ? "Информация профиля успешно обновлена!" : "Profile settings successfully updated!", { icon: '⚙️' });
     
     // Clear passwords
     setNewPassword('');
@@ -149,6 +308,14 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
 
   const handleDownload = (product: Product) => {
     if (downloadingId !== null) return;
+    if (!currentUser) return;
+
+    const key = `${currentUser.email}:${product.id}`;
+    const currentLimit = downloadLimits[key] ?? 5;
+    if (currentLimit <= 0) {
+      toast.error(language === 'uz' ? "Yuklab olish limiti tugagan!" : language === 'ru' ? "Лимит скачиваний исчерпан!" : "Download limit reached!");
+      return;
+    }
 
     setDownloadingId(product.id);
     setDownloadProgress(0);
@@ -179,14 +346,25 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
           [product.id]: { license: licenseKey, decrypt: decryptKey }
         }));
 
-        toast.success(language === 'uz' ? "Fayl shifrlangan shaklda yuklab olindi!" : language === 'ru' ? "Ð¤Ð°Ð¹Ð» ÑƒÑÐ¿ÐµÑˆÐ½Ð¾ ÑÐºÐ°Ñ‡Ð°Ð½ Ð² Ð·Ð°ÑˆÐ¸Ñ„Ñ€Ð¾Ð²Ð°Ð½Ð½Ð¾Ð¼ Ð²Ð¸Ð´Ðµ!" : "File downloaded in encrypted form!", { icon: 'ðŸ”’' });
+        // Decrement limit
+        const key = `${currentUser.email}:${product.id}`;
+        const currentLimit = downloadLimits[key] ?? 5;
+        const newLimit = Math.max(0, currentLimit - 1);
+        const updatedLimits = {
+          ...downloadLimits,
+          [key]: newLimit
+        };
+        setDownloadLimits(updatedLimits);
+        localStorage.setItem('zetra-download-limits', JSON.stringify(updatedLimits));
+
+        toast.success(language === 'uz' ? "Fayl shifrlangan shaklda yuklab olindi!" : language === 'ru' ? "Файл успешно скачан в зашифрованном виде!" : "File downloaded in encrypted form!", { icon: '🔒' });
         toast.success(
           language === 'uz' 
             ? `Nusxalashga qarshi ochish paroli: ${decryptKey}` 
             : language === 'ru' 
-              ? `ÐŸÐ°Ñ€Ð¾Ð»ÑŒ Ð´Ð»Ñ Ñ€Ð°ÑÑˆÐ¸Ñ„Ñ€Ð¾Ð²ÐºÐ¸ Ð¿Ñ€Ð¾Ñ‚Ð¸Ð² ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ: ${decryptKey}` 
+              ? `Пароль для расшифровки против копирования: ${decryptKey}` 
               : `Anti-copy decryption password: ${decryptKey}`, 
-          { icon: 'ðŸ”‘', duration: 6000 }
+          { icon: '🔑', duration: 6000 }
         );
 
         // Reset downloading states
@@ -233,12 +411,24 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
             <button
               onClick={() => setActiveTab('settings')}
               className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative cursor-pointer ${
-                activeTab === 'settings' ? 'text-indigo-400 light:text-indigo-600' : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800'
+                activeTab === 'settings' ? 'text-indigo-400 light:text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800'
               }`}
             >
               <Settings className="w-4.5 h-4.5" />
               {t('profile_settings')}
               {activeTab === 'settings' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 light:bg-indigo-600 rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`flex items-center gap-2 pb-4 text-sm font-semibold transition-all relative cursor-pointer ${
+                activeTab === 'security' ? 'text-indigo-400 light:text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-4.5 h-4.5" />
+              {t('profile_security_tab')}
+              {activeTab === 'security' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 light:bg-indigo-600 rounded-full" />
               )}
             </button>
@@ -294,7 +484,17 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                             <span>•</span>
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3.5 h-3.5" />
-                              {language === 'uz' ? 'Bugun sotib olindi' : language === 'ru' ? 'ÐšÑƒÐ¿Ð»ÐµÐ½Ð¾ ÑÐµÐ³Ð¾Ð´Ð½Ñ' : 'Purchased today'}
+                              {language === 'uz' ? 'Bugun sotib olindi' : language === 'ru' ? 'Куплено сегодня' : 'Purchased today'}
+                            </span>
+                            <span>•</span>
+                            <span className={`font-bold flex items-center gap-1 ${
+                              (downloadLimits[`${currentUser?.email}:${product.id}`] ?? 5) === 0
+                                ? 'text-red-500'
+                                : (downloadLimits[`${currentUser?.email}:${product.id}`] ?? 5) <= 2
+                                  ? 'text-amber-500'
+                                  : 'text-emerald-500'
+                            }`}>
+                              {t('dl_remaining')}: {downloadLimits[`${currentUser?.email}:${product.id}`] ?? 5}/5
                             </span>
                           </div>
                         </div>
@@ -329,13 +529,36 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                                 {formatPrice(product.price, currency, exchangeRate)}
                               </p>
                             </div>
-                            <button
-                              onClick={() => handleDownload(product)}
-                              className="flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                            >
-                              <Download className="w-4 h-4" />
-                              {secKeys[product.id] ? t('profile_download_again') : t('profile_download')}
-                            </button>
+                            {(() => {
+                              const key = `${currentUser?.email}:${product.id}`;
+                              const remaining = downloadLimits[key] ?? 5;
+                              const isLocked = remaining <= 0;
+
+                              return (
+                                <button
+                                  onClick={() => !isLocked && handleDownload(product)}
+                                  disabled={isLocked}
+                                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+                                    isLocked 
+                                      ? 'bg-slate-800 text-slate-500 border border-slate-700/40 cursor-not-allowed shadow-none light:bg-slate-200 light:text-slate-400' 
+                                      : 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95 cursor-pointer'
+                                  }`}
+                                  title={isLocked ? (language === 'uz' ? "Maksimal yuklab olish soniga yetildi" : language === 'ru' ? "Лимит скачиваний исчерпан" : "Download limit reached") : undefined}
+                                >
+                                  {isLocked ? (
+                                    <>
+                                      <Lock className="w-4 h-4 text-slate-555" />
+                                      {language === 'uz' ? "Limit tugadi" : language === 'ru' ? "Лимит исчерпан" : "Limit Exceeded"}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Download className="w-4 h-4" />
+                                      {secKeys[product.id] ? t('profile_download_again') : t('profile_download')}
+                                    </>
+                                  )}
+                                </button>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
@@ -444,6 +667,112 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 {t('profile_save_btn')}
               </button>
             </form>
+          )}
+
+          {/* TAB 3: SECURITY */}
+          {activeTab === 'security' && (
+            <div className="space-y-8 animate-fade-in max-w-3xl">
+              {/* Active Sessions */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-sm font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+                    {t('profile_active_sessions')}
+                  </h4>
+                  {sessions.filter(s => !s.isCurrent).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleRevokeOtherSessions}
+                      className="px-3.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-bold transition-all border border-red-500/15 cursor-pointer active:scale-95 flex items-center gap-1.5"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      {t('profile_revoke_all')}
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {sessions.map((session) => (
+                    <div 
+                      key={session.id}
+                      className="flex items-center justify-between p-4 bg-slate-850/30 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl gap-4"
+                    >
+                      <div className="flex items-center gap-4.5">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                          session.isCurrent 
+                            ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 light:bg-indigo-50 light:text-indigo-600 light:border-indigo-200' 
+                            : 'bg-slate-800/40 border-slate-800 text-slate-500 light:bg-slate-100 light:text-slate-400 light:border-slate-200'
+                        }`}>
+                          <User className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-200 light:text-slate-850 text-sm">
+                              {session.device}
+                            </span>
+                            {session.isCurrent && (
+                              <span className="text-[9px] font-extrabold bg-indigo-500/15 text-indigo-400 light:bg-indigo-50 light:text-indigo-650 px-2 py-0.5 rounded-full border border-indigo-500/10 light:border-indigo-150 uppercase tracking-wider">
+                                {t('profile_session_current')}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 light:text-slate-400 mt-1">
+                            {t('profile_ip_address')}: <span className="font-mono text-slate-400 light:text-slate-655">{session.ip}</span> • {t('profile_last_active')}: <span className="text-slate-400 light:text-slate-655">{new Date(session.lastActive).toLocaleTimeString()}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Security Logs */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+                  {t('profile_security_logs')}
+                </h4>
+
+                <div className="bg-slate-850/20 light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-800 light:border-slate-200 bg-slate-950/20 light:bg-slate-100/50 text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+                          <th className="p-4">{t('profile_event')}</th>
+                          <th className="p-4">{t('profile_ip_address')}</th>
+                          <th className="p-4">{t('profile_device')}</th>
+                          <th className="p-4">{t('profile_last_active')}</th>
+                          <th className="p-4 text-center">{t('profile_status')}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800 light:divide-slate-200">
+                        {securityLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-slate-850/10 hover:light:bg-slate-50/50 transition-colors text-slate-350 light:text-slate-700">
+                            <td className="p-4 font-semibold text-slate-250 light:text-slate-850">
+                              {log.event}
+                            </td>
+                            <td className="p-4 font-mono text-[11px]">{log.ip}</td>
+                            <td className="p-4 text-[11px] truncate max-w-[130px]" title={log.device}>{log.device}</td>
+                            <td className="p-4 text-[11px]">
+                              {new Date(log.date).toLocaleDateString(language === 'uz' ? 'uz-UZ' : language === 'ru' ? 'ru-RU' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td className="p-4 text-center">
+                              <span className={`inline-block text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${
+                                log.status === 'success' 
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 light:bg-emerald-50 light:text-emerald-700 light:border-emerald-200' 
+                                  : log.status === 'warning'
+                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 light:bg-amber-50 light:text-amber-700 light:border-amber-200'
+                                    : 'bg-red-500/10 text-red-400 border-red-500/20 light:bg-red-50 light:text-red-700 light:border-red-200'
+                              }`}>
+                                {log.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
         </div>

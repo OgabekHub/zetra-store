@@ -359,7 +359,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button 
               onClick={() => setIsCartOpen(true)}
               aria-label={t('nav_cart')}
-              className="text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 rounded-lg transition-colors relative cursor-pointer"
+              className="hidden md:block text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 rounded-lg transition-colors relative cursor-pointer"
             >
               <ShoppingCart className="w-6 h-6" />
               {cartItems.length > 0 && (
@@ -446,7 +446,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Menyu"
-              className="md:hidden text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 cursor-pointer"
+              className="hidden text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 cursor-pointer"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -454,17 +454,33 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden animate-fade-in"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Bottom Sheet Menu */}
       <div
-        ref={mobileMenuRef}
-        className="md:hidden bg-slate-900 light:bg-white border-b border-slate-800 light:border-slate-200 overflow-hidden transition-all duration-300 ease-in-out"
-        style={{
-          maxHeight: isMobileMenuOpen ? (mobileMenuRef.current?.scrollHeight ?? 1000) + 'px' : '0px',
-          opacity: isMobileMenuOpen ? 1 : 0,
+        className={`fixed inset-x-0 bottom-0 z-50 md:hidden bg-slate-900 light:bg-white border-t border-slate-800 light:border-slate-200 rounded-t-3xl shadow-2xl transition-all duration-300 transform ${
+          isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
+        }`}
+        style={{ 
+          maxHeight: '80vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 5.5rem)' 
         }}
       >
-        <div className="px-4 pt-2 pb-5 space-y-4">
-          
+        {/* Drag Handle */}
+        <div className="w-full flex justify-center py-3.5 border-b border-slate-800/60 light:border-slate-100/80 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="w-12 h-1.5 bg-slate-700 light:bg-slate-300 rounded-full" />
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto px-4 py-5 space-y-5">
           {/* Mobile Search */}
           <div ref={mobileSearchRef} className="relative w-full">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
@@ -553,7 +569,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   element.scrollIntoView({ behavior: 'smooth' });
                 }
               }} 
-              className="text-left text-slate-350 hover:text-white light:text-slate-600 light:hover:text-slate-900 px-2 py-2 rounded-lg text-sm font-semibold"
+              className="text-left text-slate-350 hover:text-white light:text-slate-655 light:hover:text-slate-900 px-2 py-2 rounded-lg text-sm font-semibold"
             >
               {t('nav_categories')}
             </button>
@@ -681,7 +697,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     setIsMobileMenuOpen(false);
                     onOpenMyPurchases();
                   }}
-                  className="w-full text-left text-slate-350 hover:text-white light:text-slate-650 light:hover:text-slate-900 px-2 py-2 rounded-lg text-sm cursor-pointer"
+                  className="w-full text-left text-slate-350 hover:text-white light:text-slate-655 light:hover:text-slate-900 px-2 py-2 rounded-lg text-sm cursor-pointer"
                 >
                   {t('nav_my_purchases')}
                 </button>
@@ -699,7 +715,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     setIsMobileMenuOpen(false);
                     onLogout();
                   }}
-                  className="w-full text-left text-red-400 hover:text-red-300 light:text-red-600 light:hover:text-red-750 px-2 py-2 rounded-lg text-sm flex items-center gap-2 font-medium cursor-pointer"
+                  className="w-full text-left text-red-400 hover:text-red-300 light:text-red-655 light:hover:text-red-750 px-2 py-2 rounded-lg text-sm flex items-center gap-2 font-medium cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   {t('nav_logout')}

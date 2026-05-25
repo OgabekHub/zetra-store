@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Search, Menu, User, X, LogOut, Languages, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, Search, Menu, User, X, LogOut, Languages, Sun, Moon, Home, Compass } from 'lucide-react';
 import Image from 'next/image';
 import zetraLogo from '../../assets/images/zetra-logo2-backup.png';
 import { CartItem } from '@/types';
@@ -717,6 +717,91 @@ const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-slate-950/85 light:bg-white/90 backdrop-blur-lg border-t border-slate-800/80 light:border-slate-200/80 px-4 pt-2 shadow-2xl transition-all duration-300"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
+      >
+        <div className="flex justify-between items-center max-w-lg mx-auto">
+          {/* Home Button */}
+          <button 
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              setIsMobileMenuOpen(false);
+            }}
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900 transition-all duration-200 flex-1 active:scale-95 cursor-pointer"
+          >
+            <Home className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
+            <span className="text-[10px] font-semibold">{t('nav_home') || 'Asosiy'}</span>
+          </button>
+
+          {/* Categories Button */}
+          <button 
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              const element = document.getElementById('products-section');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900 transition-all duration-200 flex-1 active:scale-95 cursor-pointer"
+          >
+            <Compass className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
+            <span className="text-[10px] font-semibold">{t('nav_categories')}</span>
+          </button>
+
+          {/* Cart Button */}
+          <button 
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              setIsCartOpen(true);
+            }}
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900 transition-all duration-200 flex-1 relative active:scale-95 cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingCart className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-slate-950 light:border-white shadow animate-pulse">
+                  {cartItems.reduce((acc, item) => acc + item.quantity, 0)}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-semibold">{t('nav_cart')}</span>
+          </button>
+
+          {/* Profile Button */}
+          <button 
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              if (currentUser) {
+                onOpenProfileSettings();
+              } else {
+                onOpenAuth();
+              }
+            }}
+            className="flex flex-col items-center gap-1 text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900 transition-all duration-200 flex-1 active:scale-95 cursor-pointer"
+          >
+            <User className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
+            <span className="text-[10px] font-semibold truncate max-w-[60px]">
+              {currentUser ? currentUser.name.split(' ')[0] : t('nav_profile') || 'Profil'}
+            </span>
+          </button>
+
+          {/* Menu Toggle Button */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`flex flex-col items-center gap-1 transition-all duration-200 flex-1 active:scale-95 cursor-pointer ${
+              isMobileMenuOpen 
+                ? 'text-indigo-500 light:text-indigo-600' 
+                : 'text-slate-400 hover:text-white light:text-slate-500 light:hover:text-slate-900'
+            }`}
+          >
+            <Menu className="w-5 h-5 transition-transform duration-200 hover:scale-110" />
+            <span className="text-[10px] font-semibold">{t('nav_menu') || 'Menyu'}</span>
+          </button>
         </div>
       </div>
     </nav>

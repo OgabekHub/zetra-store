@@ -293,7 +293,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 selection:bg-indigo-500/30 relative">
+    <div className="min-h-screen bg-slate-900 selection:bg-indigo-500/30 relative pb-20 md:pb-0">
       <Navbar 
         cartItems={cart}
         isCartOpen={isCartOpen}

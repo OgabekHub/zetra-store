@@ -22,6 +22,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_search_placeholder": "Raqamli mahsulotlarni qidirish...",
     "nav_cart": "Savat",
     "nav_categories": "Kategoriyalar",
+    "nav_home": "Asosiy",
+    "nav_profile": "Profil",
+    "nav_menu": "Menyu",
 
     // Header / Hero
     "hero_title": "Raqamli Mahsulotlar Premium Bozoriga Xush Kelibsiz",
@@ -266,6 +269,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_search_placeholder": "Поиск цифровых товаров...",
     "nav_cart": "Корзина",
     "nav_categories": "Категории",
+    "nav_home": "Главная",
+    "nav_profile": "Профиль",
+    "nav_menu": "Меню",
 
     // Header / Hero
     "hero_title": "Добро пожаловать на Премиум Рынок Цифровых Товаров",
@@ -510,6 +516,9 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_search_placeholder": "Search digital products...",
     "nav_cart": "Cart",
     "nav_categories": "Categories",
+    "nav_home": "Home",
+    "nav_profile": "Profile",
+    "nav_menu": "Menu",
 
     // Header / Hero
     "hero_title": "Welcome to the Premium Marketplace for Digital Products",

@@ -445,7 +445,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Menyu"
-              className="md:hidden text-slate-300 hover:text-white p-2 cursor-pointer"
+              className="md:hidden text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 cursor-pointer"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -456,7 +456,7 @@ const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Menu */}
       <div
         ref={mobileMenuRef}
-        className="md:hidden bg-slate-900 border-b border-slate-800 overflow-hidden transition-all duration-300 ease-in-out"
+        className="md:hidden bg-slate-900 light:bg-white border-b border-slate-800 light:border-slate-200 overflow-hidden transition-all duration-300 ease-in-out"
         style={{
           maxHeight: isMobileMenuOpen ? (mobileMenuRef.current?.scrollHeight ?? 1000) + 'px' : '0px',
           opacity: isMobileMenuOpen ? 1 : 0,
@@ -468,7 +468,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <div ref={mobileSearchRef} className="relative w-full">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-slate-400" />
+                <Search className="h-5 w-5 text-slate-400 light:text-slate-500" />
               </div>
               <input
                 type="text"
@@ -478,17 +478,17 @@ const Navbar: React.FC<NavbarProps> = ({
                   setSearchQuery(e.target.value);
                   setShowMobileSuggestions(true);
                 }}
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 rounded-2xl leading-5 bg-slate-800/50 text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 light:border-slate-250 rounded-2xl leading-5 bg-slate-800/50 light:bg-slate-100/70 text-slate-200 light:text-slate-800 placeholder-slate-400 light:placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-slate-800 light:focus:bg-white"
                 placeholder={t('search') + '...'}
               />
             </form>
 
             {/* Mobile Autocomplete Suggestions */}
             {showMobileSuggestions && searchQuery.trim() !== '' && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl z-[60]">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl overflow-hidden shadow-2xl z-[60]">
                 {suggestions.length > 0 ? (
                   <div className="py-1">
-                    <div className="px-4 py-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                    <div className="px-4 py-1.5 text-[9px] font-bold text-slate-500 light:text-slate-400 uppercase tracking-wider">
                       {t('pay_items_purchased')}
                     </div>
                     <div className="max-h-[240px] overflow-y-auto">
@@ -500,9 +500,9 @@ const Navbar: React.FC<NavbarProps> = ({
                              setShowMobileSuggestions(false);
                              setIsMobileMenuOpen(false);
                            }}
-                           className="flex items-center gap-3 px-4 py-2 hover:bg-slate-800/60 cursor-pointer"
+                           className="flex items-center gap-3 px-4 py-2 hover:bg-slate-800/60 light:hover:bg-slate-50 cursor-pointer"
                         >
-                          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800">
+                          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800 border border-slate-700/50 light:border-slate-200">
                             <Image
                               src={product.image}
                               alt={product.title}
@@ -512,30 +512,30 @@ const Navbar: React.FC<NavbarProps> = ({
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-slate-200 truncate">
+                            <h4 className="text-xs font-semibold text-slate-200 light:text-slate-800 truncate">
                               {product.title}
                             </h4>
-                            <p className="text-[10px] text-slate-450 truncate">
+                            <p className="text-[10px] text-slate-450 light:text-slate-500 truncate">
                               {product.category}
                             </p>
                           </div>
-                          <div className="text-xs font-bold text-white flex-shrink-0">
+                          <div className="text-xs font-bold text-white light:text-slate-900 flex-shrink-0">
                             {formatPrice(product.price, currency, exchangeRate)}
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="border-t border-slate-800 mt-1 px-3 py-1.5">
+                    <div className="border-t border-slate-800 light:border-slate-100 mt-1 px-3 py-1.5">
                       <button
                         onClick={handleSearchSubmit}
-                        className="w-full text-center text-xs font-semibold text-indigo-400 py-1"
+                        className="w-full text-center text-xs font-semibold text-indigo-400 light:text-indigo-650 hover:text-indigo-300 light:hover:text-indigo-750 py-1"
                       >
                         {t('main_all_products_btn')} ({totalMatches})
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-xs text-slate-500">
+                  <div className="p-4 text-center text-xs text-slate-500 light:text-slate-400">
                     {t('seller_no_products')}
                   </div>
                 )}

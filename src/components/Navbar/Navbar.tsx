@@ -462,15 +462,12 @@ const Navbar: React.FC<NavbarProps> = ({
         />
       )}
 
-      {/* Mobile Bottom Sheet Menu */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-50 md:hidden bg-slate-900 light:bg-white border-t border-slate-800 light:border-slate-200 rounded-t-3xl shadow-2xl transition-all duration-300 transform ${
+        className={`fixed inset-x-0 bottom-0 z-50 md:hidden flex flex-col bg-slate-900 light:bg-white border-t border-slate-800 light:border-slate-200 rounded-t-3xl shadow-2xl transition-all duration-300 transform ${
           isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
         style={{ 
           maxHeight: '80vh', 
-          display: 'flex', 
-          flexDirection: 'column',
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 5.5rem)' 
         }}
       >

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users, Eye, ArrowUpRight, Trash2, CheckCircle2, ChevronRight, Shield, ShieldAlert, ShieldCheck, AlertOctagon, RotateCcw, Loader2 } from 'lucide-react';
+import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users, Eye, ArrowUpRight, Trash2, CheckCircle2, ChevronRight, ChevronDown, Shield, ShieldAlert, ShieldCheck, AlertOctagon, RotateCcw, Loader2 } from 'lucide-react';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
@@ -53,6 +53,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
   // Form states
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Dizayn Shablonlari');
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [fileSize, setFileSize] = useState('');
@@ -642,24 +643,46 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                       required
                     />
                   </div>
-                  <div>
+                  <div className="relative">
                     <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
                       {t('seller_prod_cat')}
                     </label>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all cursor-pointer"
+                    <button
+                      type="button"
+                      onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                      className="flex items-center justify-between w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-sm transition-all cursor-pointer text-left"
                     >
-                      <option value="Dizayn Shablonlari">{t('cat_design')}</option>
-                      <option value="3D Modellar">{t('cat_3d')}</option>
-                      <option value="E-Kitoblar">{t('cat_ebooks')}</option>
-                      <option value="Dastur Kodelari">{t('cat_code')}</option>
-                      <option value="Grafika & Media">{t('cat_graphics')}</option>
-                      <option value="O'yin va Hisoblar">{t('cat_games')}</option>
-                      <option value="Litsenziya & Kalitlar">{t('cat_keys')}</option>
-                      <option value="Audio & Musiqa">{t('cat_audio')}</option>
-                    </select>
+                      <span>{getCategoryDisplayName(category)}</span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isCategoryDropdownOpen && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={() => setIsCategoryDropdownOpen(false)}
+                        />
+                        <div className="absolute left-0 right-0 mt-2 z-50 rounded-2xl border border-slate-800 light:border-slate-200 bg-slate-950 light:bg-white shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                          {Object.keys(categoryTranslations).map((catName) => (
+                            <button
+                              key={catName}
+                              type="button"
+                              onClick={() => {
+                                setCategory(catName);
+                                setIsCategoryDropdownOpen(false);
+                              }}
+                              className={`flex items-center w-full px-4 py-2.5 text-sm text-left transition-colors cursor-pointer ${
+                                category === catName
+                                  ? 'bg-indigo-600 text-white font-semibold'
+                                  : 'text-slate-300 light:text-slate-700 hover:bg-slate-900 light:hover:bg-slate-100'
+                              }`}
+                            >
+                              {getCategoryDisplayName(catName)}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

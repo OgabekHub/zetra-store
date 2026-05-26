@@ -2,8 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Lock, User, MessageCircle, Sparkles, ShieldCheck, Smartphone, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/context/ThemeContext';
+import zetraLogoDark from '../../assets/images/zetra-logo-dark.png';
+import zetraLogoLight from '../../assets/images/zetra-logo-light.png';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,6 +18,8 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
+  const zetraLogo = theme === 'dark' ? zetraLogoDark : zetraLogoLight;
   
   // 2FA & Security Session States
   const [step, setStep] = useState<'form' | 'otp' | 'social_loading'>('form');
@@ -284,9 +290,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }
       >
         {/* Header */}
         <div className="p-6 pb-0 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-indigo-400 light:text-indigo-600" />
-            <span className="text-white light:text-slate-900 font-bold text-lg">Zetra Store</span>
+          <div className="flex items-center">
+            <Image 
+              src={zetraLogo} 
+              alt="Zetra Logo" 
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <button 
             onClick={onClose}

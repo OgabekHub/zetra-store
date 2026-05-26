@@ -547,7 +547,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   onClick={() => setSubMethod('phone')}
                   className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     subMethod === 'phone' 
-                      ? `${colors.bg} ${method === 'payme' ? 'text-slate-900' : 'text-white'} shadow-md` 
+                      ? `${colors.bg} text-white shadow-md` 
                       : 'text-slate-450 hover:text-slate-200 light:text-slate-500 hover:light:text-slate-850'
                   }`}
                 >
@@ -651,7 +651,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   className={`w-full py-3.5 text-white rounded-2xl font-bold transition-all shadow-lg active:scale-[0.98] text-sm cursor-pointer flex items-center justify-center gap-2 ${
                     isSubmitting 
                       ? 'bg-slate-800 light:bg-slate-200 text-slate-500 light:text-slate-400 pointer-events-none' 
-                      : `${colors.bg} ${method === 'payme' && subMethod === 'phone' ? 'text-slate-900' : 'text-white'}`
+                      : `${colors.bg} text-white`
                   }`}
                 >
                   {isSubmitting ? (

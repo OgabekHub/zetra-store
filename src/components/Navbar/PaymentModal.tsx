@@ -440,7 +440,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* Uzum Bank Button */}
                 <button
                   onClick={() => handleSelectMethod('uzum')}
-                  className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-purple-900/10 to-indigo-950/20 hover:from-purple-900/20 hover:to-indigo-950/30 light:from-purple-50 light:to-indigo-50 hover:light:from-purple-100/85 hover:light:to-indigo-100/80 border border-purple-800/20 hover:border-purple-550/50 light:border-purple-200 hover:light:border-purple-400 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] h-20 overflow-hidden"
+                  className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-purple-900/10 to-indigo-950/20 hover:from-purple-900/20 hover:to-indigo-950/30 light:from-purple-50 light:to-indigo-50 hover:light:from-purple-100/85 hover:light:to-indigo-100/80 border border-purple-800/20 hover:border-purple-500/50 light:border-purple-200 hover:light:border-purple-400 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] h-20 overflow-hidden"
                 >
                   <div className="flex items-center gap-4 relative z-10">
                     <div className="w-16 h-12 flex items-center justify-center flex-shrink-0">
@@ -1035,7 +1035,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
                 
                 {/* Watermark security note */}
-                <div className="text-[9px] text-indigo-400 light:text-indigo-650 bg-indigo-500/5 light:bg-indigo-50 p-2.5 rounded-lg border border-indigo-550/10 light:border-indigo-100/50 text-center font-medium mt-3">
+                <div className="text-[9px] text-indigo-400 light:text-indigo-650 bg-indigo-500/5 light:bg-indigo-50 p-2.5 rounded-lg border border-indigo-500/10 light:border-indigo-100/50 text-center font-medium mt-3">
                   {t('pay_invoice_secure')}
                 </div>
               </div>

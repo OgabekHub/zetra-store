@@ -521,7 +521,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
           {/* STEP 2: PAYMENT DETAILS FORM (CARD OR PHONE SUB-METHODS) */}
           {step === 'form' && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-6 px-1 animate-fade-in">
               {/* Brand Summary */}
               <div className="flex justify-between items-center bg-slate-850/40 light:bg-white p-4 rounded-2xl border border-slate-800 light:border-slate-200 shadow-sm">
                 <span className="text-xs text-slate-400 light:text-slate-500">{t('pay_total')}</span>

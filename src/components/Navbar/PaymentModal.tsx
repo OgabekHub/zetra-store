@@ -447,7 +447,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       <Image 
                         src={uzumLogo} 
                         alt="Uzum Bank" 
-                        className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.35)]" 
+                        className="w-full h-full object-contain" 
                       />
                     </div>
                     <div>
@@ -471,7 +471,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       <Image 
                         src={paymeLogo} 
                         alt="Payme" 
-                        className="w-full h-full object-contain dark:drop-shadow-[0_0_4px_rgba(255,255,255,0.65)]" 
+                        className="w-full h-full object-contain" 
                       />
                     </div>
                     <div>
@@ -851,7 +851,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                             <Image 
                               src={paymeLogo} 
                               alt="Payme" 
-                              className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.6)]" 
+                              className="w-full h-full object-contain" 
                             />
                           </div>
                           <span className="text-[9px] font-bold text-white">Payme</span>
@@ -934,7 +934,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       <Image 
                         src={uzumLogo} 
                         alt="Uzum Bank" 
-                        className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.35)]" 
+                        className="w-full h-full object-contain" 
                       />
                     </div>
                     <span className="text-xs font-bold text-slate-300 light:text-slate-850">Hamyoni</span>

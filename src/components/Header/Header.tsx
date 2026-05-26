@@ -3,6 +3,8 @@
 import React from 'react';
 import { ArrowRight, Sparkles, ShieldCheck, Download } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import Image from 'next/image';
+import zetraIcon from '@/app/icon.png';
 
 interface HeaderProps {
   onExploreClick?: () => void;
@@ -30,8 +32,10 @@ const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 light:bg-slate-200/50 border border-slate-700 light:border-slate-300 text-indigo-400 light:text-indigo-650 text-sm font-medium mb-8 backdrop-blur-sm">
-          <Sparkles className="w-4 h-4" />
+        <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-800/80 light:bg-slate-200/50 border border-slate-700 light:border-slate-300 text-indigo-400 light:text-indigo-650 text-sm font-medium mb-8 backdrop-blur-sm">
+          <div className="w-4 h-4 relative flex items-center justify-center flex-shrink-0 animate-pulse">
+            <Image src={zetraIcon} alt="Zetra Icon" className="w-full h-full object-contain" />
+          </div>
           <span>{language === 'uz' ? 'Yangi raqamli mahsulotlar bozori' : language === 'ru' ? 'Новый рынок цифровых продуктов' : 'New digital product marketplace'}</span>
         </div>
         

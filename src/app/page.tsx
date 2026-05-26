@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
 import Navbar from '@/components/Navbar/Navbar';
 import Header from '@/components/Header/Header';
 import Carousel from '@/components/Carousel/Carousel';
@@ -43,9 +42,6 @@ export default function Home() {
 
   // Loading state (for category changes)
   const [isLoading, setIsLoading] = useState(false);
-
-  // Back to Top button visibility
-  const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Dynamic products list state
   const [allProducts, setAllProducts] = useState<Product[]>([]);
@@ -155,19 +151,6 @@ export default function Home() {
     }
   }, [purchasedProducts, isInitialized]);
 
-  // Scroll event listener for Back to Top button
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id);
@@ -222,10 +205,6 @@ export default function Home() {
     setTimeout(() => {
       setIsLoading(false);
     }, 600);
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBecomeSeller = () => {
@@ -389,17 +368,6 @@ export default function Home() {
         exchangeRate={exchangeRate}
         onPaymentSuccess={handlePaymentSuccess}
       />
-
-      {/* Floating Back to Top Button */}
-      <button
-        onClick={scrollToTop}
-        className={`fixed bottom-8 right-8 z-40 p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl transition-all duration-300 border border-indigo-500/20 active:scale-95 cursor-pointer flex items-center justify-center ${
-          showBackToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-        }`}
-        aria-label="Yuqoriga qaytish"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </button>
     </div>
   );
 }

@@ -23,7 +23,7 @@
 }
 
 @custom-variant light {
-  &:where(.light, .light *) {
+  &:is(.light, .light *) {
     @slot;
   }
 }

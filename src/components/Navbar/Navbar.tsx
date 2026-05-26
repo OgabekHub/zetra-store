@@ -260,7 +260,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Currency Switcher */}
-            <div className="hidden md:flex bg-slate-800/80 light:bg-slate-150 p-0.5 rounded-xl border border-slate-700/50 light:border-slate-250 items-center">
+            <div className="hidden md:flex bg-slate-800/80 light:bg-slate-100 p-0.5 rounded-xl border border-slate-700/50 light:border-slate-250 items-center">
               <button 
                 onClick={() => {
                   setCurrency('USD');
@@ -269,7 +269,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   currency === 'USD' 
                     ? 'bg-indigo-600 text-white shadow-md' 
-                    : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
+                    : 'text-slate-400 hover:text-slate-200 light:text-slate-500 light:hover:text-slate-800'
                 }`}
               >
                 USD
@@ -282,7 +282,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   currency === 'UZS' 
                     ? 'bg-indigo-600 text-white shadow-md' 
-                    : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
+                    : 'text-slate-400 hover:text-slate-200 light:text-slate-500 light:hover:text-slate-800'
                 }`}
               >
                 UZS
@@ -293,7 +293,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="relative hidden md:block" ref={langDropdownRef}>
               <button
                 onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-150 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-700 light:hover:text-slate-900 transition-all text-[10px] font-bold cursor-pointer active:scale-95 shadow-md"
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-200 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-700 light:hover:text-slate-900 transition-all text-[10px] font-bold cursor-pointer active:scale-95 shadow-md"
               >
                 <Languages className="w-3.5 h-3.5 text-indigo-400" />
                 <span className="uppercase">{language}</span>
@@ -347,13 +347,13 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Theme Switcher */}
             <button
               onClick={toggleTheme}
-              className="hidden md:flex p-2 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-150 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-650 light:hover:text-slate-900 transition-all cursor-pointer active:scale-95 shadow-md items-center justify-center"
+              className="hidden md:flex p-2 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-200 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer active:scale-95 shadow-md items-center justify-center"
               aria-label="Mavzuni o'zgartirish"
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
               ) : (
-                <Moon className="w-4 h-4 text-indigo-650" />
+                <Moon className="w-4 h-4 text-slate-700" />
               )}
             </button>
             

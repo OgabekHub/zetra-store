@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #00F2C2;
+  --color-brand-primary-hover: #00d9ae;
+  --color-brand-dark: #090E17;
+  --color-brand-dark-light: #121a29;
+  --color-brand-dark-soft: #0e1624;
+
+  /* Map Tailwind's Indigo to Zetra's brand colors for seamless integration */
+  --color-indigo-400: #00F2C2;
+  --color-indigo-500: #00d9ae;
+  --color-indigo-600: #00a383;
+  --color-indigo-700: #008067;
+  --color-indigo-800: #006652;
+  --color-indigo-900: #004d3e;
+
+  /* Map Tailwind's Slates to Zetra's brand dark colors for cohesive backgrounds/borders */
+  --color-slate-800: #121824;
+  --color-slate-850: #0d121c;
+  --color-slate-900: #090e17;
+  --color-slate-950: #05080c;
+}
+
 @custom-variant light {
   &:where(.light, .light *) {
     @slot;

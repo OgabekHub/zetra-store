@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz" className={`${inter.variable} scroll-smooth`}>
-      <body className="antialiased bg-slate-900 text-slate-100 light:bg-slate-50 light:text-slate-800 font-sans transition-colors duration-300">
+      <body className="antialiased bg-brand-dark text-slate-100 light:bg-slate-50 light:text-slate-800 font-sans transition-colors duration-300">
         <ThemeProvider>
           <LanguageProvider>
             <Toaster position="top-center" toastOptions={{ style: { background: '#1e293b', color: '#e2e8f0', borderRadius: '12px', border: '1px solid #334155' }, duration: 2500 }} />

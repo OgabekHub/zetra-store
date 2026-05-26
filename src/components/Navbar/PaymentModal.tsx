@@ -6,9 +6,11 @@ import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
 import Image from 'next/image';
+import { useTheme } from '@/context/ThemeContext';
 import uzumLogo from '@/assets/images/uzum-logo.png';
 import paymeLogo from '@/assets/images/payme-logo.png';
-import clickLogo from '@/assets/images/click-logo.png';
+import clickLogoDark from '@/assets/images/click-logo-dark.png';
+import clickLogoLight from '@/assets/images/click-logo-light.png';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -71,6 +73,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [subMethod, setSubMethod] = useState<'card' | 'phone'>('card');
   const [step, setStep] = useState<PaymentStep>('select');
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
+  const clickLogo = theme === 'dark' ? clickLogoDark : clickLogoLight;
   
   // Form states
   const [cardNumber, setCardNumber] = useState('');
@@ -491,7 +495,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       <Image 
                         src={clickLogo} 
                         alt="Click Evolution" 
-                        className="w-full h-full object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)] dark:drop-shadow-none" 
+                        className="w-full h-full object-contain" 
                       />
                     </div>
                     <div>

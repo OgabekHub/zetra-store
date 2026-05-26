@@ -4,7 +4,9 @@ import React from 'react';
 import { ArrowRight, Sparkles, ShieldCheck, Download } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import Image from 'next/image';
-import zetraIcon from '@/app/icon.png';
+import { useTheme } from '@/context/ThemeContext';
+import zetraIconDark from '@/assets/images/zetra-icon-dark.png';
+import zetraIconLight from '@/assets/images/zetra-icon-light.png';
 
 interface HeaderProps {
   onExploreClick?: () => void;
@@ -13,6 +15,8 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
+  const zetraIcon = theme === 'dark' ? zetraIconDark : zetraIconLight;
   const handleExplore = () => {
     if (onExploreClick) {
       onExploreClick();
@@ -32,11 +36,11 @@ const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-800/80 light:bg-slate-200/50 border border-slate-700 light:border-slate-300 text-indigo-400 light:text-indigo-650 text-sm font-medium mb-8 backdrop-blur-sm">
-          <div className="w-4 h-4 relative flex items-center justify-center flex-shrink-0 animate-pulse">
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-800/80 light:bg-slate-200/50 border border-slate-700 light:border-slate-300 text-indigo-400 light:text-indigo-650 text-sm font-semibold mb-8 backdrop-blur-sm">
+          <div className="w-5 h-5 relative flex items-center justify-center flex-shrink-0 animate-pulse">
             <Image src={zetraIcon} alt="Zetra Icon" className="w-full h-full object-contain" />
           </div>
-          <span>{language === 'uz' ? 'Yangi raqamli mahsulotlar bozori' : language === 'ru' ? 'Новый рынок цифровых продуктов' : 'New digital product marketplace'}</span>
+          <span className="leading-none">{language === 'uz' ? 'Yangi raqamli mahsulotlar bozori' : language === 'ru' ? 'Новый рынок цифровых продуктов' : 'New digital product marketplace'}</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white light:text-slate-900 tracking-tight mb-8 max-w-4xl mx-auto leading-tight transition-colors">

@@ -4,11 +4,15 @@ import React from 'react';
 import Image from 'next/image';
 import { Send, MessageCircle, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import zetraLogo from '@/assets/images/zetra-logo2-backup.png';
+import zetraLogoDark from '@/assets/images/zetra-logo-dark.png';
+import zetraLogoLight from '@/assets/images/zetra-logo-light.png';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/context/ThemeContext';
 
 const Footer: React.FC = () => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
+  const zetraLogo = theme === 'dark' ? zetraLogoDark : zetraLogoLight;
 
   const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

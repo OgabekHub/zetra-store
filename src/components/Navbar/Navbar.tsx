@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, Search, Menu, User, X, LogOut, Languages, Sun, Moon, Home, Compass } from 'lucide-react';
 import Image from 'next/image';
-import zetraLogo from '../../assets/images/zetra-logo2-backup.png';
+import zetraLogoDark from '../../assets/images/zetra-logo-dark.png';
+import zetraLogoLight from '../../assets/images/zetra-logo-light.png';
 import { CartItem } from '@/types';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
@@ -59,6 +60,7 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const zetraLogo = theme === 'dark' ? zetraLogoDark : zetraLogoLight;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showMobileSuggestions, setShowMobileSuggestions] = useState(false);

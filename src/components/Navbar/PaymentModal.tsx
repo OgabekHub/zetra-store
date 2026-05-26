@@ -5,6 +5,10 @@ import { X, CheckCircle2, CreditCard, Smartphone, Lock, ShieldCheck, ArrowLeft, 
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import Image from 'next/image';
+import uzumLogo from '@/assets/images/uzum-logo.png';
+import paymeLogo from '@/assets/images/payme-logo.png';
+import clickLogo from '@/assets/images/click-logo.png';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -435,8 +439,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-purple-900/10 to-indigo-950/20 hover:from-purple-900/20 hover:to-indigo-950/30 light:from-purple-50 light:to-indigo-50 hover:light:from-purple-100/85 hover:light:to-indigo-100/80 border border-purple-800/20 hover:border-purple-550/50 light:border-purple-200 hover:light:border-purple-400 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] h-20 overflow-hidden"
                 >
                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-purple-600/25">
-                      U
+                    <div className="w-16 h-12 flex items-center justify-center flex-shrink-0">
+                      <Image 
+                        src={uzumLogo} 
+                        alt="Uzum Bank" 
+                        className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.35)]" 
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Uzum Bank</p>
@@ -455,8 +463,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-teal-950/10 to-emerald-950/10 hover:from-teal-950/20 hover:to-emerald-950/20 light:from-teal-50 light:to-emerald-50 hover:light:from-teal-100/80 hover:light:to-emerald-100/80 border border-teal-800/20 hover:border-teal-400/50 light:border-teal-200 hover:light:border-teal-400 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] h-20 overflow-hidden"
                 >
                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-[#3cd2c4] flex items-center justify-center text-slate-900 font-extrabold text-lg shadow-lg shadow-teal-500/20">
-                      P
+                    <div className="w-16 h-12 flex items-center justify-center flex-shrink-0">
+                      <Image 
+                        src={paymeLogo} 
+                        alt="Payme" 
+                        className="w-full h-full object-contain dark:drop-shadow-[0_0_4px_rgba(255,255,255,0.65)]" 
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Payme</p>
@@ -475,8 +487,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   className="group relative flex items-center justify-between p-4 bg-gradient-to-r from-blue-900/10 to-sky-950/10 hover:from-blue-900/20 hover:to-sky-950/20 light:from-blue-50 light:to-sky-50 hover:light:from-blue-100/80 hover:light:to-sky-100/80 border border-blue-800/20 hover:border-blue-500/50 light:border-blue-200 hover:light:border-blue-400 rounded-2xl transition-all cursor-pointer text-left active:scale-[0.99] h-20 overflow-hidden"
                 >
                   <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-blue-600/20">
-                      C
+                    <div className="w-16 h-12 flex items-center justify-center flex-shrink-0">
+                      <Image 
+                        src={clickLogo} 
+                        alt="Click Evolution" 
+                        className="w-full h-full object-contain drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)] dark:drop-shadow-none" 
+                      />
                     </div>
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Click Evolution</p>
@@ -827,7 +843,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-4 h-4 bg-[#3cd2c4] rounded flex items-center justify-center text-[10px] font-black text-slate-900">P</div>
+                          <div className="w-8 h-4 relative flex items-center justify-center flex-shrink-0">
+                            <Image 
+                              src={paymeLogo} 
+                              alt="Payme" 
+                              className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.6)]" 
+                            />
+                          </div>
                           <span className="text-[9px] font-bold text-white">Payme</span>
                         </div>
                         <span className="text-[7px] text-slate-500">now</span>
@@ -904,8 +926,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <div className="bg-purple-500/5 border border-purple-500/15 p-4 rounded-2xl space-y-3 shadow-sm">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-1.5">
-                    <div className="w-6 h-6 rounded-lg bg-purple-600 flex items-center justify-center text-white font-extrabold text-xs">U</div>
-                    <span className="text-xs font-bold text-slate-300 light:text-slate-800">Uzum Pay Wallet</span>
+                    <div className="w-14 h-5 relative flex items-center justify-center flex-shrink-0">
+                      <Image 
+                        src={uzumLogo} 
+                        alt="Uzum Bank" 
+                        className="w-full h-full object-contain dark:drop-shadow-[0_0_2px_rgba(255,255,255,0.35)]" 
+                      />
+                    </div>
+                    <span className="text-xs font-bold text-slate-300 light:text-slate-850">Hamyoni</span>
                   </div>
                   <span className="text-[9px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
                     {language === 'uz' ? 'Faol' : 'Активен'}

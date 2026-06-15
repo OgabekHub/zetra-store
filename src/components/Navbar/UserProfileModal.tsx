@@ -226,12 +226,16 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   // Body scroll lock
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+      document.documentElement.style.setProperty('--scrollbar-w', `${scrollbarW}px`);
+      document.body.classList.add('modal-open');
     } else {
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.removeProperty('--scrollbar-w');
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.removeProperty('--scrollbar-w');
     };
   }, [isOpen]);
 

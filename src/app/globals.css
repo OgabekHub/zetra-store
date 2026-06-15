@@ -28,3 +28,20 @@
   }
 }
 
+/* ─── Scrollbar layout-shift fix ─────────────────────────────────────
+   scrollbar-gutter: stable reserves space for the scrollbar at all
+   times, so the page width never changes when a modal/drawer sets
+   overflow:hidden on <body>.                                        */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Fallback for browsers that don't support scrollbar-gutter:
+   when a modal opens we add this class to <body> instead of just
+   overflow:hidden. It compensates by padding-right = scrollbar width
+   which is stored in --scrollbar-w via JS.                          */
+body.modal-open {
+  overflow: hidden;
+  padding-right: var(--scrollbar-w, 0px);
+}
+

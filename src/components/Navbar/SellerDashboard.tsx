@@ -533,61 +533,62 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
 
                       {/* SVG Drawing Area */}
                       <div className="relative flex-1 w-full h-full min-h-[160px]">
+                        {/* SVG Line and Area (Stretched safely for paths only) */}
                         <svg className="w-full h-full absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
                           <defs>
                             <linearGradient id="chartGradBrand" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#00F2C2" stopOpacity="0.25"/>
+                              <stop offset="0%" stopColor="#00F2C2" stopOpacity="0.22"/>
                               <stop offset="100%" stopColor="#00F2C2" stopOpacity="0"/>
                             </linearGradient>
                           </defs>
                           {/* Area fill */}
                           <path d={fillD} fill="url(#chartGradBrand)" />
                           {/* Stroke line */}
-                          <path d={pathD} fill="none" stroke="#00F2C2" strokeWidth="2" strokeLinecap="round" />
-                          
-                          {/* Interactive Hover Areas (Vertical slices) */}
-                          {chartPoints.map((p, i) => (
-                            <g 
-                              key={i} 
-                              onMouseEnter={() => setHoveredPoint(i)}
-                              onMouseLeave={() => setHoveredPoint(null)}
-                              className="cursor-pointer"
-                            >
-                              {/* Invisible interactive hover rectangle */}
-                              <rect 
-                                x={p.x - 7.3} 
-                                y={10} 
-                                width={14.6} 
-                                height={80} 
-                                fill="transparent" 
-                              />
-                              
-                              {/* Vertical highlight line */}
-                              {hoveredPoint === i && (
-                                <line 
-                                  x1={p.x} 
-                                  y1={10} 
-                                  x2={p.x} 
-                                  y2={85} 
-                                  stroke="rgba(0, 242, 194, 0.15)" 
-                                  strokeWidth="1.5" 
-                                  strokeDasharray="2 2" 
-                                />
-                              )}
-
-                              {/* Day circle point */}
-                              <circle 
-                                cx={p.x} 
-                                cy={p.y} 
-                                r={hoveredPoint === i ? 5 : 3} 
-                                fill={hoveredPoint === i ? "#00F2C2" : "#090E17"} 
-                                stroke="#00F2C2" 
-                                strokeWidth={2}
-                                className="transition-all duration-150"
-                              />
-                            </g>
-                          ))}
+                          <path d={pathD} fill="none" stroke="#00F2C2" strokeWidth="2.5" strokeLinecap="round" />
                         </svg>
+
+                        {/* HTML Overlay: Vertical Guides, Data Circles, and Tooltips */}
+                        
+                        {/* Hover highlight line */}
+                        {hoveredPoint !== null && (
+                          <div 
+                            className="absolute top-2 bottom-8 w-[1.5px] border-l border-dashed border-[#00F2C2]/40 pointer-events-none transition-all duration-150"
+                            style={{ left: `${chartPoints[hoveredPoint].x}%` }}
+                          />
+                        )}
+
+                        {/* Data Circles */}
+                        {chartPoints.map((p, i) => (
+                          <div
+                            key={i}
+                            className={`absolute w-3.5 h-3.5 rounded-full border-2 border-[#00F2C2] bg-slate-950 light:bg-white transition-all duration-150 pointer-events-none z-10 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 ${
+                              hoveredPoint === i ? 'scale-125 ring-4 ring-[#00F2C2]/30 shadow-[0_0_8px_rgba(0,242,194,0.6)]' : ''
+                            }`}
+                            style={{
+                              left: `${p.x}%`,
+                              top: `${p.y}%`,
+                            }}
+                          >
+                            {/* Inner center dot when hovered */}
+                            {hoveredPoint === i && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-[#00F2C2]" />
+                            )}
+                          </div>
+                        ))}
+
+                        {/* Transparent Hover Columns (Slices) */}
+                        {chartPoints.map((p, i) => (
+                          <div
+                            key={i}
+                            onMouseEnter={() => setHoveredPoint(i)}
+                            onMouseLeave={() => setHoveredPoint(null)}
+                            className="absolute top-0 bottom-6 cursor-pointer z-25"
+                            style={{
+                              left: `${p.x - 7.3}%`,
+                              width: '14.6%',
+                            }}
+                          />
+                        ))}
 
                         {/* Hover Tooltip inside Chart */}
                         {hoveredPoint !== null && (
@@ -610,11 +611,14 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                       </div>
 
                       {/* Chart X-Axis Labels */}
-                      <div className="w-full flex justify-between text-[10px] font-bold text-slate-550 light:text-slate-400 mt-2 pt-2 border-t border-slate-800/20 light:border-slate-200 select-none">
+                      <div className="w-full relative h-6 mt-2 pt-2 border-t border-slate-800/20 light:border-slate-200 select-none">
                         {chartPoints.map((p, i) => (
                           <span 
                             key={i} 
-                            className={`w-12 text-center transition-colors ${hoveredPoint === i ? 'text-[#00F2C2] light:text-[#00a383] font-extrabold' : ''}`}
+                            className={`absolute text-[10px] font-bold text-slate-550 light:text-slate-400 transition-colors -translate-x-1/2 ${
+                              hoveredPoint === i ? 'text-[#00F2C2] light:text-[#00a383] font-extrabold scale-105' : ''
+                            }`}
+                            style={{ left: `${p.x}%` }}
                           >
                             {language === 'uz' ? p.dayUz : language === 'ru' ? p.dayRu : p.dayEn}
                           </span>

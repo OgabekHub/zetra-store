@@ -42,6 +42,15 @@ html {
    which is stored in --scrollbar-w via JS.                          */
 body.modal-open {
   overflow: hidden;
-  padding-right: var(--scrollbar-w, 0px);
+}
+
+/* Fallback for browsers that don't support scrollbar-gutter (e.g. older browsers) */
+@supports not (scrollbar-gutter: stable) {
+  body.modal-open {
+    padding-right: var(--scrollbar-w, 0px);
+  }
+  body.modal-open nav.sticky {
+    padding-right: var(--scrollbar-w, 0px);
+  }
 }
 

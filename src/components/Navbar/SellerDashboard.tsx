@@ -77,6 +77,59 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
     }
   }, [scanLogs, isScanning]);
 
+  // Chart states and data
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  
+  const chartData = [
+    { dayUz: 'Dush', dayRu: 'Пн', dayEn: 'Mon', valueUsd: 120 },
+    { dayUz: 'Sesh', dayRu: 'Вт', dayEn: 'Tue', valueUsd: 240 },
+    { dayUz: 'Chor', dayRu: 'Ср', dayEn: 'Wed', valueUsd: 180 },
+    { dayUz: 'Pay',  dayRu: 'Чт', dayEn: 'Thu', valueUsd: 480 },
+    { dayUz: 'Jum',  dayRu: 'Пт', dayEn: 'Fri', valueUsd: 890 },
+    { dayUz: 'Shan', dayRu: 'Сб', dayEn: 'Sat', valueUsd: 710 },
+    { dayUz: 'Yak',  dayRu: 'Вс', dayEn: 'Sun', valueUsd: 790 },
+  ];
+
+  // Coordinates calculation for SVG viewBox="0 0 100 100"
+  // Padding left/right: 6%, padding bottom: 15%, top: 15%
+  const chartPoints = chartData.map((d, i) => {
+    const x = 6 + i * 14.6; // evenly distributed from 6 to 94
+    const y = 85 - (d.valueUsd / 1000) * 70; // mapped to height limits
+    return { x, y, ...d };
+  });
+
+  // Generate cubic bezier curve path
+  let pathD = `M ${chartPoints[0].x} ${chartPoints[0].y}`;
+  for (let i = 0; i < chartPoints.length - 1; i++) {
+    const p0 = chartPoints[i];
+    const p1 = chartPoints[i + 1];
+    const cpX1 = p0.x + 7.3;
+    const cpY1 = p0.y;
+    const cpX2 = p1.x - 7.3;
+    const cpY2 = p1.y;
+    pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+  }
+
+  const fillD = `${pathD} L ${chartPoints[chartPoints.length - 1].x} 88 L ${chartPoints[0].x} 88 Z`;
+
+  const formatYValue = (valUsd: number) => {
+    if (currency === 'UZS') {
+      const valUzs = valUsd * exchangeRate;
+      if (valUzs >= 1000000) {
+        return `${(valUzs / 1000000).toFixed(1)}M`;
+      }
+      return `${Math.round(valUzs / 1000)}k`;
+    }
+    return `$${valUsd}`;
+  };
+
+  const formatTooltipValue = (valUsd: number) => {
+    if (currency === 'UZS') {
+      return formatPrice(valUsd * exchangeRate, 'UZS', exchangeRate);
+    }
+    return formatPrice(valUsd, 'USD', exchangeRate);
+  };
+
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Body scroll lock
@@ -458,58 +511,115 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                     </div>
                   </div>
                   
-                  {/* SVG Chart */}
-                  <div className="relative h-60 w-full bg-slate-950/20 light:bg-slate-50/50 border border-slate-800/60 light:border-slate-200 rounded-2xl flex flex-col justify-end p-6 overflow-hidden">
-                    <div className="absolute inset-0 grid grid-rows-4 pointer-events-none">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="border-b border-slate-800/30 light:border-slate-250/30 w-full h-full" />
-                      ))}
+                  {/* Interactive Chart Wrapper */}
+                  <div className="relative h-64 w-full bg-slate-950/20 light:bg-slate-50/50 border border-slate-800/60 light:border-slate-200 rounded-2xl flex items-stretch p-4 overflow-hidden">
+                    {/* Y-Axis Grid Labels */}
+                    <div className="w-10 flex flex-col justify-between text-[9px] font-bold text-slate-500 light:text-slate-400 pb-8 pr-1.5 text-right select-none z-10 border-r border-slate-800/20 light:border-slate-200/50">
+                      <span>{formatYValue(1000)}</span>
+                      <span>{formatYValue(750)}</span>
+                      <span>{formatYValue(500)}</span>
+                      <span>{formatYValue(250)}</span>
+                      <span>{formatYValue(0)}</span>
                     </div>
-                    {/* SVG Line Chart path */}
-                    <svg className="w-full h-full absolute inset-0 text-indigo-500/10" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="rgb(99, 102, 241)" stopOpacity="0.25"/>
-                          <stop offset="100%" stopColor="rgb(99, 102, 241)" stopOpacity="0"/>
-                        </linearGradient>
-                      </defs>
-                      <path d="M 0 80 Q 15 50 30 70 T 60 30 T 90 20 L 100 15 L 100 100 L 0 100 Z" fill="url(#chartGrad)" />
-                      <path d="M 0 80 Q 15 50 30 70 T 60 30 T 90 20 L 100 15" fill="none" stroke="rgb(99, 102, 241)" strokeWidth="2.5" />
-                    </svg>
 
-                    {/* Chart Labels */}
-                    <div className="w-full flex justify-between text-[10px] font-semibold text-slate-550 light:text-slate-400 mt-auto relative z-10 pt-4 border-t border-slate-800/30 light:border-slate-200">
-                      {language === 'uz' ? (
-                        <>
-                          <span>Dush</span>
-                          <span>Sesh</span>
-                          <span>Chor</span>
-                          <span>Pay</span>
-                          <span>Jum</span>
-                          <span>Shan</span>
-                          <span>Yak</span>
-                        </>
-                      ) : language === 'ru' ? (
-                        <>
-                          <span>Пн</span>
-                          <span>Вт</span>
-                          <span>Ср</span>
-                          <span>Чт</span>
-                          <span>Пт</span>
-                          <span>Сб</span>
-                          <span>Вс</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Mon</span>
-                          <span>Tue</span>
-                          <span>Wed</span>
-                          <span>Thu</span>
-                          <span>Fri</span>
-                          <span>Sat</span>
-                          <span>Sun</span>
-                        </>
-                      )}
+                    {/* Chart Area */}
+                    <div className="flex-1 relative flex flex-col justify-end pl-2">
+                      {/* Horizontal Grid lines */}
+                      <div className="absolute inset-0 grid grid-rows-4 pointer-events-none pr-2">
+                        {[1, 2, 3, 4].map((i) => (
+                          <div key={i} className="border-b border-slate-800/20 light:border-slate-250/20 w-full h-full" />
+                        ))}
+                      </div>
+
+                      {/* SVG Drawing Area */}
+                      <div className="relative flex-1 w-full h-full min-h-[160px]">
+                        <svg className="w-full h-full absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="chartGradBrand" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#00F2C2" stopOpacity="0.25"/>
+                              <stop offset="100%" stopColor="#00F2C2" stopOpacity="0"/>
+                            </linearGradient>
+                          </defs>
+                          {/* Area fill */}
+                          <path d={fillD} fill="url(#chartGradBrand)" />
+                          {/* Stroke line */}
+                          <path d={pathD} fill="none" stroke="#00F2C2" strokeWidth="2" strokeLinecap="round" />
+                          
+                          {/* Interactive Hover Areas (Vertical slices) */}
+                          {chartPoints.map((p, i) => (
+                            <g 
+                              key={i} 
+                              onMouseEnter={() => setHoveredPoint(i)}
+                              onMouseLeave={() => setHoveredPoint(null)}
+                              className="cursor-pointer"
+                            >
+                              {/* Invisible interactive hover rectangle */}
+                              <rect 
+                                x={p.x - 7.3} 
+                                y={10} 
+                                width={14.6} 
+                                height={80} 
+                                fill="transparent" 
+                              />
+                              
+                              {/* Vertical highlight line */}
+                              {hoveredPoint === i && (
+                                <line 
+                                  x1={p.x} 
+                                  y1={10} 
+                                  x2={p.x} 
+                                  y2={85} 
+                                  stroke="rgba(0, 242, 194, 0.15)" 
+                                  strokeWidth="1.5" 
+                                  strokeDasharray="2 2" 
+                                />
+                              )}
+
+                              {/* Day circle point */}
+                              <circle 
+                                cx={p.x} 
+                                cy={p.y} 
+                                r={hoveredPoint === i ? 5 : 3} 
+                                fill={hoveredPoint === i ? "#00F2C2" : "#090E17"} 
+                                stroke="#00F2C2" 
+                                strokeWidth={2}
+                                className="transition-all duration-150"
+                              />
+                            </g>
+                          ))}
+                        </svg>
+
+                        {/* Hover Tooltip inside Chart */}
+                        {hoveredPoint !== null && (
+                          <div 
+                            className="absolute bg-slate-900/95 light:bg-white border border-[#00F2C2]/45 rounded-xl px-2.5 py-1.5 shadow-2xl text-center pointer-events-none z-30 transition-all duration-150 animate-fade-in"
+                            style={{ 
+                              left: `${chartPoints[hoveredPoint].x}%`, 
+                              top: `${chartPoints[hoveredPoint].y}%`,
+                              transform: 'translate(-50%, -125%)'
+                            }}
+                          >
+                            <p className="text-[9px] font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider">
+                              {language === 'uz' ? chartPoints[hoveredPoint].dayUz : language === 'ru' ? chartPoints[hoveredPoint].dayRu : chartPoints[hoveredPoint].dayEn}
+                            </p>
+                            <p className="text-xs font-black text-[#00F2C2] light:text-[#00a383] mt-0.5 whitespace-nowrap">
+                              {formatTooltipValue(chartPoints[hoveredPoint].valueUsd)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chart X-Axis Labels */}
+                      <div className="w-full flex justify-between text-[10px] font-bold text-slate-550 light:text-slate-400 mt-2 pt-2 border-t border-slate-800/20 light:border-slate-200 select-none">
+                        {chartPoints.map((p, i) => (
+                          <span 
+                            key={i} 
+                            className={`w-12 text-center transition-colors ${hoveredPoint === i ? 'text-[#00F2C2] light:text-[#00a383] font-extrabold' : ''}`}
+                          >
+                            {language === 'uz' ? p.dayUz : language === 'ru' ? p.dayRu : p.dayEn}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

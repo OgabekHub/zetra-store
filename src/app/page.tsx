@@ -254,6 +254,16 @@ export default function Home() {
     setIsPaymentOpen(true); // Open the Uzum/Payme/Click payment simulator modal
   };
 
+  const handleStartShopping = () => {
+    setIsCartOpen(false);
+    setTimeout(() => {
+      const section = document.getElementById('products-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 300);
+  };
+
   const handlePaymentSuccess = () => {
     // Convert CartItems to Products (strip quantity)
     const newPurchases = cart.map(item => {
@@ -320,6 +330,7 @@ export default function Home() {
         currency={currency}
         exchangeRate={exchangeRate}
         onCheckout={handleCheckout}
+        onStartShopping={handleStartShopping}
       />
 
       <AuthModal 

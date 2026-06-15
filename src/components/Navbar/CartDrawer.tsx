@@ -16,6 +16,7 @@ interface CartDrawerProps {
   currency: 'USD' | 'UZS';
   exchangeRate: number;
   onCheckout: () => void;
+  onStartShopping?: () => void;
 }
 
 const categoryTranslations: Record<string, string> = {
@@ -37,7 +38,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   onRemoveItem,
   currency,
   exchangeRate,
-  onCheckout
+  onCheckout,
+  onStartShopping
 }) => {
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const { t } = useLanguage();
@@ -112,7 +114,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                   <p className="text-slate-550 light:text-slate-600 text-sm mt-1 transition-colors">{t('cart_empty_sub')}</p>
                 </div>
                 <button 
-                  onClick={onClose}
+                  onClick={onStartShopping ?? onClose}
                   className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors cursor-pointer"
                 >
                   {t('cart_start_shopping')}

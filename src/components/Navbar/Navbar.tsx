@@ -5,17 +5,13 @@ import { ShoppingCart, Search, Menu, User, X, LogOut, Languages, Sun, Moon, Home
 import Image from 'next/image';
 import zetraLogoDark from '../../assets/images/zetra-logo-dark.png';
 import zetraLogoLight from '../../assets/images/zetra-logo-light.png';
-import { CartItem } from '@/types';
+import { CartItem, UserProfile } from '@/types';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
 
-interface UserProfile {
-  name: string;
-  email: string;
-}
 
 interface NavbarProps {
   cartItems: CartItem[];

@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, LayoutDashboard, PlusCircle, Package, TrendingUp, DollarSign, Users, Eye, ArrowUpRight, Trash2, CheckCircle2, ChevronRight, ChevronDown, Shield, ShieldAlert, ShieldCheck, AlertOctagon, RotateCcw, Loader2 } from 'lucide-react';
 import { Product } from '@/data/products';
+import { UserProfile } from '@/types';
 import { formatPrice } from '@/utils/price';
+import { getCategoryLabel, ALL_CATEGORIES } from '@/utils/categories';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -15,19 +17,10 @@ interface SellerDashboardProps {
   onDeleteProduct: (id: number) => void;
   currency: 'USD' | 'UZS';
   exchangeRate: number;
-  currentUser: { name: string; email: string } | null;
+  currentUser: UserProfile | null;
 }
 
-const categoryTranslations: Record<string, string> = {
-  'Dizayn Shablonlari': 'cat_design',
-  '3D Modellar': 'cat_3d',
-  'E-Kitoblar': 'cat_ebooks',
-  'Dastur Kodelari': 'cat_code',
-  'Grafika & Media': 'cat_graphics',
-  'O\'yin va Hisoblar': 'cat_games',
-  'Litsenziya & Kalitlar': 'cat_keys',
-  'Audio & Musiqa': 'cat_audio'
-};
+
 
 const SellerDashboard: React.FC<SellerDashboardProps> = ({
   isOpen,
@@ -174,10 +167,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
     (product) => product.author === (currentUser?.name || 'Sotuvchi')
   );
 
-  const getCategoryDisplayName = (catName: string) => {
-    const key = categoryTranslations[catName];
-    return key ? t(key) : catName;
-  };
+  const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
   const handleAddFeature = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -781,7 +771,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                           onClick={() => setIsCategoryDropdownOpen(false)}
                         />
                         <div className="absolute left-0 right-0 mt-2 z-50 rounded-2xl border border-slate-800 light:border-slate-200 bg-slate-950 light:bg-white shadow-2xl overflow-hidden py-1 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                          {Object.keys(categoryTranslations).map((catName) => (
+                          {ALL_CATEGORIES.map((catName) => (
                             <button
                               key={catName}
                               type="button"

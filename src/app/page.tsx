@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Navbar from '@/components/Navbar/Navbar';
 import Header from '@/components/Header/Header';
 import Carousel from '@/components/Carousel/Carousel';
@@ -12,233 +12,68 @@ import ProductModal from '@/components/MainContent/ProductModal';
 import SellerDashboard from '@/components/Navbar/SellerDashboard';
 import UserProfileModal from '@/components/Navbar/UserProfileModal';
 import PaymentModal from '@/components/Navbar/PaymentModal';
-import { Product, products } from '@/data/products';
+import { Product } from '@/data/products';
 import { CartItem } from '@/types';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { useProducts } from '@/hooks/useProducts';
+import { useCurrency } from '@/hooks/useCurrency';
 import toast from 'react-hot-toast';
 
-interface UserProfile {
-  name: string;
-  email: string;
-}
-
 export default function Home() {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { cart, isCartOpen, setIsCartOpen, addToCart, removeFromCart, updateQuantity, clearCart, totalItems } = useCart();
+  const { currentUser, isAuthOpen, setIsAuthOpen, purchasedProducts, login, logout, updateProfile, addPurchases } = useAuth();
+  const { allProducts, addProduct, deleteProduct } = useProducts();
+  const { currency, setCurrency, exchangeRate } = useCurrency();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
-  // Auth state
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Centralized Product Modal state
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
-  // Currency state
-  const [currency, setCurrency] = useState<'USD' | 'UZS'>('USD');
-  const [exchangeRate, setExchangeRate] = useState<number>(12800); // Default fallback rate
-
-  // Loading state (for category changes)
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Dynamic products list state
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-
-  // Seller dashboard state
   const [isSellerOpen, setIsSellerOpen] = useState(false);
-
-  // User Profile settings & Purchases state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileActiveTab, setProfileActiveTab] = useState<'purchases' | 'settings' | 'security'>('purchases');
-  const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
-  // Safely initialize state on client-side mount & fetch exchange rate
-  useEffect(() => {
-    // Load cart
-    const savedCart = localStorage.getItem('zetra-cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Savatchani yuklashda xatolik:", e);
-      }
-    }
-
-    // Load user
-    const savedUser = localStorage.getItem('zetra-user');
-    if (savedUser) {
-      try {
-        setCurrentUser(JSON.parse(savedUser));
-      } catch (e) {
-        console.error("User yuklashda xatolik:", e);
-      }
-    }
-
-    // Load dynamic products list
-    const savedProducts = localStorage.getItem('zetra-products');
-    if (savedProducts) {
-      try {
-        setAllProducts(JSON.parse(savedProducts));
-      } catch (e) {
-        console.error("Mahsulotlarni yuklashda xatolik:", e);
-        setAllProducts(products);
-      }
-    } else {
-      setAllProducts(products);
-    }
-
-    // Load purchased products
-    const savedPurchases = localStorage.getItem('zetra-purchases');
-    if (savedPurchases) {
-      try {
-        setPurchasedProducts(JSON.parse(savedPurchases));
-      } catch (e) {
-        console.error("Purchases yuklashda xatolik:", e);
-      }
-    }
-
-    // Fetch live currency exchange rate
-    const fetchExchangeRate = async () => {
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (!res.ok) throw new Error('Api call failed');
-        const data = await res.json();
-        if (data && data.rates && data.rates.UZS) {
-          setExchangeRate(data.rates.UZS);
-          console.log(`ZETRA: Real vaqtdagi USD/UZS kursi muvaffaqiyatli yuklandi: 1 USD = ${data.rates.UZS} UZS`);
-        }
-      } catch (err) {
-        console.warn("ZETRA: Jonli valyuta kursini olishda xatolik (fallback ishlatiladi):", err);
-      }
-    };
-
-    fetchExchangeRate();
-    setIsInitialized(true);
-  }, []);
-
-  // Save cart changes to localStorage once client-side is initialized
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('zetra-cart', JSON.stringify(cart));
-    }
-  }, [cart, isInitialized]);
-
-  // Save user changes to localStorage once client-side is initialized
-  useEffect(() => {
-    if (isInitialized) {
-      if (currentUser) {
-        localStorage.setItem('zetra-user', JSON.stringify(currentUser));
-      } else {
-        localStorage.removeItem('zetra-user');
-      }
-    }
-  }, [currentUser, isInitialized]);
-
-  // Save products changes to localStorage once client-side is initialized
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('zetra-products', JSON.stringify(allProducts));
-    }
-  }, [allProducts, isInitialized]);
-
-  // Save purchases changes to localStorage
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('zetra-purchases', JSON.stringify(purchasedProducts));
-    }
-  }, [purchasedProducts, isInitialized]);
-
-  const addToCart = (product: Product) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevCart, { ...product, quantity: 1 }];
-    });
-    // Open cart drawer immediately for instant feedback
-    setIsCartOpen(true);
-  };
-
-  const removeFromCart = (id: number) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
-  };
-
-  const updateQuantity = (id: number, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(id);
-      return;
-    }
-    setCart((prevCart) =>
-      prevCart.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
-  };
-
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchQuery('');
     setSelectedCategory(null);
-  };
+  }, []);
 
-  const handleOpenProductModal = (product: Product) => {
+  const handleOpenProductModal = useCallback((product: Product) => {
     setSelectedProduct(product);
     setIsProductModalOpen(true);
-  };
+  }, []);
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setIsSellerOpen(false); // Close dashboard on logout
-    setIsProfileOpen(false); // Close profile on logout
-    setPurchasedProducts([]); // Clear purchases on logout
-    localStorage.removeItem('zetra-purchases');
-    toast.success("Tizimdan muvaffaqiyatli chiqdingiz!", { icon: '👋' });
-  };
-
-  // Simulating loading skeletons when category is changed
-  const handleSelectCategory = (category: string | null) => {
+  const handleSelectCategory = useCallback((category: string | null) => {
     setIsLoading(true);
     setSelectedCategory(category);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-  };
+    setTimeout(() => setIsLoading(false), 600);
+  }, []);
 
-  const handleBecomeSeller = () => {
+  const handleBecomeSeller = useCallback(() => {
     if (!currentUser) {
       setIsAuthOpen(true);
       toast.error("Sotuvchi bo'limiga kirish uchun avval tizimga kiring!");
     } else {
       setIsSellerOpen(true);
     }
-  };
+  }, [currentUser, setIsAuthOpen]);
 
-  const handleAddProduct = (newProduct: Product) => {
-    setAllProducts((prev) => [newProduct, ...prev]);
-  };
-
-  const handleDeleteProduct = (id: number) => {
-    setAllProducts((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const handleOpenProfileSettings = () => {
+  const handleOpenProfileSettings = useCallback(() => {
     setProfileActiveTab('settings');
     setIsProfileOpen(true);
-  };
+  }, []);
 
-  const handleOpenMyPurchases = () => {
+  const handleOpenMyPurchases = useCallback(() => {
     setProfileActiveTab('purchases');
     setIsProfileOpen(true);
-  };
+  }, []);
 
-  const handleUpdateProfile = (name: string, email: string) => {
-    setCurrentUser((prev) => prev ? { ...prev, name, email } : { name, email });
-  };
-
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     if (!currentUser) {
       setIsCartOpen(false);
       setIsAuthOpen(true);
@@ -249,41 +84,34 @@ export default function Home() {
       toast.error("Savatchangiz bo'sh!");
       return;
     }
+    setIsCartOpen(false);
+    setIsPaymentOpen(true);
+  }, [currentUser, cart, setIsCartOpen, setIsAuthOpen]);
 
-    setIsCartOpen(false); // Close cart drawer
-    setIsPaymentOpen(true); // Open the Uzum/Payme/Click payment simulator modal
-  };
-
-  const handleStartShopping = () => {
+  const handleStartShopping = useCallback(() => {
     setIsCartOpen(false);
     setTimeout(() => {
-      const section = document.getElementById('products-section');
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 300);
-  };
+  }, [setIsCartOpen]);
 
-  const handlePaymentSuccess = () => {
-    // Convert CartItems to Products (strip quantity)
-    const newPurchases = cart.map(item => {
-      const { quantity, ...product } = item;
-      return product as Product;
-    });
+  const handlePaymentSuccess = useCallback(() => {
+    const newPurchases = cart.map(({ quantity: _q, ...product }) => product as Product);
+    addPurchases(newPurchases);
+    clearCart();
+    setIsPaymentOpen(false);
+    setTimeout(() => handleOpenMyPurchases(), 600);
+  }, [cart, addPurchases, clearCart, handleOpenMyPurchases]);
 
-    setPurchasedProducts((prev) => [...newPurchases, ...prev]);
-    setCart([]); // Clear cart
-    setIsPaymentOpen(false); // Close payment modal
-
-    // Open My Purchases modal after a brief delay
-    setTimeout(() => {
-      handleOpenMyPurchases();
-    }, 600);
-  };
+  const handleLogout = useCallback(() => {
+    logout();
+    setIsSellerOpen(false);
+    setIsProfileOpen(false);
+  }, [logout]);
 
   return (
     <div className="min-h-screen bg-brand-dark selection:bg-brand-primary/30 relative pb-20 md:pb-0">
-      <Navbar 
+      <Navbar
         cartItems={cart}
         isCartOpen={isCartOpen}
         setIsCartOpen={setIsCartOpen}
@@ -304,12 +132,12 @@ export default function Home() {
         onOpenMyPurchases={handleOpenMyPurchases}
       />
       <Header onBecomeSeller={handleBecomeSeller} />
-      <Carousel 
+      <Carousel
         selectedCategory={selectedCategory}
         onSelectCategory={handleSelectCategory}
       />
-      <MainContent 
-        onAddToCart={addToCart} 
+      <MainContent
+        onAddToCart={addToCart}
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         onClearFilters={clearFilters}
@@ -320,8 +148,8 @@ export default function Home() {
         products={allProducts}
       />
       <Footer />
-      
-      <CartDrawer 
+
+      <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         cartItems={cart}
@@ -333,13 +161,13 @@ export default function Home() {
         onStartShopping={handleStartShopping}
       />
 
-      <AuthModal 
+      <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(name, email) => setCurrentUser({ name, email })}
+        onLoginSuccess={login}
       />
 
-      <ProductModal 
+      <ProductModal
         product={selectedProduct}
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
@@ -348,12 +176,12 @@ export default function Home() {
         exchangeRate={exchangeRate}
       />
 
-      <SellerDashboard 
+      <SellerDashboard
         isOpen={isSellerOpen}
         onClose={() => setIsSellerOpen(false)}
         products={allProducts}
-        onAddProduct={handleAddProduct}
-        onDeleteProduct={handleDeleteProduct}
+        onAddProduct={addProduct}
+        onDeleteProduct={deleteProduct}
         currency={currency}
         exchangeRate={exchangeRate}
         currentUser={currentUser}
@@ -365,7 +193,7 @@ export default function Home() {
         activeTab={profileActiveTab}
         setActiveTab={setProfileActiveTab}
         currentUser={currentUser}
-        onUpdateProfile={handleUpdateProfile}
+        onUpdateProfile={updateProfile}
         purchases={purchasedProducts}
         currency={currency}
         exchangeRate={exchangeRate}

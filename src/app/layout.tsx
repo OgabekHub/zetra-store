@@ -11,8 +11,51 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Zetra - Premium Raqamli Mahsulotlar Bozori",
-  description: "Zetra Store - premium dizayn shablonlari, e-kitoblar, dasturlash kodlari, litsenziyalar va boshqalar.",
+  title: {
+    default: "Zetra — Premium Raqamli Mahsulotlar Bozori",
+    template: "%s | Zetra",
+  },
+  description: "Zetra Store — premium dizayn shablonlari, e-kitoblar, dasturlash kodlari, litsenziyalar va boshqalar. O'zbekistoning eng yaxshi raqamli bozori.",
+  keywords: ["raqamli mahsulotlar", "figma templates", "e-kitoblar", "dastur kodi", "litsenziya", "zetra", "uzbekistan"],
+  authors: [{ name: "Zetra Team" }],
+  creator: "Zetra",
+  metadataBase: new URL("https://zetra.uz"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "uz_UZ",
+    url: "https://zetra.uz",
+    siteName: "Zetra",
+    title: "Zetra — Premium Raqamli Mahsulotlar Bozori",
+    description: "Zetra Store — dizayn shablonlari, e-kitoblar, dasturlash kodlari va litsenziyalar.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Zetra — Premium Digital Marketplace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zetra — Premium Raqamli Mahsulotlar Bozori",
+    description: "O'zbekistoning eng yaxshi raqamli mahsulotlar bozori.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

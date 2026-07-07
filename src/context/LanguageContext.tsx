@@ -13,7 +13,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('uz');
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize language from localStorage on mount
   useEffect(() => {
@@ -21,7 +20,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (savedLang && (savedLang === 'uz' || savedLang === 'ru' || savedLang === 'en')) {
       setLanguageState(savedLang);
     }
-    setIsInitialized(true);
   }, []);
 
   const setLanguage = (lang: Language) => {

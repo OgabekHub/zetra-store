@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { CartItem } from '@/types';
 import { formatPrice } from '@/utils/price';
 import { useLanguage } from '@/context/LanguageContext';
+import { getCategoryLabel } from '@/utils/categories';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -19,16 +20,7 @@ interface CartDrawerProps {
   onStartShopping?: () => void;
 }
 
-const categoryTranslations: Record<string, string> = {
-  'Dizayn Shablonlari': 'cat_design',
-  '3D Modellar': 'cat_3d',
-  'E-Kitoblar': 'cat_ebooks',
-  'Dastur Kodelari': 'cat_code',
-  'Grafika & Media': 'cat_graphics',
-  'O\'yin va Hisoblar': 'cat_games',
-  'Litsenziya & Kalitlar': 'cat_keys',
-  'Audio & Musiqa': 'cat_audio'
-};
+
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ 
   isOpen, 
@@ -62,10 +54,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
     }
   }, [isOpen, onClose]);
 
-  const getCategoryDisplayName = (catName: string) => {
-    const key = categoryTranslations[catName];
-    return key ? t(key) : catName;
-  };
+  const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
   return (
     <div 

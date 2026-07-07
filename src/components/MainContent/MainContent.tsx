@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Star, ShoppingCart, Eye } from 'lucide-react';
+import { Star, ShoppingCart, Eye, Sparkles, Flame } from 'lucide-react';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import { useLanguage } from '@/context/LanguageContext';
+import { getCategoryLabel } from '@/utils/categories';
 
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
@@ -18,17 +19,6 @@ interface MainContentProps {
   isLoading: boolean;
   products: Product[];
 }
-
-const categoryTranslations: Record<string, string> = {
-  'Dizayn Shablonlari': 'cat_design',
-  '3D Modellar': 'cat_3d',
-  'E-Kitoblar': 'cat_ebooks',
-  'Dastur Kodelari': 'cat_code',
-  'Grafika & Media': 'cat_graphics',
-  'O\'yin va Hisoblar': 'cat_games',
-  'Litsenziya & Kalitlar': 'cat_keys',
-  'Audio & Musiqa': 'cat_audio'
-};
 
 const MainContent: React.FC<MainContentProps> = ({ 
   onAddToCart, 
@@ -43,6 +33,8 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
   const { language, t } = useLanguage();
+
+  const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
   const openProductModal = onOpenProductModal;
 
@@ -62,11 +54,6 @@ const MainContent: React.FC<MainContentProps> = ({
     }
     return b.id - a.id;
   });
-
-  const getCategoryDisplayName = (catName: string) => {
-    const key = categoryTranslations[catName];
-    return key ? t(key) : catName;
-  };
 
   // Render skeletons when category changes are loading
   if (isLoading) {
@@ -195,6 +182,21 @@ const MainContent: React.FC<MainContentProps> = ({
                       <ShoppingCart className="w-5 h-5" />
                     </button>
                   </div>
+                  {/* Badges: Yangi / Ommabop */}
+                  <div className="absolute top-3 right-3 flex flex-col gap-1.5">
+                    {product.isNew && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-lg">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        {language === 'uz' ? 'Yangi' : language === 'ru' ? 'Новый' : 'New'}
+                      </span>
+                    )}
+                    {product.reviews >= 150 && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full shadow-lg">
+                        <Flame className="w-2.5 h-2.5" />
+                        {language === 'uz' ? 'Trend' : language === 'ru' ? 'Тренд' : 'Hot'}
+                      </span>
+                    )}
+                  </div>
                   <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white">
                     {getCategoryDisplayName(product.category)}
                   </div>
@@ -216,9 +218,11 @@ const MainContent: React.FC<MainContentProps> = ({
 
                   <div className="flex items-end justify-between mt-auto">
                     <div className="flex flex-col">
-                      <span className="text-xs text-slate-550 light:text-slate-400 line-through">
-                        {formatPrice(product.price * 1.2, currency, exchangeRate)}
-                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-slate-500 light:text-slate-400 line-through">
+                          {formatPrice(product.originalPrice, currency, exchangeRate)}
+                        </span>
+                      )}
                       <span className="text-xl font-bold text-white light:text-slate-900 transition-colors">
                         {formatPrice(product.price, currency, exchangeRate)}
                       </span>

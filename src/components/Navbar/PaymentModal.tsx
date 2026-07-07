@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, CheckCircle2, CreditCard, Smartphone, Lock, ShieldCheck, ArrowLeft, ArrowRight, Clock, Receipt, Check, Phone, KeyRound, AlertTriangle } from 'lucide-react';
 import { formatPrice } from '@/utils/price';
+import { CartItem } from '@/types';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
 import Image from 'next/image';
@@ -15,7 +16,7 @@ import clickLogoLight from '@/assets/images/click-logo-light.png';
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cartItems: any[];
+  cartItems: CartItem[];
   currency: 'USD' | 'UZS';
   exchangeRate: number;
   onPaymentSuccess: () => void;

@@ -5,6 +5,7 @@ import { X, Star, ShoppingCart, CheckCircle2, HardDrive, FileType, Box, Music, T
 import Image from 'next/image';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
+import { getCategoryLabel } from '@/utils/categories';
 import { useLanguage } from '@/context/LanguageContext';
 import { ThreeDViewer } from './previews/ThreeDViewer';
 import { AudioWavePlayer } from './previews/AudioWavePlayer';
@@ -18,17 +19,6 @@ interface ProductModalProps {
   currency: 'USD' | 'UZS';
   exchangeRate: number;
 }
-
-const categoryTranslations: Record<string, string> = {
-  'Dizayn Shablonlari': 'cat_design',
-  '3D Modellar': 'cat_3d',
-  'E-Kitoblar': 'cat_ebooks',
-  'Dastur Kodelari': 'cat_code',
-  'Grafika & Media': 'cat_graphics',
-  'O\'yin va Hisoblar': 'cat_games',
-  'Litsenziya & Kalitlar': 'cat_keys',
-  'Audio & Musiqa': 'cat_audio'
-};
 
 const ProductModal: React.FC<ProductModalProps> = ({ 
   product, 
@@ -65,10 +55,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   if (!isOpen || !product) return null;
 
-  const getCategoryDisplayName = (catName: string) => {
-    const key = categoryTranslations[catName];
-    return key ? t(key) : catName;
-  };
+  const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true">

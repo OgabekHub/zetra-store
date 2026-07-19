@@ -197,7 +197,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({
   useEffect(() => {
     if (isOpen && currentUser && purchases.length > 0) {
       const savedLimits = localStorage.getItem('zetra-download-limits');
-      let parsedLimits = savedLimits ? JSON.parse(savedLimits) : {};
+      const parsedLimits = savedLimits ? JSON.parse(savedLimits) : {};
       
       let updated = false;
       purchases.forEach((product) => {

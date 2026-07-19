@@ -130,7 +130,7 @@ export const ThreeDViewer: React.FC = () => {
       const isLight = document.documentElement.classList.contains('light');
       let primaryColor = '#22d3ee'; // Cyan
       let secondaryColor = 'rgba(34, 211, 238, 0.12)';
-      let nodeColor = isLight ? '#0f172a' : '#ffffff';
+      const nodeColor = isLight ? '#0f172a' : '#ffffff';
 
       if (theme === 'indigo') {
         primaryColor = isLight ? '#4f46e5' : '#6366f1';
@@ -170,12 +170,12 @@ export const ThreeDViewer: React.FC = () => {
 
         // Apply 3D rotation
         // Rotate Y
-        let x1 = x * cosY - z * sinY;
-        let z1 = x * sinY + z * cosY;
+        const x1 = x * cosY - z * sinY;
+        const z1 = x * sinY + z * cosY;
 
         // Rotate X
-        let y2 = y * cosX - z1 * sinX;
-        let z2 = y * sinX + z1 * cosX;
+        const y2 = y * cosX - z1 * sinX;
+        const z2 = y * sinX + z1 * cosX;
 
         // Perspective projection to 2D
         const distance3D = 2.5;

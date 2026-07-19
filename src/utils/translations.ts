@@ -24,13 +24,29 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_categories": "Kategoriyalar",
     "nav_home": "Asosiy",
     "nav_profile": "Profil",
+    "nav_profile": "Profil",
     "nav_menu": "Menyu",
+    "nav_currency": "Valyuta",
+    "nav_language": "Til",
+    "nav_mode": "Rejim",
+    "nav_mode_light": "Kun",
+    "nav_mode_dark": "Tun",
 
     // Header / Hero
     "hero_title": "Raqamli Mahsulotlar Premium Bozoriga Xush Kelibsiz",
     "hero_subtitle": "Zetra-da zamonaviy dizayn shablonlari, 3D modellar, dastur kodlari va eksklyuziv elektron darsliklarni to'g'ridan-to'g'ri mutaxassislardan xarid qiling.",
     "hero_start_btn": "Bozorni ko'rish",
     "hero_seller_btn": "Sotuvchi bo'lish",
+    "header_badge_text": "Yangi raqamli mahsulotlar bozori",
+    "header_title_part1": "Eng yaxshi raqamli ",
+    "header_title_part2": "mahsulotlar bitta joyda",
+    "header_stat1_title": "Darhol Yuklab Olish",
+    "header_stat1_desc": "To'lovdan so'ng darhol faylga ega bo'ling",
+    "header_stat2_title": "Xavfsiz To'lovlar",
+    "header_stat2_desc": "Barcha tranzaksiyalar 100% himoyalangan",
+    "header_stat3_title": "Premium Sifat",
+    "header_stat3_desc": "Faqat tekshirilgan va sifatli mahsulotlar",
+
 
     // Categories
     "cat_all": "Barchasi",
@@ -55,6 +71,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "main_original_price": "Asl narxi",
     "main_new_popular_title": "Yangi va Ommabop",
     "main_sub_title": "Eng ko'p sotilayotgan raqamli mahsulotlar",
+    "main_badge_new": "Yangi",
+    "main_badge_hot": "Trend",
+    "main_search_results_prefix": "\"",
+    "main_search_results_suffix": "\" bo'yicha qidiruv natijalari",
+
 
     // Auth Modal
     "auth_welcome_back": "Tizimga Xush Kelibsiz",
@@ -271,13 +292,29 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_categories": "Категории",
     "nav_home": "Главная",
     "nav_profile": "Профиль",
+    "nav_profile": "Профиль",
     "nav_menu": "Меню",
+    "nav_currency": "Валюта",
+    "nav_language": "Язык",
+    "nav_mode": "Режим",
+    "nav_mode_light": "Свет",
+    "nav_mode_dark": "Ночь",
 
     // Header / Hero
     "hero_title": "Добро пожаловать на Премиум Рынок Цифровых Товаров",
     "hero_subtitle": "Покупайте современные шаблоны дизайна, 3D-модели, программный код и эксклюзивные электронные учебники напрямую от специалистов на Zetra.",
     "hero_start_btn": "Смотреть рынок",
     "hero_seller_btn": "Стать продавцом",
+    "header_badge_text": "Новый рынок цифровых продуктов",
+    "header_title_part1": "Лучшие цифровые ",
+    "header_title_part2": "продукты в одном месте",
+    "header_stat1_title": "Мгновенное скачивание",
+    "header_stat1_desc": "Получите ваши файлы сразу после оплаты",
+    "header_stat2_title": "Безопасные платежи",
+    "header_stat2_desc": "Все транзакции защищены на 100%",
+    "header_stat3_title": "Премиум качество",
+    "header_stat3_desc": "Только проверенные и качественные товары",
+
 
     // Categories
     "cat_all": "Все",
@@ -302,6 +339,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "main_original_price": "Ориг. цена",
     "main_new_popular_title": "Новые и популярные",
     "main_sub_title": "Самые продаваемые цифровые продукты",
+    "main_badge_new": "Новый",
+    "main_badge_hot": "Тренд",
+    "main_search_results_prefix": "Результаты поиска по запросу \"",
+    "main_search_results_suffix": "\"",
+
 
     // Auth Modal
     "auth_welcome_back": "Добро пожаловать",
@@ -518,13 +560,29 @@ export const translations: Record<Language, Record<string, string>> = {
     "nav_categories": "Categories",
     "nav_home": "Home",
     "nav_profile": "Profile",
+    "nav_profile": "Profile",
     "nav_menu": "Menu",
+    "nav_currency": "Currency",
+    "nav_language": "Language",
+    "nav_mode": "Mode",
+    "nav_mode_light": "Light",
+    "nav_mode_dark": "Dark",
 
     // Header / Hero
     "hero_title": "Welcome to the Premium Marketplace for Digital Products",
     "hero_subtitle": "Buy modern UI design templates, 3D models, software codes, and exclusive ebooks directly from global professionals on Zetra.",
     "hero_start_btn": "Browse Market",
     "hero_seller_btn": "Become a Seller",
+    "header_badge_text": "New digital product marketplace",
+    "header_title_part1": "The best digital ",
+    "header_title_part2": "products in one place",
+    "header_stat1_title": "Instant Download",
+    "header_stat1_desc": "Get your files immediately after checkout",
+    "header_stat2_title": "Secure Payments",
+    "header_stat2_desc": "All transactions are 100% encrypted",
+    "header_stat3_title": "Premium Quality",
+    "header_stat3_desc": "Only curated and verified products",
+
 
     // Categories
     "cat_all": "All",
@@ -549,6 +607,11 @@ export const translations: Record<Language, Record<string, string>> = {
     "main_original_price": "Orig. Price",
     "main_new_popular_title": "New & Popular",
     "main_sub_title": "Best selling digital products",
+    "main_badge_new": "New",
+    "main_badge_hot": "Hot",
+    "main_search_results_prefix": "Search results for \"",
+    "main_search_results_suffix": "\"",
+
 
     // Auth Modal
     "auth_welcome_back": "Welcome Back",

@@ -40,23 +40,13 @@ const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
           <div className="w-5 h-5 relative flex items-center justify-center flex-shrink-0 animate-pulse">
             <Image src={zetraIcon} alt="Zetra Icon" className="w-full h-full object-contain" />
           </div>
-          <span className="leading-none">{language === 'uz' ? 'Yangi raqamli mahsulotlar bozori' : language === 'ru' ? 'Новый рынок цифровых продуктов' : 'New digital product marketplace'}</span>
+          <span className="leading-none">{t('header_badge_text')}</span>
         </div>
         
         <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white light:text-slate-900 tracking-tight mb-8 max-w-4xl mx-auto leading-tight transition-colors">
-          {language === 'uz' ? (
-            <>
-              Eng yaxshi raqamli <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">mahsulotlar bitta joyda</span>
-            </>
-          ) : language === 'ru' ? (
-            <>
-              Лучшие цифровые <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">продукты в одном месте</span>
-            </>
-          ) : (
-            <>
-              The best digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">products in one place</span>
-            </>
-          )}
+          <>
+            {t('header_title_part1')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{t('header_title_part2')}</span>
+          </>
         </h1>
         
         <p className="mt-4 text-base md:text-lg text-slate-400 light:text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed transition-colors">
@@ -85,22 +75,22 @@ const Header: React.FC<HeaderProps> = ({ onExploreClick, onBecomeSeller }) => {
             <div className="w-12 h-12 bg-indigo-500/10 light:bg-indigo-50 rounded-xl flex items-center justify-center mb-4 transition-colors">
               <Download className="w-6 h-6 text-indigo-400 light:text-indigo-600" />
             </div>
-            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{language === 'uz' ? 'Darhol Yuklab Olish' : language === 'ru' ? 'Мгновенное скачивание' : 'Instant Download'}</h3>
-            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{language === 'uz' ? 'To\'lovdan so\'ng darhol faylga ega bo\'ling' : language === 'ru' ? 'Получите ваши файлы сразу после оплаты' : 'Get your files immediately after checkout'}</p>
+            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{t('header_stat1_title')}</h3>
+            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{t('header_stat1_desc')}</p>
           </div>
           <div className="flex flex-col items-center justify-center">
             <div className="w-12 h-12 bg-purple-500/10 light:bg-purple-50 rounded-xl flex items-center justify-center mb-4 transition-colors">
               <ShieldCheck className="w-6 h-6 text-purple-400 light:text-purple-600" />
             </div>
-            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{language === 'uz' ? 'Xavfsiz To\'lovlar' : language === 'ru' ? 'Безопасные платежи' : 'Secure Payments'}</h3>
-            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{language === 'uz' ? 'Barcha tranzaksiyalar 100% himoyalangan' : language === 'ru' ? 'Все транзакции защищены на 100%' : 'All transactions are 100% encrypted'}</p>
+            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{t('header_stat2_title')}</h3>
+            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{t('header_stat2_desc')}</p>
           </div>
           <div className="flex flex-col items-center justify-center">
             <div className="w-12 h-12 bg-pink-500/10 light:bg-pink-50 rounded-xl flex items-center justify-center mb-4 transition-colors">
               <Sparkles className="w-6 h-6 text-pink-400 light:text-pink-600" />
             </div>
-            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{language === 'uz' ? 'Premium Sifat' : language === 'ru' ? 'Премиум качество' : 'Premium Quality'}</h3>
-            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{language === 'uz' ? 'Faqat tekshirilgan va sifatli mahsulotlar' : language === 'ru' ? 'Только проверенные и качественные товары' : 'Only curated and verified products'}</p>
+            <h3 className="text-white light:text-slate-900 font-semibold text-base transition-colors">{t('header_stat3_title')}</h3>
+            <p className="text-slate-400 light:text-slate-550 text-xs mt-1 transition-colors">{t('header_stat3_desc')}</p>
           </div>
         </div>
       </div>

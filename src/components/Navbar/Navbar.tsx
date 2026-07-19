@@ -593,7 +593,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Currency Switcher */}
             <div className="flex items-center justify-between px-2 py-2 border-t border-slate-800/60 light:border-slate-100 mt-1">
-              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{language === 'uz' ? 'Valyuta' : language === 'ru' ? 'Валюта' : 'Currency'}</span>
+              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{t('nav_currency')}</span>
               <div className="flex bg-slate-800/85 light:bg-slate-100 p-0.5 rounded-lg border border-slate-700/55 light:border-slate-200">
                 <button 
                   onClick={() => {
@@ -626,7 +626,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Language Switcher */}
             <div className="flex items-center justify-between px-2 py-2 border-t border-slate-800/60 light:border-slate-100">
-              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{language === 'uz' ? 'Til' : language === 'ru' ? 'Язык' : 'Language'}</span>
+              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{t('nav_language')}</span>
               <div className="flex bg-slate-800/85 light:bg-slate-100 p-0.5 rounded-lg border border-slate-700/55 light:border-slate-200">
                 <button 
                   onClick={() => {
@@ -666,7 +666,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Theme Switcher */}
             <div className="flex items-center justify-between px-2 py-2 border-t border-slate-800/60 light:border-slate-100">
-              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{language === 'uz' ? 'Rejim' : language === 'ru' ? 'Режим' : 'Mode'}</span>
+              <span className="text-sm text-slate-400 font-medium light:text-slate-600">{t('nav_mode')}</span>
               <div className="flex bg-slate-800/85 p-0.5 rounded-lg border border-slate-700/55 light:bg-slate-100 light:border-slate-200">
                 <button 
                   onClick={() => { if (theme !== 'light') toggleTheme(); }}
@@ -677,7 +677,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <Sun className="w-3 h-3" />
-                  {language === 'uz' ? 'Kun' : language === 'ru' ? 'Свет' : 'Light'}
+                  {t('nav_mode_light')}
                 </button>
                 <button 
                   onClick={() => { if (theme !== 'dark') toggleTheme(); }}
@@ -688,7 +688,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   }`}
                 >
                   <Moon className="w-3 h-3" />
-                  {language === 'uz' ? 'Tun' : language === 'ru' ? 'Ночь' : 'Dark'}
+                  {t('nav_mode_dark')}
                 </button>
               </div>
             </div>

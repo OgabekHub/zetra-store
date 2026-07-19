@@ -104,11 +104,7 @@ const MainContent: React.FC<MainContentProps> = ({
             </h2>
             <p className="text-slate-400 light:text-slate-600 transition-colors">
               {searchQuery 
-                ? (language === 'uz' 
-                    ? `"${searchQuery}" bo'yicha qidiruv natijalari` 
-                    : language === 'ru' 
-                      ? `Результаты поиска по запросу "${searchQuery}"` 
-                      : `Search results for "${searchQuery}"`) 
+                ? `${t('main_search_results_prefix')}${searchQuery}${t('main_search_results_suffix')}` 
                 : t('main_sub_title')}
             </p>
           </div>
@@ -187,13 +183,13 @@ const MainContent: React.FC<MainContentProps> = ({
                     {product.isNew && (
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-lg">
                         <Sparkles className="w-2.5 h-2.5" />
-                        {language === 'uz' ? 'Yangi' : language === 'ru' ? 'Новый' : 'New'}
+                        {t('main_badge_new')}
                       </span>
                     )}
                     {product.reviews >= 150 && (
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-orange-500 text-white text-[10px] font-bold rounded-full shadow-lg">
                         <Flame className="w-2.5 h-2.5" />
-                        {language === 'uz' ? 'Trend' : language === 'ru' ? 'Тренд' : 'Hot'}
+                        {t('main_badge_hot')}
                       </span>
                     )}
                   </div>

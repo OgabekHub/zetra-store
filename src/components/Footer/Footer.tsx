@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-slate-950 light:bg-slate-100 border-t border-slate-800/80 light:border-slate-200 pt-16 pb-8 relative overflow-hidden transition-colors duration-300">
+    <footer className="bg-slate-950 light:bg-slate-100 border-t border-slate-800/80 light:border-slate-200 pt-16 pb-[92px] md:pb-8 relative overflow-hidden transition-colors duration-300">
       {/* Background neon blur */}
       <div className="absolute bottom-0 right-0 w-[400px] h-[400px] opacity-10 light:opacity-5 pointer-events-none">
         <div className="absolute inset-0 bg-indigo-500 blur-[80px] rounded-full" />

@@ -756,7 +756,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
     {/* Mobile Bottom Navigation Bar */}
     <div 
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-slate-950/85 light:bg-white/90 backdrop-blur-lg border-t border-slate-800/80 light:border-slate-200/80 px-4 pt-2 shadow-2xl transition-all duration-300 select-none"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-slate-950/95 light:bg-white/95 backdrop-blur-xl border-t border-slate-800/80 light:border-slate-200/80 px-4 pt-2 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.5)] transition-all duration-300 select-none"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
     >
       <div className="flex justify-between items-center max-w-lg mx-auto">

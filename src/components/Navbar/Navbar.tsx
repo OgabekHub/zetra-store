@@ -59,12 +59,10 @@ const Navbar: React.FC<NavbarProps> = ({
   const zetraLogo = theme === 'dark' ? zetraLogoDark : zetraLogoLight;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showMobileSuggestions, setShowMobileSuggestions] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
-  const mobileSearchRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -74,14 +72,9 @@ const Navbar: React.FC<NavbarProps> = ({
     const handleOutsideClick = (e: MouseEvent) => {
       const target = e.target as Node;
       
-      // Desktop search click outside
+      // Search click outside
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSuggestions(false);
-      }
-      
-      // Mobile search click outside
-      if (mobileSearchRef.current && !mobileSearchRef.current.contains(target)) {
-        setShowMobileSuggestions(false);
       }
 
       // User dropdown click outside
@@ -104,7 +97,6 @@ const Navbar: React.FC<NavbarProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowSuggestions(false);
-        setShowMobileSuggestions(false);
         setIsUserDropdownOpen(false);
       }
     };
@@ -116,7 +108,6 @@ const Navbar: React.FC<NavbarProps> = ({
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSuggestions(false);
-    setShowMobileSuggestions(false);
     setIsMobileMenuOpen(false);
     
     const element = document.getElementById('products-section');
@@ -158,16 +149,16 @@ const Navbar: React.FC<NavbarProps> = ({
             <Image 
               src={zetraLogo} 
               alt="Zetra Logo" 
-              className="h-12 w-auto object-contain"
+              className="h-9 md:h-12 w-auto object-contain transition-all"
               priority
             />
           </div>
 
-          {/* Search Bar - Hidden on Mobile */}
-          <div ref={searchRef} className="hidden md:flex flex-1 max-w-2xl mx-8 relative">
+          {/* Search Bar - Always Visible */}
+          <div ref={searchRef} className="flex flex-1 max-w-2xl ml-3 md:mx-8 relative">
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-slate-400" />
+                <Search className="h-4 w-4 md:h-5 md:w-5 text-slate-400" />
               </div>
               <input
                 type="text"
@@ -177,7 +168,7 @@ const Navbar: React.FC<NavbarProps> = ({
                   setSearchQuery(e.target.value);
                   setShowSuggestions(true);
                 }}
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 light:border-slate-250 rounded-2xl leading-5 bg-slate-800/50 light:bg-slate-100/70 text-slate-200 light:text-slate-800 placeholder-slate-400 light:placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-300 focus:bg-slate-800 light:focus:bg-white"
+                className="block w-full pl-9 md:pl-10 pr-3 py-2 md:py-2.5 border border-slate-700 light:border-slate-250 rounded-xl md:rounded-2xl leading-5 bg-slate-800/50 light:bg-slate-100/70 text-slate-200 light:text-slate-800 placeholder-slate-400 light:placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm transition-all duration-300 focus:bg-slate-800 light:focus:bg-white"
                 placeholder={t('nav_search_placeholder')}
               />
             </form>
@@ -242,7 +233,7 @@ const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Navigation */}
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <button 
               onClick={() => {
                 const element = document.getElementById('products-section');
@@ -497,86 +488,7 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto px-4 py-5 space-y-5">
-          {/* Mobile Search */}
-          <div ref={mobileSearchRef} className="relative w-full">
-            <form onSubmit={handleSearchSubmit} className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-slate-400 light:text-slate-500" />
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onFocus={() => setShowMobileSuggestions(true)}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowMobileSuggestions(true);
-                }}
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-700 light:border-slate-250 rounded-2xl leading-5 bg-slate-800/50 light:bg-slate-100/70 text-slate-200 light:text-slate-800 placeholder-slate-400 light:placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-slate-800 light:focus:bg-white"
-                placeholder={t('search') + '...'}
-              />
-            </form>
-
-            {/* Mobile Autocomplete Suggestions */}
-            {showMobileSuggestions && searchQuery.trim() !== '' && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 rounded-2xl overflow-hidden shadow-2xl z-[60]">
-                {suggestions.length > 0 ? (
-                  <div className="py-1">
-                    <div className="px-4 py-1.5 text-[9px] font-bold text-slate-500 light:text-slate-400 uppercase tracking-wider">
-                      {t('pay_items_purchased')}
-                    </div>
-                    <div className="max-h-[240px] overflow-y-auto">
-                      {suggestions.map((product) => (
-                        <div
-                           key={product.id}
-                           onClick={() => {
-                             onOpenProductModal(product);
-                             setShowMobileSuggestions(false);
-                             setIsMobileMenuOpen(false);
-                           }}
-                           className="flex items-center gap-3 px-4 py-2 hover:bg-slate-800/60 light:hover:bg-slate-50 cursor-pointer"
-                        >
-                          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800 border border-slate-700/50 light:border-slate-200">
-                            <Image
-                              src={product.image}
-                              alt={product.title}
-                              fill
-                              sizes="32px"
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-semibold text-slate-200 light:text-slate-800 truncate">
-                              {product.title}
-                            </h4>
-                            <p className="text-[10px] text-slate-450 light:text-slate-500 truncate">
-                              {product.category}
-                            </p>
-                          </div>
-                          <div className="text-xs font-bold text-white light:text-slate-900 flex-shrink-0">
-                            {formatPrice(product.price, currency, exchangeRate)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="border-t border-slate-800 light:border-slate-100 mt-1 px-3 py-1.5">
-                      <button
-                        onClick={handleSearchSubmit}
-                        className="w-full text-center text-xs font-semibold text-indigo-400 light:text-indigo-650 hover:text-indigo-300 light:hover:text-indigo-750 py-1"
-                      >
-                        {t('main_all_products_btn')} ({totalMatches})
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-xs text-slate-500 light:text-slate-400">
-                    {t('seller_no_products')}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
+        <div className="overflow-y-auto px-4 py-4 space-y-4">
           <div className="flex flex-col gap-2">
             <button 
               onClick={() => {

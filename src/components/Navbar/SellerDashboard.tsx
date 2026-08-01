@@ -728,7 +728,7 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                         setIsScanning(false);
                         setScanStatus('idle');
                       }}
-                      className="w-full py-3.5 bg-slate-800 hover:bg-slate-750 light:bg-slate-200 light:hover:bg-slate-250 text-slate-200 light:text-slate-800 rounded-2xl font-bold transition-all border border-slate-700/40 light:border-slate-300 active:scale-[0.98] text-xs cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 light:bg-slate-200 light:hover:bg-slate-300 text-white light:text-slate-900 rounded-2xl font-bold transition-all border border-slate-700/40 light:border-slate-300 active:scale-[0.98] text-xs cursor-pointer flex items-center justify-center gap-2"
                     >
                       <RotateCcw className="w-4 h-4" />
                       {t('scan_try_again')}
@@ -865,8 +865,9 @@ const SellerDashboard: React.FC<SellerDashboardProps> = ({
                       placeholder={t('seller_features_placeholder')}
                     />
                     <button
+                      type="button"
                       onClick={handleAddFeature}
-                      className="px-5 bg-slate-850 light:bg-slate-105 hover:bg-slate-800 hover:light:bg-slate-200 text-slate-250 light:text-slate-800 border border-slate-700/50 light:border-slate-200 rounded-2xl font-semibold transition-colors cursor-pointer text-xs"
+                      className="px-5 bg-slate-800 hover:bg-slate-700 light:bg-slate-200 light:hover:bg-slate-300 text-white light:text-slate-900 border border-slate-700/50 light:border-slate-300 rounded-2xl font-bold transition-all cursor-pointer text-xs active:scale-95 shadow-sm"
                     >
                       {t('seller_features_add')}
                     </button>

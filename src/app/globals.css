@@ -8,18 +8,43 @@
   --color-brand-dark-soft: #0e1624;
 
   /* Map Tailwind's Indigo to Zetra's brand colors for seamless integration */
+  --color-indigo-250: #66fae0;
   --color-indigo-400: #00F2C2;
   --color-indigo-500: #00d9ae;
+  --color-indigo-550: #00be98;
   --color-indigo-600: #00a383;
+  --color-indigo-650: #009174;
+  --color-indigo-655: #009174;
   --color-indigo-700: #008067;
+  --color-indigo-750: #00735c;
   --color-indigo-800: #006652;
   --color-indigo-900: #004d3e;
 
-  /* Map Tailwind's Slates to Zetra's brand dark colors for cohesive backgrounds/borders */
+  /* Map intermediate Slate colors used across UI for light and dark modes */
+  --color-slate-105: #e8eef6;
+  --color-slate-150: #e2e8f0;
+  --color-slate-202: #cbd5e1;
+  --color-slate-250: #c5d1e0;
+  --color-slate-350: #94a3b8;
+  --color-slate-450: #64748b;
+  --color-slate-455: #64748b;
+  --color-slate-505: #55657a;
+  --color-slate-550: #475569;
+  --color-slate-555: #475569;
+  --color-slate-650: #334155;
+  --color-slate-655: #334155;
+  --color-slate-750: #1e293b;
   --color-slate-800: #121824;
   --color-slate-850: #0d121c;
+  --color-slate-855: #0b0f18;
   --color-slate-900: #090e17;
   --color-slate-950: #05080c;
+
+  /* Map intermediate Emerald & Red colors */
+  --color-emerald-450: #10b981;
+  --color-emerald-455: #10b981;
+  --color-red-650: #dc2626;
+  --color-red-655: #dc2626;
 }
 
 @custom-variant light {

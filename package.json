@@ -9,7 +9,7 @@
     "lint": "npm run lint:eslint && npm run i18n:check",
     "lint:eslint": "eslint .",
     "i18n:check": "node scripts/check-i18n.mjs",
-    "typecheck": "tsc --noEmit --incremental false",
+    "typecheck": "next typegen && tsc --noEmit --incremental false",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

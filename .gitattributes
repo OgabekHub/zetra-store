@@ -1,0 +1,9 @@
+# Matn fayllari repoda LF bilan saqlanadi: mashinalar orasida core.autocrlf
+# farq qilganda Windows nusxasi butun faylni o'zgargandek ko'rsatmasligi uchun.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.woff binary
+*.woff2 binary

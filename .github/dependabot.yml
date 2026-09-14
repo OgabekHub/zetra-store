@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # npm paketlari: haftalik, kichik yangilanishlar bitta PR ga guruhlanadi.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # GitHub Actions versiyalari ham yangilanib turadi.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

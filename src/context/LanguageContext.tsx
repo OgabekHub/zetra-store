@@ -1,7 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { translations, Language } from '@/utils/translations';
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
+import { translations } from '@/utils/translations';
+import { usePersistentStore } from '@/store/usePersistentStore';
+import { languageStore, type Language } from '@/store/preferencesStore';
+
+export type { Language };
 
 interface LanguageContextType {
   language: Language;
@@ -12,31 +16,30 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('uz');
+  const language = usePersistentStore(languageStore);
 
-  // Initialize language from localStorage on mount
-  useEffect(() => {
-    const savedLang = localStorage.getItem('zetra-lang') as Language;
-    if (savedLang && (savedLang === 'uz' || savedLang === 'ru' || savedLang === 'en')) {
-      setLanguageState(savedLang);
-    }
+  const setLanguage = useCallback((lang: Language) => {
+    languageStore.set(lang);
   }, []);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('zetra-lang', lang);
-  };
+  // Tarjima funksiyasi faqat til o'zgarganda qayta yaratiladi. Avval u har
+  // renderda yangi bo'lardi va 12 ta iste'molchini keraksiz qayta render
+  // qilardi — loyihada `useMemo` umuman ishlatilmagan edi.
+  const t = useMemo(() => {
+    const table = translations[language];
+    return (key: string): string => table?.[key] ?? key;
+  }, [language]);
 
-  const t = (key: string): string => {
-    if (!translations[language]) return key;
-    return translations[language][key] || key;
-  };
+  // `<html lang>` avval `layout.tsx` da qat'iy "uz" edi va hech qachon
+  // yangilanmasdi: ekran o'quvchilar noto'g'ri ovoz tanlardi va Chrome har
+  // sahifani o'zbekchadan tarjima qilishni taklif qilardi.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };
 
 export const useLanguage = () => {

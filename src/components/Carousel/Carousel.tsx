@@ -35,7 +35,7 @@ interface CarouselProps {
 
 const Carousel: React.FC<CarouselProps> = ({ onSelectCategory, selectedCategory }) => {
   const sliderRef = useRef<Slider>(null);
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   const settings = {
     dots: false,
@@ -95,14 +95,14 @@ const Carousel: React.FC<CarouselProps> = ({ onSelectCategory, selectedCategory 
               <button 
                 onClick={() => sliderRef.current?.slickPrev()}
                 className="w-10 h-10 bg-slate-850 hover:bg-indigo-600 hover:text-white light:bg-white light:hover:bg-indigo-600 light:hover:text-white border border-slate-700/60 light:border-slate-250 text-slate-400 light:text-slate-600 rounded-xl flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-md light:shadow-slate-200/50"
-                aria-label="Oldingi slayd"
+                aria-label={t('a11y_prev_slide')}
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <button 
                 onClick={() => sliderRef.current?.slickNext()}
                 className="w-10 h-10 bg-slate-850 hover:bg-indigo-600 hover:text-white light:bg-white light:hover:bg-indigo-600 light:hover:text-white border border-slate-700/60 light:border-slate-250 text-slate-400 light:text-slate-600 rounded-xl flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-md light:shadow-slate-200/50"
-                aria-label="Keyingi slayd"
+                aria-label={t('a11y_next_slide')}
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -111,29 +111,29 @@ const Carousel: React.FC<CarouselProps> = ({ onSelectCategory, selectedCategory 
         </div>
 
         <div className="px-2">
-          <Slider ref={sliderRef} {...settings} className="category-slider -mx-3">
+          <Slider ref={sliderRef} {...settings} className="-mx-3">
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.name;
               return (
                 <div key={cat.id} className="px-3 outline-none py-1">
-                  <div 
+                  <button type="button" aria-pressed={isSelected} 
                     onClick={() => onSelectCategory && onSelectCategory(cat.name)}
-                    className={`bg-slate-800/50 hover:bg-slate-800 light:bg-white light:hover:bg-slate-50 border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 group ${
+                    className={`w-full bg-slate-800/50 hover:bg-slate-800 light:bg-white light:hover:bg-slate-50 border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 group ${
                       isSelected 
                         ? 'border-indigo-500 shadow-lg shadow-indigo-600/10 light:shadow-indigo-600/5 bg-slate-800 light:bg-white' 
                         : 'border-slate-700/50 light:border-slate-200 hover:border-slate-600 light:hover:border-slate-300'
                     }`}
                   >
-                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${cat.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${
+                    <span className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${cat.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${
                       isSelected ? 'scale-110 ring-2 ring-indigo-500/30' : ''
                     }`}>
                       <cat.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${cat.color}`} />
-                    </div>
-                    <h3 className="text-white light:text-slate-800 font-medium text-xs sm:text-sm mb-1 line-clamp-1 transition-colors">{t(cat.translationKey)}</h3>
-                    <span className="text-slate-500 light:text-slate-400 text-[10px] sm:text-xs transition-colors">
-                      {cat.count} {language === 'uz' ? 'ta mahsulot' : language === 'ru' ? 'товаров' : 'products'}
                     </span>
-                  </div>
+                    <span className="block text-white light:text-slate-800 font-medium text-xs sm:text-sm mb-1 line-clamp-1 transition-colors">{t(cat.translationKey)}</span>
+                    <span className="text-slate-500 light:text-slate-400 text-[10px] sm:text-xs transition-colors">
+                      {cat.count} {t('cat_product_count')}
+                    </span>
+                  </button>
                 </div>
               );
             })}

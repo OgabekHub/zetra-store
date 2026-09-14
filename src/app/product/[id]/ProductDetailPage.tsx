@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Product } from '@/data/products';
+import type { Product } from '@/types';
 import { formatPrice } from '@/utils/price';
 import { getCategoryLabel, categoryToSlug } from '@/utils/categories';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useCart } from '@/hooks/useCart';
+import { useProducts } from '@/hooks/useProducts';
 import {
   Star, ShoppingCart, ArrowLeft, Download, HardDrive,
   FileType, CheckCircle2, Sparkles, Flame, ChevronRight
@@ -16,34 +17,58 @@ import {
 import toast from 'react-hot-toast';
 
 interface ProductDetailPageProps {
-  product: Product;
+  productId: number;
+  /** Serverda render qilingan fixture nusxasi. Sotuvchi mahsuloti uchun `null`. */
+  seedProduct: Product | null;
 }
 
-export default function ProductDetailPage({ product }: ProductDetailPageProps) {
-  const { t, language } = useLanguage();
-  const { currency, setCurrency, exchangeRate } = useCurrency();
-  const { addToCart, isCartOpen, setIsCartOpen } = useCart();
+export default function ProductDetailPage({ productId, seedProduct }: ProductDetailPageProps) {
+  const { t } = useLanguage();
+  const { currency, exchangeRate } = useCurrency();
+  const { addToCart } = useCart();
+  const { allProducts } = useProducts();
   const [added, setAdded] = useState(false);
+
+  // Avval katalogdan qidiriladi (sotuvchi mahsulotlari va o'chirishlar shu
+  // yerda ko'rinadi), topilmasa serverdan kelgan nusxa ishlatiladi — shu
+  // tufayli fixture mahsulotlarida hidratatsiya nomuvofiqligi bo'lmaydi.
+  const fromCatalog = allProducts.find((p) => p.id === productId);
+  const product = fromCatalog ?? seedProduct;
 
   const getCatLabel = (cat: string) => getCategoryLabel(cat, t);
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart(product);
     setAdded(true);
-    toast.success(
-      language === 'uz'
-        ? 'Savatchaga qo\'shildi!'
-        : language === 'ru'
-        ? 'Добавлено в корзину!'
-        : 'Added to cart!',
-      { icon: '🛒' }
-    );
+    toast.success(t('cart_added'), { icon: '🛒' });
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const discountPercent = product.originalPrice
+  const discountPercent = product?.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-brand-dark light:bg-slate-50 flex items-center justify-center px-6">
+        <div className="text-center max-w-md space-y-5">
+          <h1 className="text-2xl font-bold text-white light:text-slate-900">
+            {t('product_unavailable_title')}
+          </h1>
+          <p className="text-slate-400 light:text-slate-500 text-sm leading-relaxed">
+            {t('product_unavailable_body')}
+          </p>
+          <Link
+            href="/"
+            className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-colors"
+          >
+            {t('profile_back_store')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-dark text-slate-100">
@@ -52,7 +77,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
-            {language === 'uz' ? 'Bosh sahifa' : language === 'ru' ? 'Главная' : 'Home'}
+            {t('nav_home')}
           </Link>
           <ChevronRight className="w-3 h-3" />
           <Link
@@ -76,7 +101,9 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                 src={product.image}
                 alt={product.title}
                 fill
-                priority
+                // `priority` Next 16 da eskirgan. Bu rasm oldindan render qilinadigan
+                // sahifaning haqiqiy LCP elementi, shuning uchun `preload` o'rinli.
+                preload
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
@@ -85,13 +112,13 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                 {product.isNew && (
                   <span className="flex items-center gap-1 px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full shadow-lg">
                     <Sparkles className="w-3 h-3" />
-                    {language === 'uz' ? 'Yangi' : language === 'ru' ? 'Новый' : 'New'}
+                    {t('main_badge_new')}
                   </span>
                 )}
                 {product.reviews >= 150 && (
                   <span className="flex items-center gap-1 px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
                     <Flame className="w-3 h-3" />
-                    {language === 'uz' ? 'Trend' : language === 'ru' ? 'Тренд' : 'Hot'}
+                    {t('main_badge_hot')}
                   </span>
                 )}
                 {discountPercent > 0 && (
@@ -108,7 +135,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                 <HardDrive className="w-5 h-5 text-indigo-400 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500">
-                    {language === 'uz' ? 'Fayl hajmi' : language === 'ru' ? 'Размер файла' : 'File Size'}
+                    {t('prod_file_size')}
                   </p>
                   <p className="text-sm font-semibold text-white">{product.fileSize}</p>
                 </div>
@@ -117,7 +144,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                 <FileType className="w-5 h-5 text-purple-400 flex-shrink-0" />
                 <div>
                   <p className="text-xs text-slate-500">
-                    {language === 'uz' ? 'Fayl turi' : language === 'ru' ? 'Тип файла' : 'File Type'}
+                    {t('prod_format')}
                   </p>
                   <p className="text-sm font-semibold text-white">{product.fileType}</p>
                 </div>
@@ -146,14 +173,14 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                   {product.author.charAt(0)}
                 </div>
                 <span className="text-sm text-slate-400">
-                  {language === 'uz' ? 'Sotuvchi' : language === 'ru' ? 'Продавец' : 'Seller'}:{' '}
+                  {t('main_seller')}:{' '}
                   <span className="text-slate-200 font-medium">{product.author}</span>
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 <span className="text-sm font-bold text-white">{product.rating}</span>
-                <span className="text-xs text-slate-500">({product.reviews} {language === 'uz' ? 'sharh' : language === 'ru' ? 'отзывов' : 'reviews'})</span>
+                <span className="text-xs text-slate-500">({product.reviews} {t('prod_reviews_count')})</span>
               </div>
             </div>
 
@@ -163,7 +190,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
             {/* Features */}
             <div className="space-y-2">
               <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">
-                {language === 'uz' ? 'Xususiyatlar' : language === 'ru' ? 'Характеристики' : 'Features'}
+                {t('prod_features')}
               </h3>
               <ul className="space-y-2">
                 {product.features.map((feature, idx) => (
@@ -187,7 +214,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                       {formatPrice(product.originalPrice, currency, exchangeRate)}
                     </span>
                     <span className="text-xs text-red-400 font-semibold">
-                      -{discountPercent}% {language === 'uz' ? 'chegirma' : language === 'ru' ? 'скидка' : 'off'}
+                      -{discountPercent}% {t('prod_discount_off')}
                     </span>
                   </div>
                 )}
@@ -205,12 +232,12 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
                   {added ? (
                     <>
                       <CheckCircle2 className="w-5 h-5" />
-                      {language === 'uz' ? 'Qo\'shildi!' : language === 'ru' ? 'Добавлено!' : 'Added!'}
+                      {t('prod_added')}
                     </>
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5" />
-                      {language === 'uz' ? 'Savatchaga qo\'shish' : language === 'ru' ? 'В корзину' : 'Add to Cart'}
+                      {t('prod_add_to_cart')}
                     </>
                   )}
                 </button>
@@ -218,11 +245,7 @@ export default function ProductDetailPage({ product }: ProductDetailPageProps) {
 
               <p className="text-center text-xs text-slate-500 mt-4 flex items-center justify-center gap-1.5">
                 <Download className="w-3.5 h-3.5" />
-                {language === 'uz'
-                  ? "To'lovdan so'ng darhol yuklash"
-                  : language === 'ru'
-                  ? 'Мгновенная загрузка после оплаты'
-                  : 'Instant download after payment'}
+                {t('prod_instant_download')}
               </p>
             </div>
           </div>

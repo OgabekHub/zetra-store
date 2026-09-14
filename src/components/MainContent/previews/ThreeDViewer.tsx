@@ -1,11 +1,35 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Layers, Rotate3d, Maximize2, Minimize2, ZoomIn, ZoomOut } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Layers, Rotate3d, ZoomIn, ZoomOut } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 type ShapeType = 'knot' | 'torus' | 'tesseract';
 type ColorTheme = 'cyan' | 'indigo' | 'green' | 'pink';
+
+/** 3D karkas uchun geometriya tiplari. Avval bularning hammasi `any` edi. */
+interface Vec3 {
+  x: number;
+  y: number;
+  z: number;
+  /** Faqat tesserakt (4D) uchun: to'rtinchi o'lcham. */
+  w?: number;
+}
+
+/** Ikkita uchni bog'laydigan qirra: [boshlanish indeksi, tugash indeksi]. */
+type Edge = [number, number];
+
+/** Ekranga proyeksiya qilingan nuqta. */
+interface Point2D {
+  x: number;
+  y: number;
+  depth: number;
+}
+
+interface ShapeData {
+  vertices: Vec3[];
+  edges: Edge[];
+}
 
 export const ThreeDViewer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,7 +38,7 @@ export const ThreeDViewer: React.FC = () => {
   const [shape, setShape] = useState<ShapeType>('knot');
   const [theme, setTheme] = useState<ColorTheme>('cyan');
   const [zoom, setZoom] = useState(1.0);
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   // Rotation angles
   const angleX = useRef(0.5);
@@ -25,10 +49,10 @@ export const ThreeDViewer: React.FC = () => {
   const prevMouseY = useRef(0);
 
   // Generate math data dynamically
-  const getShapeData = () => {
+  const getShapeData = useCallback((): ShapeData => {
     if (shape === 'knot') {
       // Torus Knot (p=2, q=3)
-      const vertices = [];
+      const vertices: Vec3[] = [];
       const numPoints = 120;
       for (let i = 0; i < numPoints; i++) {
         const phi = (i / numPoints) * 2 * Math.PI;
@@ -39,15 +63,15 @@ export const ThreeDViewer: React.FC = () => {
         vertices.push({ x, y, z });
       }
       
-      const edges = [];
+      const edges: Edge[] = [];
       for (let i = 0; i < numPoints; i++) {
         edges.push([i, (i + 1) % numPoints]);
       }
       return { vertices, edges };
     } else if (shape === 'torus') {
       // 3D Torus Grid
-      const vertices = [];
-      const edges = [];
+      const vertices: Vec3[] = [];
+      const edges: Edge[] = [];
       const segmentsU = 16;
       const segmentsV = 12;
       const R = 0.75;
@@ -78,7 +102,7 @@ export const ThreeDViewer: React.FC = () => {
       return { vertices, edges };
     } else {
       // 4D Tesseract (Hypercube)
-      const vertices = [];
+      const vertices: Vec3[] = [];
       for (let i = 0; i < 16; i++) {
         vertices.push({
           x: (i & 1 ? 1 : -1) * 0.55,
@@ -88,7 +112,7 @@ export const ThreeDViewer: React.FC = () => {
         });
       }
       
-      const edges = [];
+      const edges: Edge[] = [];
       for (let i = 0; i < 16; i++) {
         for (let j = i + 1; j < 16; j++) {
           const diff = i ^ j;
@@ -99,7 +123,7 @@ export const ThreeDViewer: React.FC = () => {
       }
       return { vertices, edges };
     }
-  };
+  }, [shape]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -144,14 +168,14 @@ export const ThreeDViewer: React.FC = () => {
       }
 
       // Project vertices
-      const projected = shapeData.vertices.map((v: any) => {
+      const projected = shapeData.vertices.map((v: Vec3) => {
         let x = v.x;
         let y = v.y;
         let z = v.z;
 
         // If Tesseract (4D), perform 4D rotation first, then project to 3D
         if ('w' in v) {
-          const w = v.w;
+          const w = v.w ?? 0;
           const cosW = Math.cos(angleW.current);
           const sinW = Math.sin(angleW.current);
           
@@ -219,7 +243,7 @@ export const ThreeDViewer: React.FC = () => {
       ctx.lineWidth = wireframe ? (shape === 'knot' ? 2.5 : 1.8) : 1.0;
       ctx.lineJoin = 'round';
 
-      shapeData.edges.forEach((e: any) => {
+      shapeData.edges.forEach((e: Edge) => {
         ctx.beginPath();
         ctx.moveTo(projected[e[0]].x, projected[e[0]].y);
         ctx.lineTo(projected[e[1]].x, projected[e[1]].y);
@@ -228,7 +252,7 @@ export const ThreeDViewer: React.FC = () => {
 
       // Draw nodes
       ctx.fillStyle = nodeColor;
-      projected.forEach((p: any) => {
+      projected.forEach((p: Point2D) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, shape === 'knot' ? 2.5 : 3.5, 0, Math.PI * 2);
         ctx.fill();
@@ -246,7 +270,7 @@ export const ThreeDViewer: React.FC = () => {
     render();
 
     return () => cancelAnimationFrame(animationId);
-  }, [wireframe, isRotating, shape, theme, zoom]);
+  }, [wireframe, isRotating, shape, theme, zoom, getShapeData]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     isDragging.current = true;
@@ -284,9 +308,9 @@ export const ThreeDViewer: React.FC = () => {
           onChange={(e) => setShape(e.target.value as ShapeType)}
           className="bg-slate-900 border border-slate-800 text-slate-200 light:bg-white light:border-slate-250 light:text-slate-800 px-2.5 py-1 rounded-lg text-xs font-bold focus:outline-none cursor-pointer"
         >
-          <option value="knot">{language === 'uz' ? 'Tugun' : language === 'ru' ? 'Узел' : 'Torus Knot'}</option>
-          <option value="torus">{language === 'uz' ? 'Torus (Donut)' : language === 'ru' ? 'Тор (Бублик)' : 'Torus Grid'}</option>
-          <option value="tesseract">{language === 'uz' ? 'Tesserakt (4D)' : language === 'ru' ? 'Тессеракт (4D)' : 'Tesseract (4D)'}</option>
+          <option value="knot">{t('preview_torus_knot')}</option>
+          <option value="torus">{t('preview_torus_grid')}</option>
+          <option value="tesseract">{t('preview_tesseract_4d')}</option>
         </select>
 
         {/* Zoom Controls */}
@@ -330,7 +354,7 @@ export const ThreeDViewer: React.FC = () => {
             className={`p-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
               wireframe ? 'bg-indigo-650 border-indigo-550 text-white' : 'bg-slate-900 border-slate-800 light:bg-white light:border-slate-250 text-slate-400 light:text-slate-600 hover:text-slate-200'
             }`}
-            title={language === 'uz' ? 'Simli rejim' : language === 'ru' ? 'Каркасный режим' : 'Wireframe Mode'}
+            title={t('preview_wireframe_mode')}
           >
             <Layers className="w-4 h-4" />
           </button>
@@ -340,7 +364,7 @@ export const ThreeDViewer: React.FC = () => {
             className={`p-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
               isRotating ? 'bg-indigo-650 border-indigo-550 text-white' : 'bg-slate-900 border-slate-800 light:bg-white light:border-slate-250 text-slate-400 light:text-slate-600 hover:text-slate-200'
             }`}
-            title={language === 'uz' ? 'Avto aylantirish' : language === 'ru' ? 'Вращение' : 'Auto Rotate'}
+            title={t('preview_auto_rotate')}
           >
             <Rotate3d className="w-4 h-4" />
           </button>

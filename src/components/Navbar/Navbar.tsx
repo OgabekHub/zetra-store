@@ -1,32 +1,36 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Search, Menu, User, X, LogOut, Languages, Sun, Moon, Home, Compass } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo, useId } from 'react';
+import { ShoppingCart, Search, Menu, User, LogOut, Languages, Sun, Moon, Home, Compass } from 'lucide-react';
 import Image from 'next/image';
 import zetraLogoDark from '../../assets/images/zetra-logo-dark.png';
 import zetraLogoLight from '../../assets/images/zetra-logo-light.png';
-import { CartItem, UserProfile } from '@/types';
-import { Product } from '@/data/products';
-import { formatPrice } from '@/utils/price';
+import type { CartItem, UserProfile, Product, Currency } from '@/types';
+import { formatPrice, formatExchangeRate } from '@/utils/price';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
+import type { Language } from '@/context/LanguageContext';
+
+/** Til tanlash variantlari: olti marta takrorlangan tugma bloklari o'rniga bitta ro'yxat. */
+const LANGUAGE_OPTIONS: readonly { code: Language; nativeName: string; flag: string; toastKey: string }[] = [
+  { code: 'uz', nativeName: "O'zbekcha", flag: '🇺🇿', toastKey: 'lang_switched_uz' },
+  { code: 'ru', nativeName: 'Русский', flag: '🇷🇺', toastKey: 'lang_switched_ru' },
+  { code: 'en', nativeName: 'English', flag: '🇺🇸', toastKey: 'lang_switched_en' },
+];
 
 
 interface NavbarProps {
   cartItems: CartItem[];
-  isCartOpen: boolean;
   setIsCartOpen: (isOpen: boolean) => void;
-  onUpdateQuantity: (id: number, quantity: number) => void;
-  onRemoveItem: (id: number) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   currentUser: UserProfile | null;
   onLogout: () => void;
   onOpenAuth: () => void;
   onOpenProductModal: (product: Product) => void;
-  currency: 'USD' | 'UZS';
-  setCurrency: (currency: 'USD' | 'UZS') => void;
+  currency: Currency;
+  setCurrency: (currency: Currency) => void;
   exchangeRate: number;
   products: Product[];
   onOpenSeller: () => void;
@@ -36,10 +40,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ 
   cartItems = [], 
-  isCartOpen, 
   setIsCartOpen, 
-  onUpdateQuantity, 
-  onRemoveItem, 
   searchQuery, 
   setSearchQuery,
   currentUser,
@@ -65,7 +66,6 @@ const Navbar: React.FC<NavbarProps> = ({
   const searchRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Click outside handler
   useEffect(() => {
@@ -96,6 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
         setShowSuggestions(false);
         setIsUserDropdownOpen(false);
       }
@@ -117,20 +118,50 @@ const Navbar: React.FC<NavbarProps> = ({
   };
 
   // Filter suggestions
-  const getSuggestions = (query: string) => {
-    if (!query.trim()) return [];
-    return products.filter((product) =>
-      product.title.toLowerCase().includes(query.toLowerCase()) ||
-      product.category.toLowerCase().includes(query.toLowerCase()) ||
-      product.description.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 5);
-  };
+  // Bitta predikat, ikkita natija.
+  //
+  // Avval takliflar ro'yxati `description` bo'yicha ham qidirardi,
+  // "Barcha mahsulotlar (N)" tugmasidagi son esa qidirmasdi — tugma "(3)"
+  // deb turar, jadval esa 7 ta natija ko'rsatardi.
+  const matches = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    return products.filter(
+      (product) =>
+        product.title.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query),
+    );
+  }, [products, searchQuery]);
 
-  const suggestions = getSuggestions(searchQuery);
-  const totalMatches = products.filter((product) =>
-    product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  ).length;
+  const suggestions = useMemo(() => matches.slice(0, 5), [matches]);
+  const totalMatches = matches.length;
+
+  // Qidiruv WAI-ARIA combobox naqshida: fokus maydonda qoladi, strelkalar
+  // faol taklifni almashtiradi, Enter uni ochadi. Avval takliflarga faqat
+  // sichqoncha bilan yetib borish mumkin edi.
+  const searchId = useId();
+  const listboxId = `${searchId}-listbox`;
+  const optionId = (productId: number) => `${searchId}-option-${productId}`;
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const suggestionsVisible = showSuggestions && searchQuery.trim() !== '' && suggestions.length > 0;
+  const activeProduct = activeSuggestion >= 0 ? suggestions[activeSuggestion] : undefined;
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!suggestionsVisible) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestion((index) => (index + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestion((index) => (index <= 0 ? suggestions.length - 1 : index - 1));
+    } else if (e.key === 'Enter' && activeProduct) {
+      e.preventDefault();
+      onOpenProductModal(activeProduct);
+      setShowSuggestions(false);
+      setActiveSuggestion(-1);
+    }
+  };
 
   return (
     <>
@@ -139,7 +170,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
-          <div 
+          <button type="button" aria-label={t('nav_home')} 
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' });
               setSearchQuery('');
@@ -148,11 +179,12 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             <Image 
               src={zetraLogo} 
-              alt="Zetra Logo" 
+              alt="Zetra Logo"
               className="h-9 md:h-12 w-auto object-contain transition-all"
-              priority
+              sizes="(max-width: 768px) 96px, 128px"
+              fetchPriority="high"
             />
-          </div>
+          </button>
 
           {/* Search Bar - Always Visible */}
           <div ref={searchRef} className="flex flex-1 max-w-2xl ml-3 md:mx-8 relative">
@@ -163,9 +195,18 @@ const Navbar: React.FC<NavbarProps> = ({
               <input
                 type="text"
                 value={searchQuery}
+                role="combobox"
+                aria-label={t('search')}
+                aria-autocomplete="list"
+                aria-expanded={suggestionsVisible}
+                aria-controls={listboxId}
+                aria-activedescendant={activeProduct ? optionId(activeProduct.id) : undefined}
+                autoComplete="off"
+                onKeyDown={handleSearchKeyDown}
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
+                  setActiveSuggestion(-1);
                   setShowSuggestions(true);
                 }}
                 className="block w-full pl-9 md:pl-10 pr-3 py-2 md:py-2.5 border border-slate-700 light:border-slate-250 rounded-xl md:rounded-2xl leading-5 bg-slate-800/50 light:bg-slate-100/70 text-slate-200 light:text-slate-800 placeholder-slate-400 light:placeholder-slate-550 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-xs sm:text-sm transition-all duration-300 focus:bg-slate-800 light:focus:bg-white"
@@ -181,17 +222,17 @@ const Navbar: React.FC<NavbarProps> = ({
                     <div className="px-4 py-1.5 text-[10px] font-bold text-slate-500 light:text-slate-400 uppercase tracking-wider">
                       {t('pay_items_purchased')}
                     </div>
-                    <div className="max-h-[320px] overflow-y-auto">
-                      {suggestions.map((product) => (
-                        <div
+                    <div className="max-h-[320px] overflow-y-auto" role="listbox" id={listboxId} aria-label={t('search')}>
+                      {suggestions.map((product, index) => (
+                        <button type="button" role="option" id={optionId(product.id)} aria-selected={index === activeSuggestion} tabIndex={-1} onMouseEnter={() => setActiveSuggestion(index)}
                           key={product.id}
                           onClick={() => {
                             onOpenProductModal(product);
                             setShowSuggestions(false);
                           }}
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/60 light:hover:bg-slate-50 cursor-pointer transition-colors group"
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800/60 light:hover:bg-slate-50 cursor-pointer transition-colors group w-full text-left"
                         >
-                          <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800 border border-slate-700/50 light:border-slate-200">
+                          <span className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-slate-800 border border-slate-700/50 light:border-slate-200">
                             <Image
                               src={product.image}
                               alt={product.title}
@@ -199,19 +240,19 @@ const Navbar: React.FC<NavbarProps> = ({
                               sizes="40px"
                               className="object-cover"
                             />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-semibold text-slate-200 light:text-slate-800 truncate group-hover:text-indigo-400 light:group-hover:text-indigo-650 transition-colors">
+                          </span>
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-sm font-semibold text-slate-200 light:text-slate-800 truncate group-hover:text-indigo-400 light:group-hover:text-indigo-650 transition-colors">
                               {product.title}
-                            </h4>
-                            <p className="text-xs text-slate-455 light:text-slate-500 truncate mt-0.5">
+                            </span>
+                            <span className="block text-xs text-slate-455 light:text-slate-500 truncate mt-0.5">
                               {product.category}
-                            </p>
-                          </div>
-                          <div className="text-sm font-bold text-white light:text-slate-900 flex-shrink-0">
+                            </span>
+                          </span>
+                          <span className="text-sm font-bold text-white light:text-slate-900 flex-shrink-0">
                             {formatPrice(product.price, currency, exchangeRate)}
-                          </div>
-                        </div>
+                          </span>
+                        </button>
                       ))}
                     </div>
                     <div className="border-t border-slate-800/80 light:border-slate-100 mt-1 px-3 py-2">
@@ -251,7 +292,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <button 
                 onClick={() => {
                   setCurrency('USD');
-                  toast('Valyuta: AQSH Dollari', { icon: '💵' });
+                  toast(t('currency_switched_usd'), { icon: '💵' });
                 }}
                 className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   currency === 'USD' 
@@ -264,7 +305,7 @@ const Navbar: React.FC<NavbarProps> = ({
               <button 
                 onClick={() => {
                   setCurrency('UZS');
-                  toast(`Valyuta: O'zbek So'mi (Jonli kurs: 1$ = ${exchangeRate.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm)`, { icon: '🇺🇿', duration: 3000 });
+                  toast(`${t('currency_switched_uzs')} (1$ = ${formatExchangeRate(exchangeRate)} so'm)`, { icon: '🇺🇿', duration: 3000 });
                 }}
                 className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all cursor-pointer ${
                   currency === 'UZS' 
@@ -279,6 +320,10 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* Language Switcher */}
             <div className="relative hidden md:block" ref={langDropdownRef}>
               <button
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={isLangOpen}
+                aria-label={t('nav_select_language')}
                 onClick={() => setIsLangOpen(!isLangOpen)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-200 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-700 light:hover:text-slate-900 transition-colors duration-200 text-[10px] font-bold cursor-pointer shadow-sm"
               >
@@ -289,65 +334,36 @@ const Navbar: React.FC<NavbarProps> = ({
               {isLangOpen && (
                 <div className="absolute right-0 mt-2.5 w-36 bg-slate-900/95 light:bg-white/95 backdrop-blur-xl border border-slate-800 light:border-slate-200/80 rounded-2xl shadow-2xl p-1.5 z-50 animate-fade-in">
                   <div className="px-2.5 py-1 text-[8px] font-bold text-slate-500 light:text-slate-450 uppercase tracking-wider select-none border-b border-slate-800/50 light:border-slate-100 mb-1">
-                    {language === 'uz' ? 'Tilni tanlang' : language === 'ru' ? 'Выбор языка' : 'Select Language'}
+                    {t('nav_select_language')}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLanguage('uz');
-                      setIsLangOpen(false);
-                      toast("Til o'zgartirildi: O'zbekcha", { icon: '🇺🇿' });
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      language === 'uz' 
-                        ? 'text-[#00F2C2] bg-[#00F2C2]/10 light:text-indigo-650 light:bg-indigo-50/80' 
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/50 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">🇺🇿</span>
-                      <span>O'zbekcha</span>
-                    </div>
-                    {language === 'uz' && <span className="w-1.5 h-1.5 rounded-full bg-[#00F2C2] light:bg-indigo-600 animate-pulse" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLanguage('ru');
-                      setIsLangOpen(false);
-                      toast("Язык изменен: Русский", { icon: '🇷🇺' });
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      language === 'ru' 
-                        ? 'text-[#00F2C2] bg-[#00F2C2]/10 light:text-indigo-650 light:bg-indigo-50/80' 
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/50 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">🇷🇺</span>
-                      <span>Русский</span>
-                    </div>
-                    {language === 'ru' && <span className="w-1.5 h-1.5 rounded-full bg-[#00F2C2] light:bg-indigo-600 animate-pulse" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLanguage('en');
-                      setIsLangOpen(false);
-                      toast("Language updated: English", { icon: '🇺🇸' });
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      language === 'en' 
-                        ? 'text-[#00F2C2] bg-[#00F2C2]/10 light:text-indigo-650 light:bg-indigo-50/80' 
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/50 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">🇺🇸</span>
-                      <span>English</span>
-                    </div>
-                    {language === 'en' && <span className="w-1.5 h-1.5 rounded-full bg-[#00F2C2] light:bg-indigo-600 animate-pulse" />}
-                  </button>
+                  {LANGUAGE_OPTIONS.map((option) => {
+                    const selected = option.code === language;
+                    return (
+                      <button
+                        key={option.code}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => {
+                          setLanguage(option.code);
+                          setIsLangOpen(false);
+                          toast(t(option.toastKey), { icon: option.flag });
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                          selected
+                            ? 'text-[#00F2C2] bg-[#00F2C2]/10 light:text-indigo-650 light:bg-indigo-50/80'
+                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50 light:text-slate-600 light:hover:text-slate-900 light:hover:bg-slate-100'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-sm" aria-hidden="true">{option.flag}</span>
+                          <span lang={option.code}>{option.nativeName}</span>
+                        </span>
+                        {selected && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#00F2C2] light:bg-indigo-600 animate-pulse" aria-hidden="true" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -356,7 +372,7 @@ const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={toggleTheme}
               className="hidden md:flex p-2 bg-slate-800/80 hover:bg-slate-800 light:bg-slate-100 light:hover:bg-slate-200 border border-slate-700/50 light:border-slate-250 rounded-xl text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 transition-all cursor-pointer active:scale-95 shadow-md items-center justify-center"
-              aria-label="Mavzuni o'zgartirish"
+              aria-label={t('a11y_toggle_theme')}
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
@@ -451,15 +467,6 @@ const Navbar: React.FC<NavbarProps> = ({
                 {t('nav_login')}
               </button>
             )}
-
-            {/* Mobile Menu Button */}
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Menyu"
-              className="hidden text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900 p-2 cursor-pointer"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
       </div>
@@ -467,13 +474,22 @@ const Navbar: React.FC<NavbarProps> = ({
 
     {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden animate-fade-in"
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden animate-fade-in cursor-default"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       <div
+        // Yopiq panel ekrandan tashqariga surilgan, lekin DOM da qoladi. `inert`
+        // busiz klaviatura foydalanuvchisi ko'rinmaydigan tugmalarga Tab bilan kirardi.
+        inert={!isMobileMenuOpen}
+        role="dialog"
+        aria-modal={isMobileMenuOpen}
+        aria-label={t('a11y_menu')}
         className={`fixed inset-x-0 bottom-0 z-50 md:hidden flex flex-col bg-slate-900 light:bg-white border-t border-slate-800 light:border-slate-200 rounded-t-3xl shadow-2xl transition-all duration-300 transform ${
           isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
@@ -483,9 +499,9 @@ const Navbar: React.FC<NavbarProps> = ({
         }}
       >
         {/* Drag Handle */}
-        <div className="w-full flex justify-center py-3.5 border-b border-slate-800/60 light:border-slate-100/80 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="w-12 h-1.5 bg-slate-700 light:bg-slate-300 rounded-full" />
-        </div>
+        <button type="button" aria-label={t('close')} className="w-full flex justify-center py-3.5 border-b border-slate-800/60 light:border-slate-100/80 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+          <span className="block w-12 h-1.5 bg-slate-700 light:bg-slate-300 rounded-full" aria-hidden="true" />
+        </button>
 
         {/* Scrollable Content */}
         <div className="overflow-y-auto px-4 py-4 space-y-4">
@@ -510,7 +526,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={() => {
                     setCurrency('USD');
-                    toast('Valyuta: AQSH Dollari', { icon: '💵' });
+                    toast(t('currency_switched_usd'), { icon: '💵' });
                   }}
                   className={`px-3 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                     currency === 'USD' 
@@ -523,7 +539,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button 
                   onClick={() => {
                     setCurrency('UZS');
-                    toast(`Valyuta: O'zbek So'mi (Jonli kurs: 1$ = ${exchangeRate.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm)`, { icon: '🇺🇿', duration: 3000 });
+                    toast(`${t('currency_switched_uzs')} (1$ = ${formatExchangeRate(exchangeRate)} so'm)`, { icon: '🇺🇿', duration: 3000 });
                   }}
                   className={`px-3 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                     currency === 'UZS' 
@@ -540,39 +556,28 @@ const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center justify-between px-2 py-2 border-t border-slate-800/60 light:border-slate-100">
               <span className="text-sm text-slate-400 font-medium light:text-slate-600">{t('nav_language')}</span>
               <div className="flex bg-slate-800/85 light:bg-slate-100 p-0.5 rounded-lg border border-slate-700/55 light:border-slate-200">
-                <button 
-                  onClick={() => {
-                    setLanguage('uz');
-                    toast("Til o'zgartirildi: O'zbekcha", { icon: '🇺🇿' });
-                  }}
-                  className={`px-2.5 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    language === 'uz' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
-                  }`}
-                >
-                  UZ
-                </button>
-                <button 
-                  onClick={() => {
-                    setLanguage('ru');
-                    toast("Язык изменен: Русский", { icon: '🇷🇺' });
-                  }}
-                  className={`px-2.5 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    language === 'ru' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
-                  }`}
-                >
-                  RU
-                </button>
-                <button 
-                  onClick={() => {
-                    setLanguage('en');
-                    toast("Language updated: English", { icon: '🇺🇸' });
-                  }}
-                  className={`px-2.5 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    language === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
-                  }`}
-                >
-                  EN
-                </button>
+                {LANGUAGE_OPTIONS.map((option) => {
+                  const selected = option.code === language;
+                  return (
+                    <button
+                      key={option.code}
+                      type="button"
+                      aria-pressed={selected}
+                      aria-label={option.nativeName}
+                      onClick={() => {
+                        setLanguage(option.code);
+                        toast(t(option.toastKey), { icon: option.flag });
+                      }}
+                      className={`px-2.5 py-0.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                        selected
+                          ? 'bg-indigo-600 text-white'
+                          : 'text-slate-400 hover:text-slate-205 light:text-slate-500 light:hover:text-slate-800'
+                      }`}
+                    >
+                      {option.code.toUpperCase()}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

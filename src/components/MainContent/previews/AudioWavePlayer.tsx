@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, SkipForward, SkipBack, Music } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -11,7 +11,7 @@ interface Track {
 }
 
 export const AudioWavePlayer: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
@@ -32,17 +32,24 @@ export const AudioWavePlayer: React.FC = () => {
 
   const currentTrack = playlist[currentTrackIndex];
 
-  // Static waveform heights (procedural profile of the song)
+  // To'lqin balandliklari.
+  //
+  // Avval ular render paytida `useRef` ga `Math.random()` bilan yozilardi —
+  // React 19 buni xato deb belgilaydi (render sof bo'lishi kerak), va u
+  // server bilan klient turli natija berishiga ham olib kelardi. Endi
+  // deterministik: bir xil trek har doim bir xil to'lqin beradi.
   const barCount = 50;
-  const waveformHeights = useRef<number[]>([]);
-  if (waveformHeights.current.length === 0) {
+  const waveformHeights = useMemo(() => {
+    const heights: number[] = [];
     for (let i = 0; i < barCount; i++) {
-      // Create a nice distribution (higher in middle, lower at ends, with noise)
       const distFromEnd = Math.sin((i / barCount) * Math.PI);
-      const height = 10 + 35 * distFromEnd + Math.random() * 15;
-      waveformHeights.current.push(height);
+      // Tasodifiy shovqin o'rniga takrorlanadigan, lekin notekis funksiya.
+      const noise = (Math.sin(i * 12.9898) * 43758.5453) % 1;
+      const height = 10 + 35 * distFromEnd + Math.abs(noise) * 15;
+      heights.push(height);
     }
-  }
+    return heights;
+  }, []);
 
   // Format seconds to MM:SS
   const formatTime = (secs: number) => {
@@ -97,15 +104,15 @@ export const AudioWavePlayer: React.FC = () => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    const isLight = document.documentElement.classList.contains('light');
     const width = canvas.width;
     const height = canvas.height;
     const barWidth = width / barCount - 2;
     const currentProgressIndex = (currentTime / currentTrack.duration) * barCount;
+    const isLight = document.documentElement.classList.contains('light');
 
     for (let i = 0; i < barCount; i++) {
       const x = i * (barWidth + 2);
-      const h = waveformHeights.current[i];
+      const h = waveformHeights[i];
       const y = (height - h) / 2;
 
       // Draw bar with proper coloring based on progress
@@ -125,7 +132,7 @@ export const AudioWavePlayer: React.FC = () => {
       ctx.roundRect(x, y, barWidth, h, 2);
       ctx.fill();
     }
-  }, [currentTime, currentTrack.duration, barCount]);
+  }, [currentTime, currentTrack.duration, barCount, waveformHeights]);
 
   // Bouncing frequency visualizer animation
   useEffect(() => {
@@ -141,7 +148,6 @@ export const AudioWavePlayer: React.FC = () => {
     const animateVisualizer = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const isLight = document.documentElement.classList.contains('light');
       const w = canvas.width;
       const h = canvas.height;
       const bWidth = w / count - 3;

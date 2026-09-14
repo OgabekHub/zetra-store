@@ -8,6 +8,7 @@
   --color-brand-dark-soft: #0e1624;
 
   /* Map Tailwind's Indigo to Zetra's brand colors for seamless integration */
+  --color-indigo-150: #a3fced;
   --color-indigo-250: #66fae0;
   --color-indigo-400: #00F2C2;
   --color-indigo-500: #00d9ae;
@@ -24,6 +25,7 @@
   --color-slate-105: #e8eef6;
   --color-slate-150: #e2e8f0;
   --color-slate-202: #cbd5e1;
+  --color-slate-205: #dce4ee;
   --color-slate-250: #c5d1e0;
   --color-slate-350: #94a3b8;
   --color-slate-450: #64748b;
@@ -31,6 +33,7 @@
   --color-slate-505: #55657a;
   --color-slate-550: #475569;
   --color-slate-555: #475569;
+  --color-slate-605: #3d4b5e;
   --color-slate-650: #334155;
   --color-slate-655: #334155;
   --color-slate-750: #1e293b;
@@ -39,17 +42,78 @@
   --color-slate-855: #0b0f18;
   --color-slate-900: #090e17;
   --color-slate-950: #05080c;
+  --color-slate-955: #04070d;
 
   /* Map intermediate Emerald & Red colors */
   --color-emerald-450: #10b981;
   --color-emerald-455: #10b981;
   --color-red-650: #dc2626;
   --color-red-655: #dc2626;
+  --color-red-750: #b91c1c;
+
+  /* Blue accents used by the payment method badges */
+  --color-blue-450: #4d94f8;
+
+  /* Uzum Pay brand purple. These were used across PaymentModal but never
+     defined, so the primary "Pay with Uzum" CTA rendered with no background. */
+  --color-purple-405: #c084fc;
+  --color-purple-450: #b45cf9;
+  --color-purple-505: #a855f7;
+  --color-purple-650: #7e22ce;
+  --color-purple-750: #6b21a8;
+
+  /* `xs:` was used in 4 places but never defined, so `hidden xs:inline`
+     collapsed to a permanent `hidden` at every viewport width. */
+  --breakpoint-xs: 22.5rem;
+
+  /* `animate-fade-in` is used 27 times and `animate-scale-up` twice, but no
+     keyframes existed — every modal open animation was inert markup.
+     Keyframes belong inside `@theme` so Tailwind can tree-shake them with
+     their `--animate-*` token, which is how it ships spin/pulse/bounce. */
+  --animate-fade-in: fade-in 0.2s ease-out both;
+  --animate-scale-up: scale-up 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-in: fade-in 0.2s ease-out both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-up {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* `--font-sans` must live in `@theme inline`. In a plain `@theme` block
+   Tailwind resolves `var(--font-inter)` at build time, finds it undefined and
+   drops it — which is why next/font's Inter was downloaded and preloaded on
+   every route while the page rendered in the system font. */
+@theme inline {
+  --font-sans: var(--font-inter);
 }
 
 @custom-variant light {
   &:is(.light, .light *) {
     @slot;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-scale-up,
+  .animate-in {
+    animation: none;
   }
 }
 
@@ -78,4 +142,3 @@ body.modal-open {
     padding-right: var(--scrollbar-w, 0px);
   }
 }
-

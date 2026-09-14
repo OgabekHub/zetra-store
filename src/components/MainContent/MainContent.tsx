@@ -8,13 +8,14 @@ import { formatPrice } from '@/utils/price';
 import { useLanguage } from '@/context/LanguageContext';
 import { getCategoryLabel } from '@/utils/categories';
 
+import type { Currency } from '@/types';
 interface MainContentProps {
   onAddToCart: (product: Product) => void;
   searchQuery: string;
   selectedCategory: string | null;
   onClearFilters: () => void;
   onOpenProductModal: (product: Product) => void;
-  currency: 'USD' | 'UZS';
+  currency: Currency;
   exchangeRate: number;
   isLoading: boolean;
   products: Product[];
@@ -32,7 +33,7 @@ const MainContent: React.FC<MainContentProps> = ({
   products
 }) => {
   const [sortBy, setSortBy] = useState<'newest' | 'popular'>('newest');
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
 
   const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
@@ -144,42 +145,55 @@ const MainContent: React.FC<MainContentProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {sortedProducts.map((product) => (
+            {sortedProducts.map((product, index) => (
               <div key={product.id} className="bg-slate-800 light:bg-white rounded-2xl overflow-hidden border border-slate-700/50 light:border-slate-200 hover:border-indigo-500/50 light:hover:border-indigo-500/30 transition-all duration-300 group hover:shadow-2xl hover:shadow-indigo-500/10 light:hover:shadow-slate-250/80 flex flex-col justify-between h-full">
                 {/* Product Image */}
-                <div 
-                  className="relative h-48 overflow-hidden cursor-pointer flex-shrink-0"
-                  onClick={() => openProductModal(product)}
-                >
-                  <Image 
-                    src={product.image} 
-                    alt={product.title} 
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm">
-                    <button 
+                <div className="relative h-48 overflow-hidden flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openProductModal(product)}
+                    aria-label={product.title}
+                    className="absolute inset-0 w-full h-full cursor-pointer"
+                  >
+                    <Image
+                      src={product.image}
+                      alt={product.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      // Avval 16 ta jadval rasmining hammasi lazy edi, birinchi karta esa
+                      // LCP elementi. `preload` bu yerda noto'g'ri bo'lardi: LCP qaysi
+                      // rasm ekani ko'rinish kengligiga bog'liq.
+                      loading={index < 4 ? 'eager' : 'lazy'}
+                      fetchPriority={index === 0 ? 'high' : 'auto'}
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </button>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-sm pointer-events-none">
+                    <button
+                      type="button"
+                      aria-label={t('a11y_quick_view')}
                       onClick={(e) => {
                         e.stopPropagation();
                         openProductModal(product);
                       }}
-                      className="w-10 h-10 bg-white text-slate-900 rounded-full flex items-center justify-center hover:bg-indigo-50 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300"
+                      className="w-10 h-10 bg-white text-slate-900 rounded-full flex items-center justify-center hover:bg-indigo-50 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 group-focus-within:translate-y-0 pointer-events-auto cursor-pointer"
                     >
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5" aria-hidden="true" />
                     </button>
-                    <button 
+                    <button
+                      type="button"
+                      aria-label={t('prod_add_to_cart')}
                       onClick={(e) => {
                         e.stopPropagation();
                         onAddToCart(product);
                       }}
-                      className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                      className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75 group-focus-within:translate-y-0 pointer-events-auto cursor-pointer"
                     >
-                      <ShoppingCart className="w-5 h-5" />
+                      <ShoppingCart className="w-5 h-5" aria-hidden="true" />
                     </button>
                   </div>
                   {/* Badges: Yangi / Ommabop */}
-                  <div className="absolute top-3 right-3 flex flex-col gap-1.5">
+                  <div className="absolute top-3 right-3 flex flex-col gap-1.5 pointer-events-none">
                     {product.isNew && (
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded-full shadow-lg">
                         <Sparkles className="w-2.5 h-2.5" />
@@ -193,7 +207,7 @@ const MainContent: React.FC<MainContentProps> = ({
                       </span>
                     )}
                   </div>
-                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white">
+                  <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 text-xs font-medium text-white pointer-events-none">
                     {getCategoryDisplayName(product.category)}
                   </div>
                 </div>
@@ -201,14 +215,17 @@ const MainContent: React.FC<MainContentProps> = ({
                 {/* Product Details */}
                 <div className="p-5 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 
-                      onClick={() => openProductModal(product)}
-                      className="text-lg font-semibold text-white light:text-slate-900 line-clamp-2 leading-tight group-hover:text-indigo-400 light:group-hover:text-indigo-650 transition-colors cursor-pointer mb-2"
-                    >
-                      {product.title}
+                    <h3 className="mb-2">
+                      <button
+                        type="button"
+                        onClick={() => openProductModal(product)}
+                        className="block w-full text-left text-lg font-semibold text-white light:text-slate-900 line-clamp-2 leading-tight group-hover:text-indigo-400 light:group-hover:text-indigo-650 transition-colors cursor-pointer focus-visible:underline"
+                      >
+                        {product.title}
+                      </button>
                     </h3>
                     <p className="text-slate-400 light:text-slate-550 text-xs mb-4">
-                      {t('main_seller')}: <span className="text-slate-300 light:text-slate-600 hover:text-white light:hover:text-indigo-655 cursor-pointer">{product.author}</span>
+                      {t('main_seller')}: <span className="text-slate-300 light:text-slate-600">{product.author}</span>
                     </p>
                   </div>
 

@@ -1,25 +1,15 @@
-export interface Product {
-  id: number;
-  title: string;
-  category: string;
-  price: number;
-  /** Chegirmagacha bo'lgan narx. Agar mavjud bo'lsa, mahsulot kartasida chizilgan narx ko'rsatiladi. */
-  originalPrice?: number;
-  rating: number;
-  reviews: number;
-  image: string;
-  author: string;
-  description: string;
-  fileSize: string;
-  fileType: string;
-  features: string[];
-  /** Mahsulot qo'shilgan vaqt (ISO string). Tartiblash uchun ishlatiladi. */
-  createdAt?: string;
-  /** Mahsulot "Yangi" deb belgilansinmi? */
-  isNew?: boolean;
-}
+import type { Product } from '@/types';
 
-export const products: Product[] = [
+/**
+ * Zetra katalogining boshlang'ich ("seed") ma'lumotlari.
+ *
+ * `Product` tipi endi `@/types` da yashaydi — avval u shu fixture faylida
+ * e'lon qilingan va 11 ta modul tipni fixture'dan import qilardi.
+ */
+export type { Product };
+
+export const SEED_PRODUCTS: Product[] = [
+
   {
     id: 1,
     title: 'Zamonaviy E-commerce UI Kit',
@@ -273,3 +263,6 @@ export const products: Product[] = [
     isNew: false,
   },
 ];
+
+/** @deprecated `SEED_PRODUCTS` ishlating. Moslik uchun qoldirilgan alias. */
+export const products = SEED_PRODUCTS;

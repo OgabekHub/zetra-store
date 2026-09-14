@@ -1,11 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { X, CheckCircle2, CreditCard, Smartphone, Lock, ShieldCheck, ArrowLeft, ArrowRight, Clock, Receipt, Check, Phone, KeyRound, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, CheckCircle2, CreditCard, Smartphone, Lock, ShieldCheck, ArrowLeft, ArrowRight, Clock, Receipt, Check, KeyRound } from 'lucide-react';
 import { formatPrice } from '@/utils/price';
-import { CartItem } from '@/types';
+import { LOCALE_TAG } from '@/utils/locale';
+import {
+  luhnCheck,
+  formatCardNumber,
+  formatCardExpiry,
+  isValidCardExpiry,
+  isValidUzPhone,
+  formatUzPhone,
+  digitsOnly,
+} from '@/utils/validation';
+import { CartItem, Currency } from '@/types';
 import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import Image from 'next/image';
 import { useTheme } from '@/context/ThemeContext';
 import uzumLogo from '@/assets/images/uzum-logo.png';
@@ -17,7 +28,7 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItem[];
-  currency: 'USD' | 'UZS';
+  currency: Currency;
   exchangeRate: number;
   onPaymentSuccess: () => void;
 }
@@ -91,7 +102,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [appNotificationVisible, setAppNotificationVisible] = useState(false);
   const [appConfirmStep, setAppConfirmStep] = useState<'notification' | 'app_view' | 'loading' | 'success'>('notification');
 
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // Calculate total price
   const totalUSD = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -158,40 +168,40 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     return () => clearTimeout(timer);
   }, [step, smsCountdown]);
 
-  // Body scroll lock
-  useEffect(() => {
-    if (isOpen) {
-      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty('--scrollbar-w', `${scrollbarW}px`);
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-      document.documentElement.style.removeProperty('--scrollbar-w');
-    }
-    return () => {
-      document.body.classList.remove('modal-open');
-      document.documentElement.style.removeProperty('--scrollbar-w');
-    };
-  }, [isOpen]);
+  /**
+   * Xaridni yakunlaydi.
+   *
+   * Kvitansiya bosqichida modalni yopishning HAR QANDAY yo'li shu yerga olib
+   * keladi — ESC ham, fon bosish ham, X tugmasi ham. Avval ular oddiy
+   * `onClose()` ni chaqirardi, `onPaymentSuccess()` esa faqat "Xaridlarim"
+   * tugmasida ishlardi: kvitansiya "To'landi" deb turar, foydalanuvchi ESC
+   * bosardi, savat tozalanmasdi va xarid umuman yozilmasdi.
+   */
+  const handleFinishPayment = () => {
+    onPaymentSuccess();
+    onClose();
+  };
 
-  // Close on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  /** Yopish so'rovi: kvitansiyada u xaridni bekor qilmaydi, yakunlaydi. */
+  const requestClose = () => {
+    if (step === 'success') {
+      handleFinishPayment();
+      return;
+    }
+    onClose();
+  };
+
+  // Scroll qulfi, ESC, fokus tuzog'i va fokusni tiklash umumiy hook'da.
+  // `onClose` emas, `requestClose` beriladi: kvitansiya bosqichida yopish
+  // xaridni bekor qilmaydi, yakunlaydi.
+  const { backdropProps, panelProps } = useModalA11y({
+    isOpen,
+    onClose: requestClose,
+    label: t('pay_title'),
+  });
 
   if (!isOpen) return null;
 
-  const handleOutsideClick = (e: React.MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-      onClose();
-    }
-  };
 
   const handleSelectMethod = (selected: PaymentMethod) => {
     setMethod(selected);
@@ -208,18 +218,21 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     e.preventDefault();
 
     if (subMethod === 'card') {
-      const cleanCard = cardNumber.replace(/\D/g, '');
-      if (cleanCard.length < 16) {
+      // Uzunlik tekshiruvi `0000 0000 0000 0000` ni ham qabul qilardi.
+      if (!luhnCheck(cardNumber)) {
         toast.error(t('pay_card_invalid'));
         return;
       }
-      if (!cardExpiry || cardExpiry.length < 5) {
-        toast.error(t('pay_card_invalid'));
+      // Avval `99/99` va `13/24` ham o'tib ketardi.
+      if (!isValidCardExpiry(cardExpiry)) {
+        toast.error(t('pay_expiry_invalid'));
         return;
       }
     } else {
-      if (!phoneNumber || phoneNumber.length < 9) {
-        toast.error(language === 'uz' ? "Telefon raqami xato kiritildi!" : language === 'ru' ? "Неверный номер телефона!" : "Invalid phone number!");
+      // Avval faqat uzunlik tekshirilardi, ya'ni "abcdefghi" ham
+      // "muvaffaqiyatli" to'lovga olib borardi.
+      if (!isValidUzPhone(phoneNumber)) {
+        toast.error(t('pay_invalid_phone_number'));
         return;
       }
     }
@@ -255,7 +268,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const handleSmsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!smsCode || smsCode.length < 4) {
-      toast.error(language === 'uz' ? "SMS kodni to'liq kiriting!" : language === 'ru' ? "Введите СМС код полностью!" : "Please enter the complete OTP code!");
+      toast.error(t('auth_please_enter_the_complete_otp_code'));
       return;
     }
 
@@ -324,7 +337,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   };
 
   const triggerAppConfirmReject = () => {
-    toast.error(language === 'uz' ? "To'lov rad etildi!" : language === 'ru' ? "Оплата отклонена!" : "Payment rejected!");
+    toast.error(t('pay_payment_rejected'));
     setStep('form');
   };
 
@@ -343,31 +356,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     }
   };
 
-  const handleFinishPayment = () => {
-    onPaymentSuccess();
-    onClose();
-    // Reset state
-    setMethod(null);
-    setStep('select');
-    setCardNumber('');
-    setCardExpiry('');
-    setSmsCode('');
-    setClickPin('');
-    setPhoneNumber('');
-  };
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').substring(0, 16);
-    setCardNumber(value);
+    setCardNumber(digitsOnly(e.target.value).slice(0, 16));
   };
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').substring(0, 4);
-    if (value.length >= 2) {
-      setCardExpiry(value.substring(0, 2) + '/' + value.substring(2));
-    } else {
-      setCardExpiry(value);
-    }
+    // O'chirish holati alohida ko'riladi: avval `"12/"` da backspace
+    // bosilsa qiymat yana `"12/"` ga qaytardi va foydalanuvchi xato
+    // yozilgan oyni hech qachon o'chira olmasdi.
+    setCardExpiry(formatCardExpiry(e.target.value, cardExpiry));
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(formatUzPhone(e.target.value));
   };
 
   const renderCardLogo = (brand: 'uzcard' | 'humo' | 'visa' | 'mastercard' | null) => {
@@ -383,10 +385,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   return (
     <div 
       className="fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-fade-in"
-      onClick={handleOutsideClick}
+      {...backdropProps}
     >
       <div 
-        ref={modalRef}
+        {...panelProps}
         className="relative w-full h-full sm:h-auto sm:max-h-[90vh] max-w-lg bg-slate-900 light:bg-slate-50 border border-slate-800 light:border-slate-200 rounded-none sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col p-6 transition-all duration-300"
       >
         {/* Header */}
@@ -413,13 +415,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               {step === 'sms' && t('pay_sms_title')}
               {step === 'pin' && t('pay_pin_lbl')}
               {step === 'app_confirm' && t('pay_app_notification_waiting')}
-              {step === 'uzum_wallet' && (language === 'uz' ? "Uzum Pay Hamyon" : language === 'ru' ? "Кошелек Uzum Pay" : "Uzum Pay Wallet")}
+              {step === 'uzum_wallet' && (t('pay_uzum_pay_wallet'))}
               {step === 'success' && t('pay_success_title')}
             </h3>
           </div>
-          {step !== 'success' && (
-            <button 
-              onClick={onClose}
+          {(
+            <button
+              type="button"
+              aria-label={t('close')}
+              onClick={requestClose}
               className="p-2 text-slate-400 hover:text-white light:text-slate-500 hover:light:text-slate-800 rounded-xl hover:bg-slate-800 hover:light:bg-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -458,7 +462,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Uzum Bank</p>
                       <p className="text-xs text-slate-400 light:text-slate-500 mt-0.5">
-                        {language === 'uz' ? 'Karta yoki telefon orqali Uzum Pay to\'lovi' : language === 'ru' ? 'Оплата картой или через Uzum Pay' : 'Card or Uzum Pay checkout'}
+                        {t('pay_card_or_uzum_pay_checkout')}
                       </p>
                     </div>
                   </div>
@@ -482,7 +486,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Payme</p>
                       <p className="text-xs text-slate-400 light:text-slate-500 mt-0.5">
-                        {language === 'uz' ? 'Karta raqami yoki telefon orqali to\'lov' : language === 'ru' ? 'Оплата картой или по номеру телефона' : 'Card or phone number billing'}
+                        {t('pay_card_or_phone_number_billing')}
                       </p>
                     </div>
                   </div>
@@ -506,7 +510,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <div>
                       <p className="font-bold text-white light:text-slate-900 text-sm">Click Evolution</p>
                       <p className="text-xs text-slate-400 light:text-slate-500 mt-0.5">
-                        {language === 'uz' ? 'Karta (PIN tasdiqli) yoki tezkor telefon to\'lovi' : language === 'ru' ? 'Карта (с PIN-кодом) или быстрая оплата по телефону' : 'Card (with Click PIN) or express invoice'}
+                        {t('pay_card_with_click_pin_or_express_invoice')}
                       </p>
                     </div>
                   </div>
@@ -575,8 +579,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                         </div>
                         <input
                           type="text"
-                          value={cardNumber.replace(/(\d{4})/g, '$1 ').trim()}
+                          value={formatCardNumber(cardNumber)}
                           onChange={handleCardNumberChange}
+                          inputMode="numeric"
+                          autoComplete="cc-number"
                           className={`block w-full pl-11 pr-14 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-2 text-sm transition-all ${colors.ring}`}
                           placeholder="8600 0000 0000 0000"
                           required
@@ -603,6 +609,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                           type="text"
                           value={cardExpiry}
                           onChange={handleExpiryChange}
+                          inputMode="numeric"
+                          autoComplete="cc-exp"
                           className={`block w-full px-4 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-2 text-sm text-center transition-all ${colors.ring}`}
                           placeholder="MM/YY"
                           required
@@ -610,7 +618,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-400 light:text-slate-500 uppercase tracking-wider mb-2">
-                          {language === 'uz' ? "Tasdiqlash turi" : language === 'ru' ? "Способ подтверд." : "Verification"}
+                          {t('pay_verification')}
                         </label>
                         <div className="block w-full py-3 border border-slate-800/50 light:border-slate-200 rounded-2xl bg-slate-950/20 light:bg-slate-100 text-slate-500 light:text-slate-450 text-xs text-center font-bold">
                           {method === 'click' ? 'Click PIN' : t('pay_sms_info')}
@@ -632,7 +640,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                         <input
                           type="text"
                           value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          onChange={handlePhoneChange}
+                          inputMode="tel"
+                          autoComplete="tel"
+                          maxLength={12}
                           className={`block w-full pl-11 pr-3 py-3 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-200 light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400 focus:outline-none focus:ring-2 text-sm transition-all ${colors.ring}`}
                           placeholder="998 (90) 000-00-00"
                           required
@@ -643,7 +654,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       {method === 'payme' 
                         ? t('pay_app_notification_desc') 
                         : method === 'click'
-                          ? (language === 'uz' ? "Click Evolution ilovangiz orqali so'rov yuboriladi va to'lov Click PIN kodi bilan tasdiqlanadi." : "Запрос будет отправлен в приложение Click, подтверждение через Click PIN.")
+                          ? (t('pay_click_app_hint'))
                           : t('pay_phone_info')
                       }
                     </p>
@@ -692,6 +703,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   maxLength={4}
                   value={smsCode}
                   onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   className="block w-full py-3.5 border border-slate-800 light:border-slate-200 rounded-2xl bg-slate-950/40 light:bg-white text-slate-100 light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-lg tracking-[1.5em] text-center font-bold"
                   placeholder="0000"
                   required
@@ -709,7 +722,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     type="button"
                     onClick={() => {
                       setSmsCountdown(60);
-                      toast.success(language === 'uz' ? "SMS kod qayta yuborildi!" : language === 'ru' ? "СМС код отправлен повторно!" : "OTP code resent successfully!");
+                      toast.success(t('pay_otp_code_resent_successfully'));
                     }}
                     className="text-xs text-indigo-400 light:text-indigo-600 hover:text-indigo-300 hover:light:text-indigo-500 font-semibold cursor-pointer"
                   >
@@ -777,7 +790,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   onClick={() => handleKeypadPress('clear')}
                   className="py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl active:scale-95 transition-all cursor-pointer flex items-center justify-center uppercase"
                 >
-                  {language === 'uz' ? 'Tozalash' : 'Сброс'}
+                  {t('pay_clear')}
                 </button>
                 <button
                   type="button"
@@ -846,45 +859,45 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   
                   {appConfirmStep === 'notification' && appNotificationVisible && (
                     /* Sliding Notification Panel */
-                    <div 
+                    <button type="button" 
                       onClick={() => setAppConfirmStep('app_view')}
-                      className="w-full bg-slate-900/90 border border-[#3cd2c4]/30 rounded-2xl p-2.5 shadow-lg shadow-teal-950/20 space-y-1.5 cursor-pointer hover:border-[#3cd2c4]/70 active:scale-95 transition-all mt-4 animate-bounce"
+                      className="w-full bg-slate-900/90 border border-[#3cd2c4]/30 rounded-2xl p-2.5 shadow-lg shadow-teal-950/20 space-y-1.5 cursor-pointer hover:border-[#3cd2c4]/70 active:scale-95 transition-all mt-4 animate-bounce block text-left"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-8 h-4 relative flex items-center justify-center flex-shrink-0">
+                      <span className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-8 h-4 relative flex items-center justify-center flex-shrink-0">
                             <Image 
                               src={paymeLogo} 
                               alt="Payme" 
                               className="w-full h-full object-contain" 
                             />
-                          </div>
+                          </span>
                           <span className="text-[9px] font-bold text-white">Payme</span>
-                        </div>
+                        </span>
                         <span className="text-[7px] text-slate-500">now</span>
-                      </div>
-                      <div>
-                        <p className="text-[8px] font-extrabold text-[#3cd2c4]">{language === 'uz' ? 'Yangi invoys keldi' : 'Новый инвойс'}</p>
-                        <p className="text-[7px] text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">
-                          Zetra Store: {totalAmountFormatted} {language === 'uz' ? "lik to'lov" : "к оплате"}. {language === 'uz' ? "Tasdiqlash uchun bosing." : "Нажмите для подтверждения."}
-                        </p>
-                      </div>
-                    </div>
+                      </span>
+                      <span>
+                        <span className="block text-[8px] font-extrabold text-[#3cd2c4]">{t('pay_new_invoice')}</span>
+                        <span className="block text-[7px] text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">
+                          Zetra Store: {totalAmountFormatted} {t('pay_amount_suffix')}. {t('pay_tap_to_confirm')}
+                        </span>
+                      </span>
+                    </button>
                   )}
 
                   {appConfirmStep === 'app_view' && (
                     /* Expanded App screen inside Phone Mockup */
                     <div className="flex-1 flex flex-col justify-between animate-fade-in py-2">
                       <div className="text-center space-y-1 bg-slate-900/60 p-2 rounded-xl border border-slate-800">
-                        <span className="text-[7px] text-slate-500 font-bold uppercase tracking-wider block">{language === 'uz' ? 'To\'lov tafsilotlari' : 'Детали платежа'}</span>
+                        <span className="text-[7px] text-slate-500 font-bold uppercase tracking-wider block">{t('pay_details_title')}</span>
                         <p className="text-[9px] font-bold text-white truncate">Zetra Store</p>
                         <p className="text-xs font-black text-[#3cd2c4]">{totalAmountFormatted}</p>
                       </div>
 
                       <div className="space-y-1.5">
                         <div className="bg-slate-900/60 border border-slate-800 p-2 rounded-xl text-[7px] text-slate-400 space-y-0.5">
-                          <p>{language === 'uz' ? 'Karta:' : 'Карта:'} <span className="text-slate-200 font-bold">Humo (*9876)</span></p>
-                          <p>{language === 'uz' ? 'Turi:' : 'Тип:'} <span className="text-slate-200">Personal Vault</span></p>
+                          <p>{t('pay_card_label')} <span className="text-slate-200 font-bold">Humo (*9876)</span></p>
+                          <p>{t('pay_type_label')} <span className="text-slate-200">Personal Vault</span></p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-1.5">
@@ -893,14 +906,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                             onClick={triggerAppConfirmReject}
                             className="py-2 bg-red-500/20 hover:bg-red-500/35 border border-red-500/30 text-red-400 font-extrabold text-[8px] rounded-lg cursor-pointer active:scale-95 transition-all text-center uppercase"
                           >
-                            {language === 'uz' ? 'Rad etish' : 'Отмена'}
+                            {t('pay_decline')}
                           </button>
                           <button
                             type="button"
                             onClick={triggerAppConfirmApprove}
                             className="py-2 bg-emerald-500/25 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-450 font-extrabold text-[8px] rounded-lg cursor-pointer active:scale-95 transition-all text-center uppercase"
                           >
-                            {language === 'uz' ? 'Tasdiq' : 'Да'}
+                            {t('pay_confirm_short')}
                           </button>
                         </div>
                       </div>
@@ -945,19 +958,19 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     <span className="text-xs font-bold text-slate-300 light:text-slate-850">Hamyoni</span>
                   </div>
                   <span className="text-[9px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    {language === 'uz' ? 'Faol' : 'Активен'}
+                    {t('pay_wallet_active')}
                   </span>
                 </div>
 
                 <div className="pt-2">
-                  <p className="text-[10px] text-slate-500 light:text-slate-450">{language === 'uz' ? 'Hamyon balansi' : 'Баланс кошелька'}</p>
+                  <p className="text-[10px] text-slate-500 light:text-slate-450">{t('pay_wallet_balance')}</p>
                   <p className="text-xl font-black text-white light:text-slate-900 mt-0.5">1 250 000 UZS</p>
                 </div>
               </div>
 
               {/* Mock cards selection inside Uzum Pay */}
               <div className="space-y-2">
-                <span className="text-[10px] font-bold text-slate-500 light:text-slate-450 uppercase tracking-wider">{language === 'uz' ? 'Karta orqali to\'lash' : 'Оплата картой'}</span>
+                <span className="text-[10px] font-bold text-slate-500 light:text-slate-450 uppercase tracking-wider">{t('pay_pay_by_card')}</span>
                 <div className="p-3 bg-slate-950/40 light:bg-white border border-slate-800 light:border-slate-200 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <HumoLogo />
@@ -985,7 +998,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   </>
                 ) : (
                   <>
-                    {language === 'uz' ? "Uzum Pay orqali to'lash" : "Оплатить через Uzum Pay"}
+                    {t('pay_pay_with_uzum')}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -1014,7 +1027,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <div className="flex justify-between">
                   <span className="text-slate-550 light:text-slate-455">{t('pay_date')}</span>
                   <span className="font-semibold text-slate-200 light:text-slate-850">
-                    {new Date().toLocaleDateString(language === 'uz' ? 'uz-UZ' : language === 'ru' ? 'ru-RU' : 'en-US', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    {new Date().toLocaleDateString(LOCALE_TAG[language], { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 <div className="flex justify-between">

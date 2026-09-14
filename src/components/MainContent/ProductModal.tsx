@@ -1,22 +1,24 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { X, Star, ShoppingCart, CheckCircle2, HardDrive, FileType, Box, Music, Terminal } from 'lucide-react';
 import Image from 'next/image';
 import { Product } from '@/data/products';
 import { formatPrice } from '@/utils/price';
 import { getCategoryLabel } from '@/utils/categories';
 import { useLanguage } from '@/context/LanguageContext';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import { ThreeDViewer } from './previews/ThreeDViewer';
 import { AudioWavePlayer } from './previews/AudioWavePlayer';
 import { CodePreviewer } from './previews/CodePreviewer';
 
+import type { Currency } from '@/types';
 interface ProductModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
   onAddToCart: (product: Product) => void;
-  currency: 'USD' | 'UZS';
+  currency: Currency;
   exchangeRate: number;
 }
 
@@ -31,40 +33,27 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [viewMode, setViewMode] = useState<'image' | 'interactive'>('image');
   const { t } = useLanguage();
 
-  // Reset viewMode when product changes
-  useEffect(() => {
-    setViewMode('image');
-  }, [product]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty('--scrollbar-w', `${scrollbarW}px`);
-      document.body.classList.add('modal-open');
-      const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') onClose();
-      };
-      document.addEventListener('keydown', handleEsc);
-      return () => {
-        document.body.classList.remove('modal-open');
-        document.documentElement.style.removeProperty('--scrollbar-w');
-        document.removeEventListener('keydown', handleEsc);
-      };
-    }
-  }, [isOpen, onClose]);
+  // Scroll qulfi, ESC, fokus tuzog'i va fokusni tiklash umumiy hook'da.
+  const { titleId, backdropProps, panelProps } = useModalA11y({ isOpen, onClose });
 
   if (!isOpen || !product) return null;
 
   const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 animate-fade-in" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 animate-fade-in"
+      {...backdropProps}
+    >
       {/* Backdrop */}
-      <div 
+      <div
+        aria-hidden="true"
         className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity duration-300"
-        onClick={onClose}
       />
-      <div className="relative bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 text-white light:text-slate-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col md:flex-row transform transition-all duration-300 z-10 transition-colors">
+      <div
+        {...panelProps}
+        className="relative bg-slate-900 light:bg-white border border-slate-800 light:border-slate-200 text-white light:text-slate-800 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col md:flex-row transform transition-all duration-300 z-10 transition-colors"
+      >
         
         {/* Close Button */}
         <button 
@@ -146,7 +135,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 light:text-indigo-600 text-xs font-semibold rounded-lg border border-indigo-550/20 light:border-indigo-250">
                 {getCategoryDisplayName(product.category)}
               </span>
-              <h2 className="text-xl md:text-2xl font-bold text-white light:text-slate-900 mt-3 leading-tight transition-colors">{product.title}</h2>
+              <h2 id={titleId} className="text-xl md:text-2xl font-bold text-white light:text-slate-900 mt-3 leading-tight transition-colors">{product.title}</h2>
               <p className="text-slate-400 light:text-slate-555 text-xs mt-2 transition-colors">
                 {t('prod_author')}: <span className="text-slate-202 light:text-slate-850 hover:text-white light:hover:text-indigo-650 cursor-pointer transition-colors font-medium">{product.author}</span>
               </p>

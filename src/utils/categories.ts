@@ -31,14 +31,32 @@ export const getCategoryLabel = (
 };
 
 /**
- * Kategoriya nomini URL slug'ga aylantirish uchun.
- * Masalan: "Dizayn Shablonlari" → "dizayn-shablonlari"
+ * Kategoriya nomi -> URL slug.
+ *
+ * Avval slug regex bilan hosil qilinardi va apostrofni saqlab qolardi:
+ * "O'yin va Hisoblar" -> `o'yin-va-hisoblar`. Bu xom apostrof sitemap ichiga
+ * shundayligicha tushardi, `next/link` esa navigatsiyada uni `%27` ga
+ * kodlardi — natijada bitta sahifaga ikkita turli URL ishora qilardi.
+ * Endi slug qo'lda yozilgan, shuning uchun URL kritik yo'lida regex yo'q.
  */
-export const categoryToSlug = (catName: string): string =>
-  catName.toLowerCase().replace(/[^a-z0-9\u0400-\u04ff']/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+export const CATEGORY_SLUGS: Record<string, string> = {
+  'Dizayn Shablonlari': 'dizayn-shablonlari',
+  '3D Modellar': '3d-modellar',
+  'E-Kitoblar': 'e-kitoblar',
+  'Dastur Kodelari': 'dastur-kodelari',
+  'Grafika & Media': 'grafika-media',
+  "O'yin va Hisoblar": 'oyin-va-hisoblar',
+  'Litsenziya & Kalitlar': 'litsenziya-kalitlar',
+  'Audio & Musiqa': 'audio-musiqa',
+};
 
-/**
- * URL slug'dan kategoriya nomini topish.
- */
+export const categoryToSlug = (catName: string): string =>
+  CATEGORY_SLUGS[catName] ??
+  catName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+/** URL slug'dan kategoriya nomini topish. */
 export const slugToCategory = (slug: string): string | undefined =>
   ALL_CATEGORIES.find((cat) => categoryToSlug(cat) === slug);

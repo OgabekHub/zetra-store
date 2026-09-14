@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Folder, FolderOpen, FileCode, Terminal, RefreshCw, Play, Circle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -12,7 +12,7 @@ interface FileItem {
 }
 
 export const CodePreviewer: React.FC = () => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [activeFile, setActiveFile] = useState<string>('bot.py');
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
     'src': true
@@ -130,15 +130,18 @@ Ushbu loyiha Telegram Bot orqali OpenAI sun'iy intellektiga savollar berish va t
 
   const activeContent = findFileContent(projectFiles, activeFile);
 
-  // Initial welcome message in terminal
-  useEffect(() => {
-    setTerminalHistory([t('code_terminal_welcome')]);
-  }, [language]);
+  // Salomlashuv qatori holatda saqlanmaydi — u tildan hosil bo'ladi.
+  // Avval u effektda `setTerminalHistory` bilan yozilardi, ya'ni til
+  // almashganda foydalanuvchi terminal tarixi butunlay o'chib ketardi.
+  const terminalLines = useMemo(
+    () => [t('code_terminal_welcome'), ...terminalHistory],
+    [t, terminalHistory],
+  );
 
   // Scroll to bottom of terminal
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [terminalHistory]);
+  }, [terminalLines]);
 
   const toggleFolder = (folderName: string) => {
     setExpandedFolders(prev => ({
@@ -183,6 +186,7 @@ Ushbu loyiha Telegram Bot orqali OpenAI sun'iy intellektiga savollar berish va t
       return (
         <div key={idx} className="flex leading-6 text-[12px] font-mono hover:bg-slate-850/40 px-3">
           <span className="w-8 text-right pr-3 select-none text-slate-600 border-r border-slate-800/80 mr-3">{idx + 1}</span>
+          {/* eslint-disable-next-line react/no-danger -- faqat qat'iy yozilgan demo kod; &, < va > render'dan oldin qochiriladi */}
           <span className="text-slate-300 flex-1 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: html || ' ' }} />
         </div>
       );
@@ -288,9 +292,9 @@ Ushbu loyiha Telegram Bot orqali OpenAI sun'iy intellektiga savollar berish va t
 
     return (
       <div key={item.name} className="select-none">
-        <div
+        <button type="button" aria-expanded={isDir ? Boolean(isExpanded) : undefined} aria-current={!isDir && activeFile === item.name ? 'true' : undefined}
           onClick={() => isDir ? toggleFolder(item.name) : setActiveFile(item.name)}
-          className={`flex items-center gap-2 py-1 px-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+          className={`w-full text-left flex items-center gap-2 py-1 px-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
             activeFile === item.name && !isDir
               ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/10'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
@@ -303,7 +307,7 @@ Ushbu loyiha Telegram Bot orqali OpenAI sun'iy intellektiga savollar berish va t
             <FileCode className="w-4 h-4 text-slate-500" />
           )}
           <span>{item.name}</span>
-        </div>
+        </button>
         
         {isDir && isExpanded && item.children && (
           <div className="space-y-0.5 mt-0.5">
@@ -370,7 +374,7 @@ Ushbu loyiha Telegram Bot orqali OpenAI sun'iy intellektiga savollar berish va t
 
         {/* History Area */}
         <div className="flex-1 overflow-y-auto space-y-1 text-[10px] text-slate-400 select-text pr-1">
-          {terminalHistory.map((line, idx) => (
+          {terminalLines.map((line, idx) => (
             <div key={idx} className="whitespace-pre-wrap leading-5">
               {line}
             </div>

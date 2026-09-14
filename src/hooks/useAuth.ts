@@ -1,77 +1,87 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { UserProfile } from '@/types';
-import { Product } from '@/data/products';
+import { useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { usePersistentStore } from '@/store/usePersistentStore';
+import {
+  authStore,
+  login as loginUser,
+  logout as logoutUser,
+  updateProfile as updateUserProfile,
+} from '@/store/authStore';
+import { purchasesStore, recordPurchase } from '@/store/purchaseStore';
+import { useLanguage } from '@/context/LanguageContext';
+import { uiStore, useUiState } from '@/store/uiStore';
+import type { CartItem, Product, Purchase } from '@/types';
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
+  const { t } = useLanguage();
+  const authState = usePersistentStore(authStore);
+  const allPurchases = usePersistentStore(purchasesStore);
+  const { isAuthOpen } = useUiState();
 
-  // localStorage dan yuklash
-  useEffect(() => {
-    const savedUser = localStorage.getItem('zetra-user');
-    if (savedUser) {
-      try {
-        setCurrentUser(JSON.parse(savedUser));
-      } catch {
-        // xato bo'lsa null
-      }
-    }
-
-    const savedPurchases = localStorage.getItem('zetra-purchases');
-    if (savedPurchases) {
-      try {
-        setPurchasedProducts(JSON.parse(savedPurchases));
-      } catch {
-        // xato bo'lsa bo'sh
-      }
-    }
-    setIsInitialized(true);
+  const setIsAuthOpen = useCallback((open: boolean) => {
+    uiStore.set({ isAuthOpen: open });
   }, []);
 
-  // localStorage ga saqlash
-  useEffect(() => {
-    if (!isInitialized) return;
-    if (currentUser) {
-      localStorage.setItem('zetra-user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('zetra-user');
-    }
-  }, [currentUser, isInitialized]);
+  const currentUser = authState.user;
 
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('zetra-purchases', JSON.stringify(purchasedProducts));
+  /** Faqat shu foydalanuvchining xaridlari. Avval ro'yxat hamma uchun umumiy edi. */
+  const purchases: Purchase[] = useMemo(
+    () => (currentUser ? allPurchases.filter((p) => p.userId === currentUser.id) : []),
+    [allPurchases, currentUser],
+  );
+
+  /**
+   * Eski komponentlar hali `Product[]` kutadi. Ro'yxat eng yangi xariddan
+   * boshlanadi va bir mahsulot bir marta ko'rsatiladi.
+   */
+  const purchasedProducts: Product[] = useMemo(() => {
+    const seen = new Set<number>();
+    const out: Product[] = [];
+    for (const purchase of purchases) {
+      for (const line of purchase.lines) {
+        if (seen.has(line.productId)) continue;
+        seen.add(line.productId);
+        out.push(line.product);
+      }
     }
-  }, [purchasedProducts, isInitialized]);
+    return out;
+  }, [purchases]);
 
   const login = useCallback((name: string, email: string) => {
-    setCurrentUser({ name, email });
+    loginUser(name, email);
   }, []);
 
   const logout = useCallback(() => {
-    setCurrentUser(null);
-    setPurchasedProducts([]);
-    localStorage.removeItem('zetra-purchases');
-    toast.success("Tizimdan muvaffaqiyatli chiqdingiz!", { icon: '👋' });
-  }, []);
+    // Xaridlar o'chirilmaydi — ular `userId` ga bog'langan, shuning uchun
+    // qayta kirganda joyida turadi. Avval `logout()` ularni hamma uchun
+    // yo'q qilardi.
+    logoutUser();
+    toast.success(t('auth_logout_success'), { icon: '👋' });
+  }, [t]);
 
-  const updateProfile = useCallback((name: string, email: string) => {
-    setCurrentUser((prev) => (prev ? { ...prev, name, email } : { name, email }));
-  }, []);
+  // Natija qaytariladi: boshqa hisobga tegishli email rad etilganini UI
+  // foydalanuvchiga ko'rsatishi kerak.
+  const updateProfile = useCallback(
+    (name: string, email: string) => updateUserProfile(name, email),
+    [],
+  );
 
-  const addPurchases = useCallback((products: Product[]) => {
-    setPurchasedProducts((prev) => [...products, ...prev]);
-  }, []);
+  /** Savat qatorlarini, miqdori bilan birga, xaridga aylantiradi. */
+  const addPurchases = useCallback(
+    (items: CartItem[]): Purchase | null => {
+      if (!currentUser) return null;
+      return recordPurchase(currentUser.id, items);
+    },
+    [currentUser],
+  );
 
   return {
     currentUser,
     isAuthOpen,
     setIsAuthOpen,
+    purchases,
     purchasedProducts,
     login,
     logout,

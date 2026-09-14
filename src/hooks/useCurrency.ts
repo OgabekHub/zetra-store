@@ -1,42 +1,28 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
-
-const FALLBACK_RATE = 12800;
+import { useCallback, useEffect } from 'react';
+import { usePersistentStore } from '@/store/usePersistentStore';
+import {
+  currencyStore,
+  fxRateStore,
+  setCurrency as setCurrencyValue,
+  ensureExchangeRate,
+} from '@/store/currencyStore';
+import type { Currency } from '@/types';
 
 export function useCurrency() {
-  const [currency, setCurrencyState] = useState<'USD' | 'UZS'>('USD');
-  const [exchangeRate, setExchangeRate] = useState<number>(FALLBACK_RATE);
+  const currency = usePersistentStore(currencyStore);
+  const { rate: exchangeRate } = usePersistentStore(fxRateStore);
 
+  // Kurs TTL ichida bo'lsa hech qanday so'rov ketmaydi.
   useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (!res.ok) throw new Error('API call failed');
-        const data = await res.json();
-        if (data?.rates?.UZS) {
-          setExchangeRate(data.rates.UZS);
-        }
-      } catch {
-        // Fallback rate ishlatiladi — hech narsa qilmaymiz
-      }
-    };
-
-    fetchRate();
+    void ensureExchangeRate();
   }, []);
 
-  const setCurrency = (c: 'USD' | 'UZS') => {
-    setCurrencyState(c);
-    if (c === 'UZS') {
-      toast(
-        `Valyuta: O'zbek So'mi (1$ = ${exchangeRate.toLocaleString('uz-UZ').replace(/,/g, ' ')} so'm)`,
-        { icon: '🇺🇿', duration: 3000 }
-      );
-    } else {
-      toast('Valyuta: AQSH Dollari', { icon: '💵' });
-    }
-  };
+  // Tost bu yerdan olib tashlandi: setter ichida `toast()` chaqirilgani uchun
+  // Navbar ham o'z tostini chiqarardi va har bosishda ikkita ustma-ust
+  // bildirishnoma paydo bo'lardi. Endi bildirishnomani chaqiruvchi beradi.
+  const setCurrency = useCallback((next: Currency) => setCurrencyValue(next), []);
 
   return { currency, setCurrency, exchangeRate };
 }

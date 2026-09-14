@@ -1,43 +1,24 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Product, products as defaultProducts } from '@/data/products';
+import { useCallback, useMemo } from 'react';
+import { usePersistentStore } from '@/store/usePersistentStore';
+import {
+  catalogStore,
+  deriveCatalog,
+  addProduct as addToCatalog,
+  deleteProduct as removeFromCatalog,
+} from '@/store/catalogStore';
+import type { Product } from '@/types';
 
 export function useProducts() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const overlay = usePersistentStore(catalogStore);
 
-  useEffect(() => {
-    const savedProducts = localStorage.getItem('zetra-products');
-    if (savedProducts) {
-      try {
-        setAllProducts(JSON.parse(savedProducts));
-      } catch {
-        setAllProducts(defaultProducts);
-      }
-    } else {
-      setAllProducts(defaultProducts);
-    }
-    setIsInitialized(true);
-  }, []);
+  // Katalog fixture ustiga ustqurmani qo'yish orqali hosil qilinadi, shuning
+  // uchun `src/data/products.ts` tahrirlari darhol ko'rinadi.
+  const allProducts = useMemo(() => deriveCatalog(overlay), [overlay]);
 
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('zetra-products', JSON.stringify(allProducts));
-    }
-  }, [allProducts, isInitialized]);
+  const addProduct = useCallback((product: Product) => addToCatalog(product), []);
+  const deleteProduct = useCallback((id: number) => removeFromCatalog(id), []);
 
-  const addProduct = useCallback((product: Product) => {
-    setAllProducts((prev) => [product, ...prev]);
-  }, []);
-
-  const deleteProduct = useCallback((id: number) => {
-    setAllProducts((prev) => prev.filter((p) => p.id !== id));
-  }, []);
-
-  return {
-    allProducts,
-    addProduct,
-    deleteProduct,
-  };
+  return { allProducts, addProduct, deleteProduct };
 }

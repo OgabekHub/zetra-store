@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, {  } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
-import { CartItem } from '@/types';
+import { CartItem, Currency } from '@/types';
 import { formatPrice } from '@/utils/price';
 import { useLanguage } from '@/context/LanguageContext';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import { getCategoryLabel } from '@/utils/categories';
 
 interface CartDrawerProps {
@@ -14,7 +15,7 @@ interface CartDrawerProps {
   cartItems: CartItem[];
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemoveItem: (id: number) => void;
-  currency: 'USD' | 'UZS';
+  currency: Currency;
   exchangeRate: number;
   onCheckout: () => void;
   onStartShopping?: () => void;
@@ -36,23 +37,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const { t } = useLanguage();
 
-  useEffect(() => {
-    if (isOpen) {
-      // Measure scrollbar width and store as CSS var to compensate layout shift
-      const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty('--scrollbar-w', `${scrollbarW}px`);
-      document.body.classList.add('modal-open');
-      const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') onClose();
-      };
-      document.addEventListener('keydown', handleEsc);
-      return () => {
-        document.body.classList.remove('modal-open');
-        document.documentElement.style.removeProperty('--scrollbar-w');
-        document.removeEventListener('keydown', handleEsc);
-      };
-    }
-  }, [isOpen, onClose]);
+  // Scroll qulfi, ESC, fokus tuzog'i va fokusni tiklash umumiy hook'da.
+  const { backdropProps, panelProps } = useModalA11y({
+    isOpen,
+    onClose,
+    label: t('cart_title'),
+  });
 
   const getCategoryDisplayName = (catName: string) => getCategoryLabel(catName, t);
 
@@ -61,21 +51,20 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
       className={`fixed inset-0 z-50 overflow-hidden transition-all duration-300 ${
         isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'
       }`} 
-      role="dialog" 
-      aria-modal="true" 
-      aria-label="Savatcha"
+      {...backdropProps}
     >
       {/* Backdrop */}
-      <div 
+      <div
+        aria-hidden="true"
         className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'opacity-0'
         }`}
-        onClick={onClose}
       />
 
       <div className="absolute inset-y-0 right-0 w-full sm:max-w-md flex">
         {/* Drawer Panel */}
-        <div 
+        <div
+          {...panelProps}
           className={`w-full bg-slate-950/95 light:bg-white border-l border-slate-800 light:border-slate-200 text-white light:text-slate-800 shadow-2xl flex flex-col h-full transition-transform duration-300 ease-in-out backdrop-blur-md ${
             isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
